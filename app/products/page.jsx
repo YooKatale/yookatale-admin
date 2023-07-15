@@ -23,8 +23,6 @@ const Products = () => {
       if (res.status == "Success") {
         setProducts(res.data);
       }
-
-      console.log(res);
     } catch (error) {}
   };
 
