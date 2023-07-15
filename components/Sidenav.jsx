@@ -14,7 +14,7 @@ import { HiMenuAlt2 } from "react-icons/hi";
 
 const Sidenav = () => {
   return (
-    <div className="p-4 w-1/5 bg-slate-100 h-screen max-h-screen overflow-y-auto overflow-x-hidden">
+    <div className="p-4 w-1/5 bg-slate-100 h-screen max-h-screen overflow-y-auto overflow-x-hidden fixed z-20">
       <div className="py-4">
         <div className="flex">
           <div className="px-2">

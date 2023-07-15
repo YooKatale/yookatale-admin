@@ -2,8 +2,8 @@
   "name": "admin",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:8000/",
-  "proxy_temp": "https://yookatale-server-app.onrender.com/",
+  "proxy_temp": "http://localhost:8000/",
+  "proxy": "https://yookatale-server-app.onrender.com/",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.1.1",
+    "@radix-ui/react-alert-dialog": "^1.0.4",
     "@radix-ui/react-checkbox": "^1.0.4",
     "@radix-ui/react-dropdown-menu": "^2.0.5",
     "@radix-ui/react-label": "^2.0.2",

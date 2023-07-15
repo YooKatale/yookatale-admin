@@ -6,7 +6,7 @@ import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { X } from "lucide-react";
 import { useSelector } from "react-redux";
-import { useProductCreateMutation } from "@Slices/userApiSlice";
+import { useProductCreateMutation } from "@Slices/productApiSlice";
 import { useToast } from "@components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import {
@@ -64,7 +64,7 @@ const AddProduct = ({ closeModal }) => {
 
   return (
     <>
-      <div className="p-8 flex bg-none justify-center items-center fixed z-10 top-0 left-0 right-0 bottom-0">
+      <div className="p-8 flex bg-none justify-center items-center fixed z-30 top-0 left-0 right-0 bottom-0">
         <div className="m-auto w-4/5 h-full p-4 bg-white overflow-y-auto overflow-x-hidden rounded-md shadow-md relative">
           <div
             className="absolute top-4 right-8 cursor-pointer"

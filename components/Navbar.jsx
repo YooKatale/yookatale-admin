@@ -13,19 +13,22 @@ const Navbar = () => {
   const { userInfo } = useSelector((state) => state.auth);
   return (
     <>
-      <nav className="p-0 border-b-slate-100 border-b-2">
-        <div className="flex justify-between py-2 px-2">
-          <div className="p-2">
-            <div className="cursor-pointer mx-2">
-              <HiMenuAlt2 size={25} />
+      <nav className="p-0 border-b-slate-100 border-b-2 fixed w-full flex bg-white z-10">
+        <div className="w-1/5"></div>
+        <div className="w-4/5">
+          <div className="flex justify-between py-2 px-2">
+            <div className="p-2">
+              <div className="cursor-pointer mx-2">
+                <HiMenuAlt2 size={25} />
+              </div>
             </div>
-          </div>
-          <div className="flex justify-end px-4">
-            <div>
-              <p className="text-sm font-thin m-0 p-0">Admin</p>
-              <p className="text-lg font-semibold m-0 p-0">
-                {userInfo?.username}
-              </p>
+            <div className="flex justify-end px-4">
+              <div>
+                <p className="text-sm font-thin m-0 p-0">Admin</p>
+                <p className="text-lg font-semibold m-0 p-0">
+                  {userInfo?.username}
+                </p>
+              </div>
             </div>
           </div>
         </div>

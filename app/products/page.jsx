@@ -5,7 +5,7 @@ import ProductCard from "@/components/ProductCard";
 import Sidenav from "@/components/Sidenav";
 import AddProduct from "@/components/modals/AddProduct";
 import { Button } from "@/components/ui/button";
-import { useProductsGetMutation } from "@Slices/userApiSlice";
+import { useProductsGetMutation } from "@Slices/productApiSlice";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
@@ -48,36 +48,39 @@ const Products = () => {
       <main className="max-w-full">
         <div className="flex w-full">
           <Sidenav />
-          <div className="w-4/5">
-            <Navbar />
-            {/* ------------------- main content here
+          <Navbar />
+          <div className="flex w-full pt-12">
+            <div className="w-1/5"></div>
+            <div className="w-4/5 pt-4">
+              {/* ------------------- main content here
             ---------------------------------------------------
             */}
-            <div className="px-2 py-4">
-              <div className="p-2 flex justify-between">
-                <div>{/* <p className="text-xl">Products</p> */}</div>
-                <div className="flex justify-end">
-                  <Button
-                    className="mx-2 text-lg"
-                    onClick={() => handleModal("addProduct")}
-                  >
-                    Add new product
-                  </Button>
+              <div className="px-2 py-4">
+                <div className="p-2 flex justify-between">
+                  <div>{/* <p className="text-xl">Products</p> */}</div>
+                  <div className="flex justify-end">
+                    <Button
+                      className="mx-2 text-lg"
+                      onClick={() => handleModal("addProduct")}
+                    >
+                      Add new product
+                    </Button>
+                  </div>
                 </div>
-              </div>
-              <div className="py-4 px-2">
-                <div className="grid grid-cols-5 py-4">
-                  {Products?.length > 0 ? (
-                    Products.map((product, index) => (
-                      <ProductCard key={index} product={product} />
-                    ))
-                  ) : (
-                    <>
-                      <div className="py-8">
-                        <p className="text-lg">No products currently</p>
-                      </div>
-                    </>
-                  )}
+                <div className="py-4 px-2">
+                  <div className="grid grid-cols-5 py-4">
+                    {Products?.length > 0 ? (
+                      Products.map((product, index) => (
+                        <ProductCard key={index} product={product} />
+                      ))
+                    ) : (
+                      <>
+                        <div className="py-8">
+                          <p className="text-lg">No products currently</p>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
