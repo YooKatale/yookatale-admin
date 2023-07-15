@@ -78,7 +78,7 @@ const AddProduct = ({ closeModal }) => {
           <div className="py-2">
             <div className="flex">
               <div className="m-auto py-2 w-4/5">
-                <form onSubmit={submitHandler}>
+                <form onSubmit={submitHandler} encType="multipart/form-data">
                   <div className="grid grid-cols-2">
                     <div className="p-2">
                       <Label htmlFor="name" className="text-lg mb-1">
@@ -161,7 +161,7 @@ const AddProduct = ({ closeModal }) => {
                     <Label htmlFor="images" className="text-lg mb-1">
                       Product Images
                     </Label>
-                    <Input type="file" id="images" multiple />
+                    <Input type="file" id="images" name="images" multiple />
                   </div>
                   <div className="py-2">
                     <Button type="submit">Add Product</Button>
