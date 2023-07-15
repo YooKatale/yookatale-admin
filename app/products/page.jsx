@@ -30,8 +30,6 @@ const Products = () => {
     handleProductFetch();
   }, []);
 
-  console.log({ Products });
-
   // function to set modal data
   const handleModal = (modal) => {
     setModalState((prevState) => (prevState ? false : true));

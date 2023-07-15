@@ -2,9 +2,9 @@
 
 import { apiSlice } from "./apiSlice";
 
-const USERS_URL = "https://yookatale-server-app.onrender.com/api";
+// const USERS_URL = "https://yookatale-server-app.onrender.com/api";
 
-// const USERS_URL = "http://localhost:8000/api";
+const USERS_URL = "http://localhost:8000/api";
 
 export const usersApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({

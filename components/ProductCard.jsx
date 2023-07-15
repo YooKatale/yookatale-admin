@@ -7,14 +7,19 @@ const ProductCard = ({ product }) => {
     <>
       <div className="border border-slate-100 rounded-md mx-2 my-2">
         <div className="flex justify-center items-center">
-          <div className="m-auto text-center">
-            <Image
-              src={`${product?.images[0]}`}
+          <div className="m-auto text-center h-40 py-2">
+            <img
+              src={product?.images[0]}
+              alt="image"
+              className="object-contain w-auto h-full"
+            />
+            {/* <Image
+              src={`${product?.images}`}
               width={130}
               height={120}
               alt="image"
               className="object-contain w-full h-auto"
-            />
+            /> */}
           </div>
         </div>
         <div className="pt-2 pb-4">
