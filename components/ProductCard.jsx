@@ -9,7 +9,7 @@ const ProductCard = ({ product }) => {
         <div className="flex justify-center items-center">
           <div className="m-auto text-center">
             <Image
-              src={product?.image}
+              src={product?.images}
               width={130}
               height={120}
               alt="image"
