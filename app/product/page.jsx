@@ -1,11 +1,25 @@
 "use client";
-import { useProductGetMutation } from "@Slices/productApiSlice";
+import {
+  useProductDeleteMutation,
+  useProductGetMutation,
+} from "@Slices/productApiSlice";
 // import React from 'react'
 
 import Navbar from "@components/Navbar";
 import Sidenav from "@components/Sidenav";
-import AlertBox from "@components/modals/AlertBox";
-import { AlertDialog, AlertDialogTrigger } from "@components/ui/alert-dialog";
+import EditProducut from "@components/modals/EditProduct";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@components/ui/alert-dialog";
 import { Button } from "@components/ui/button";
 import { useToast } from "@components/ui/use-toast";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -14,6 +28,8 @@ import { useEffect, useState } from "react";
 const Product = () => {
   // get user information stored in the localstorage
   //   const { userInfo } = useSelector((state) => state.auth);
+  const [modalState, setModalState] = useState(false);
+  const [modal, setModal] = useState("");
 
   // create state to hold fetched Product information
   const [Product, setProduct] = useState({});
@@ -29,6 +45,7 @@ const Product = () => {
 
   // initialize mutation function to fetch product data from database
   const [fetchProduct] = useProductGetMutation();
+  const [deleteProduct] = useProductDeleteMutation();
 
   // function handle fetching data
   const handleDataFetch = async () => {
@@ -38,12 +55,48 @@ const Product = () => {
       if (res?.status == "Success") {
         setProduct({ ...res?.data });
       }
-    } catch (error) {
-      console.log({ error });
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Error occured",
+        description: err.data?.message
+          ? err.data?.message
+          : err.data || err.error,
+      });
     }
   };
 
   // function to delete product
+  // function handle fetching data
+  const handleDataDelete = async () => {
+    try {
+      const res = await deleteProduct(param).unwrap();
+
+      if (res?.status == "Success") {
+        toast({
+          variant: "teal",
+          title: "Success",
+          description: "Product deleted successfully",
+        });
+
+        router.push("/products");
+      }
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Error occured",
+        description: err.data?.message
+          ? err.data?.message
+          : err.data || err.error,
+      });
+    }
+  };
+
+  // function to set modal data
+  const handleModal = (modal) => {
+    setModalState((prevState) => (prevState ? false : true));
+    setModal(modal);
+  };
 
   // fetch product categories
   useEffect(() => {
@@ -52,6 +105,13 @@ const Product = () => {
 
   return (
     <>
+      {/* --------------- display modal forms
+        -------------------------------------------------- */}
+      {modalState && modal === "edit" ? (
+        <EditProducut product={Product} closeModal={setModalState} />
+      ) : (
+        <></>
+      )}
       <main className="max-w-full">
         <Sidenav />
         <Navbar />
@@ -69,10 +129,37 @@ const Product = () => {
                 </Button> */}
                 <>
                   <AlertDialog>
-                    <AlertDialogTrigger>Delete Product</AlertDialogTrigger>
+                    <AlertDialogTrigger className="text-white bg-red-500 px-3 rounded-md">
+                      Delete Product
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Are you absolutely sure?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently
+                          delete the {Product ? Product?.name : ""} product
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          className="text-white bg-red-500 px-3 rounded-md"
+                          onClick={handleDataDelete}
+                        >
+                          Continue
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
                   </AlertDialog>
                 </>
-                <Button className="mx-2 text-base">Edit Product</Button>
+                <Button
+                  className="mx-2 text-base"
+                  onClick={() => handleModal("edit")}
+                >
+                  Edit Product
+                </Button>
               </div>
               <div className="flex">
                 <div className="w-6/12">
@@ -84,19 +171,23 @@ const Product = () => {
                     />
                   </div>
                   <div className="py-2 grid grid-cols-4">
-                    {Product?.images.length > 0 ? (
-                      Product?.images.map((image, index) => (
-                        <div
-                          key={index}
-                          className="p-2 mr-2 border border-slate-100 rounded-sm flex justify-center items-center"
-                        >
-                          <img
-                            src={`${image}`}
-                            alt=""
-                            className="w-full h-auto"
-                          />
-                        </div>
-                      ))
+                    {Product?.images ? (
+                      Product?.images.length > 0 ? (
+                        Product?.images.map((image, index) => (
+                          <div
+                            key={index}
+                            className="p-2 mr-2 border border-slate-100 rounded-sm flex justify-center items-center"
+                          >
+                            <img
+                              src={`${image}`}
+                              alt=""
+                              className="w-full h-auto"
+                            />
+                          </div>
+                        ))
+                      ) : (
+                        <></>
+                      )
                     ) : (
                       <></>
                     )}

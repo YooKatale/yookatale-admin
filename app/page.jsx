@@ -23,23 +23,23 @@ export default function Home() {
 
                   <div className="py-2">
                     <div className="grid grid-cols-4">
-                      <div className="border border-slate-100 rounded-sm p-2 mx-2">
+                      <div className="border border-slate-100 rounded-sm p-3 mx-2">
                         <h3 className="text-2xl text-center text-gray-400 font-extrabold">
                           200
                         </h3>
-                        <p className="text-center my-2 text-xl">Products</p>
+                        <p className="text-center my-2 text-lg">Products</p>
                       </div>
-                      <div className="border border-slate-100 rounded-sm p-2 mx-2">
+                      <div className="border border-slate-100 rounded-sm p-3 mx-2">
                         <h3 className="text-2xl text-center text-gray-400 font-extrabold">
                           5
                         </h3>
-                        <p className="text-center my-2 text-xl">Customers</p>
+                        <p className="text-center my-2 text-lg">Customers</p>
                       </div>
-                      <div className="border border-slate-100 rounded-sm p-2 mx-2">
+                      <div className="border border-slate-100 rounded-sm p-3 mx-2">
                         <h3 className="text-2xl text-center text-gray-400 font-extrabold">
                           12
                         </h3>
-                        <p className="text-center my-2 text-xl">
+                        <p className="text-center my-2 text-lg">
                           Pending Orders
                         </p>
                       </div>

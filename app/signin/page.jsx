@@ -53,10 +53,8 @@ const Signin = () => {
 
       router.push("/");
     } catch (err) {
-      console.log({ err });
       // set loading to be false
       setLoading((prevState) => (prevState ? false : true));
-      console.log({ err });
       toast({
         variant: "destructive",
         title: "Error occured",
