@@ -7,6 +7,7 @@ import {
   Settings2,
   User2Icon,
   Users2Icon,
+  UsersIcon,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -69,7 +70,17 @@ const Sidenav = () => {
             </Link>
           </div>
           <div className="py-2">
-            <Link href={"/messages"}>
+            <Link href={"/accounts"}>
+              <div className="flex">
+                <UsersIcon size={25} />
+                <h3 className="mx-2 text-md font-bold text-gray-600">
+                  Accounts
+                </h3>
+              </div>
+            </Link>
+          </div>
+          <div className="py-2">
+            <Link href={"/settings"}>
               <div className="flex">
                 <Settings2 size={25} />
                 <h3 className="mx-2 text-md font-bold text-gray-600">

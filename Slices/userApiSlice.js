@@ -12,13 +12,39 @@ export const usersApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+    register: builder.mutation({
+      query: (data) => ({
+        url: `${PROD_BACKEND_URL}/admin/register`,
+        method: "POST",
+        body: data,
+      }),
+    }),
     logout: builder.mutation({
       query: () => ({
         url: `${PROD_BACKEND_URL}/api/users/logout`,
         method: "POST",
       }),
     }),
+    accountsGet: builder.mutation({
+      query: () => ({
+        url: `${PROD_BACKEND_URL}/admin/accounts`,
+        method: "GET",
+      }),
+    }),
+    accountUpdate: builder.mutation({
+      query: (data) => ({
+        url: `${PROD_BACKEND_URL}/admin/account`,
+        method: "PUT",
+        body: data,
+      }),
+    }),
   }),
 });
 
-export const { useLoginMutation, useLogoutMutation } = usersApiSlice;
+export const {
+  useLoginMutation,
+  useLogoutMutation,
+  useAccountsGetMutation,
+  useRegisterMutation,
+  useAccountUpdateMutation,
+} = usersApiSlice;
