@@ -2,6 +2,7 @@
 "use client";
 
 import {
+  CreditCardIcon,
   LucideSalad,
   MessagesSquare,
   Settings2,
@@ -50,11 +51,11 @@ const Sidenav = () => {
             </Link>
           </div>
           <div className="py-2">
-            <Link href={"/customers"}>
+            <Link href={"/cards"}>
               <div className="flex">
-                <Users2Icon size={25} />
+                <CreditCardIcon size={25} />
                 <h3 className="mx-2 text-md font-bold text-gray-600">
-                  Customers
+                  Yoo Cards
                 </h3>
               </div>
             </Link>

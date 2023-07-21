@@ -72,6 +72,15 @@
   }
 }
 
+.container__hide__scrollbar {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+}
+
+.container__hide__scrollbar::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+
 @layer base {
   * {
     @apply border-border;
