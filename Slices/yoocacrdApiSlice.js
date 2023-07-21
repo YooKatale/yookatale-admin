@@ -14,7 +14,7 @@ export const yoocardApiSlice = apiSlice.injectEndpoints({
     }),
     yoocardsFetch: builder.mutation({
       query: () => ({
-        url: `${BACKEND_URL}/admin/subscription`,
+        url: `${BACKEND_URL}/api/subscription`,
         method: "GET",
       }),
     }),
