@@ -18,8 +18,24 @@ export const yoocardApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+    subscriptionsFetch: builder.mutation({
+      query: (data) => ({
+        url: `${BACKEND_URL}/admin/subscriptions/${data}`,
+        method: "GET",
+      }),
+    }),
+    subscriptionsApprove: builder.mutation({
+      query: (data) => ({
+        url: `${BACKEND_URL}/admin/subscriptions/${data}`,
+        method: "PUT",
+      }),
+    }),
   }),
 });
 
-export const { useYoocardCreatePostMutation, useYoocardsFetchMutation } =
-  yoocardApiSlice;
+export const {
+  useYoocardCreatePostMutation,
+  useYoocardsFetchMutation,
+  useSubscriptionsFetchMutation,
+  useSubscriptionsApproveMutation,
+} = yoocardApiSlice;

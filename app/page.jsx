@@ -15,6 +15,7 @@ import {
 } from "@components/ui/table";
 import moment from "moment/moment";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function Home() {
@@ -142,7 +143,9 @@ export default function Home() {
                               YooCard Subscriptions
                             </p>
                             <div>
-                              <Button type={"button"}>View All</Button>
+                              <Link href={"/subscriptions"}>
+                                <Button type={"button"}>View All</Button>
+                              </Link>
                             </div>
                           </div>
                         </div>

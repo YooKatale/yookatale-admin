@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { HiMenuAlt2 } from "react-icons/hi";
+import { HiCreditCard, HiMenuAlt2 } from "react-icons/hi";
 
 const Sidenav = () => {
   return (
@@ -46,6 +46,16 @@ const Sidenav = () => {
                 <LucideSalad size={25} />
                 <h3 className="mx-2 text-md font-bold text-gray-600">
                   Products
+                </h3>
+              </div>
+            </Link>
+          </div>
+          <div className="py-2">
+            <Link href={"/subscriptions"}>
+              <div className="flex">
+                <HiCreditCard size={25} />
+                <h3 className="mx-2 text-md font-bold text-gray-600">
+                  Subscriptions
                 </h3>
               </div>
             </Link>
