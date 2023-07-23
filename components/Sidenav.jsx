@@ -72,7 +72,7 @@ const Sidenav = () => {
             </Link>
           </div>
           <div className="py-2">
-            <Link href={"/newsblog"}>
+            <Link href={"/newsblogs"}>
               <div className="flex">
                 <PenBoxIcon size={25} />
                 <h3 className="mx-2 text-md font-bold text-gray-600">
