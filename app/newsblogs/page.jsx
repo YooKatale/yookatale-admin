@@ -3,13 +3,12 @@
 import { useNewsblogsFetchMutation } from "@Slices/newsblogApiSlice";
 import Navbar from "@components/Navbar";
 import Sidenav from "@components/Sidenav";
-import AddNewsblog from "@components/modals/AddNewsblog";
 import { Button } from "@components/ui/button";
 import moment from "moment";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-const Newsblog = () => {
+const NewsblogsPage = () => {
   const [modalState, setModalState] = useState(false);
   const [modal, setModal] = useState("");
   const [Newsblogs, setNewsblogs] = useState([]);
@@ -113,4 +112,4 @@ const Newsblog = () => {
   );
 };
 
-export default Newsblog;
+export default NewsblogsPage;

@@ -21,9 +21,9 @@ import { Button } from "@components/ui/button";
 import { useToast } from "@components/ui/use-toast";
 import moment from "moment";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-const Newsblog = () => {
+const NewsblogPage = () => {
   const [deleteNewsblog] = useNewsblogDeleteMutation();
   const [fetchNewsblog] = useNewsblogFetchMutation();
 
@@ -195,4 +195,4 @@ const Newsblog = () => {
   );
 };
 
-export default Newsblog;
+export default NewsblogPage;

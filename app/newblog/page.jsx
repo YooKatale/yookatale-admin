@@ -9,9 +9,11 @@ import { Label } from "@components/ui/label";
 import { useToast } from "@components/ui/use-toast";
 import { quillFormats, quillModules } from "@constants/contant";
 import { Loader2Icon } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
-import ReactQuill from "react-quill";
+import { useState } from "react";
+// import ReactQuill from "react-quill";
+const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 import "react-quill/dist/quill.snow.css";
 
 const Newblog = () => {
@@ -67,13 +69,6 @@ const Newblog = () => {
 
   return (
     <>
-      {/* --------------- display modal forms
-      -------------------------------------------------- */}
-      {/* {modalState && modal === "" ? (
-      <></>
-    ) : (
-      <></>
-    )} */}
       <main className="max-w-full">
         <div className="flex w-full">
           <Sidenav />
