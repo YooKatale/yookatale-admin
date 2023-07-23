@@ -51,7 +51,7 @@ const Newblog = () => {
           description: "Newsblog created",
         });
 
-        router.push("/newsblog");
+        router.push("/newsblogs");
       }
     } catch (err) {
       // set loading to be false

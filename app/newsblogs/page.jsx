@@ -76,7 +76,7 @@ const NewsblogsPage = () => {
                           <a href={`/newsblog?id=${newsblog?._id}`}>
                             <div className="">
                               <img
-                                src={`http://localhost:8000/uploads/${newsblog?.image}`}
+                                src={`${newsblog?.image}`}
                                 alt="newsblog image"
                                 className="rounded-t-md"
                               />
