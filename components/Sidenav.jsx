@@ -5,6 +5,7 @@ import {
   CreditCardIcon,
   LucideSalad,
   MessagesSquare,
+  PenBoxIcon,
   Settings2,
   User2Icon,
   Users2Icon,
@@ -12,7 +13,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { HiCreditCard, HiMenuAlt2 } from "react-icons/hi";
+import { HiCreditCard, HiMenuAlt2, HiOutlineDocumentAdd } from "react-icons/hi";
 
 const Sidenav = () => {
   return (
@@ -66,6 +67,16 @@ const Sidenav = () => {
                 <CreditCardIcon size={25} />
                 <h3 className="mx-2 text-md font-bold text-gray-600">
                   Yoo Cards
+                </h3>
+              </div>
+            </Link>
+          </div>
+          <div className="py-2">
+            <Link href={"/newsblog"}>
+              <div className="flex">
+                <PenBoxIcon size={25} />
+                <h3 className="mx-2 text-md font-bold text-gray-600">
+                  News Blog
                 </h3>
               </div>
             </Link>
