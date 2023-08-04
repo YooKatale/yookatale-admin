@@ -114,7 +114,15 @@ const AddProduct = ({ closeModal }) => {
                               Grains and flour
                             </SelectItem>
                             <SelectItem value="meats">Meats</SelectItem>
-                            <SelectItem value="fats/oils">Fats/oils</SelectItem>
+                            <SelectItem value="fats&oils">
+                              Fats & oils
+                            </SelectItem>
+                            <SelectItem value="herbs&spices">
+                              Herbs & Spices
+                            </SelectItem>
+                            <SelectItem value="jucie&meals">
+                              Juicec & Meals
+                            </SelectItem>
                           </SelectGroup>
                         </SelectContent>
                       </Select>
