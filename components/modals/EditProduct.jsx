@@ -157,7 +157,15 @@ const EditProducut = ({ closeModal, product }) => {
                               Grains and flour
                             </SelectItem>
                             <SelectItem value="meats">Meats</SelectItem>
-                            <SelectItem value="fats/oils">Fats/oils</SelectItem>
+                            <SelectItem value="fats&oils">
+                              Fats & oils
+                            </SelectItem>
+                            <SelectItem value="herbs&spices">
+                              Herbs & Spice
+                            </SelectItem>
+                            <SelectItem value="juice&meals">
+                              Juice & Meals
+                            </SelectItem>
                           </SelectGroup>
                         </SelectContent>
                       </Select>
