@@ -174,11 +174,13 @@ export default function Home() {
                                         {subscription?.user?.lastname}
                                       </TableCell>
                                       <TableCell>
-                                        {subscription?.cards.map(
-                                          (card, index) => (
-                                            <p key={index}>{card.card}</p>
-                                          )
-                                        )}
+                                        {subscription &&
+                                          subscription?.cards?.length > 0 &&
+                                          subscription?.cards.map(
+                                            (card, index) => (
+                                              <p key={index}>{card.card}</p>
+                                            )
+                                          )}
                                       </TableCell>
                                       <TableCell>
                                         {moment(

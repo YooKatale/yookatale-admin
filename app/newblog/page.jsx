@@ -19,7 +19,7 @@ import "react-quill/dist/quill.snow.css";
 const Newblog = () => {
   const [EditorValue, setEditorValue] = useState("");
   const [NewsblogForm, setNewsblogForm] = useState({
-    author: "YooKatale",
+    author: "",
     title: "",
   });
   const [isLoading, setLoading] = useState(false);
@@ -99,6 +99,12 @@ const Newblog = () => {
                             id="author"
                             name="author"
                             value={NewsblogForm.author}
+                            onChange={(e) =>
+                              setNewsblogForm({
+                                ...NewsblogForm,
+                                [e.target.name]: e.target.value,
+                              })
+                            }
                           />
                         </div>
                         <div className="py-2 mx-2">
