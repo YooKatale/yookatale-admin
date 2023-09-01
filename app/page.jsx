@@ -135,64 +135,115 @@ export default function Home() {
                           )}
                       </div>
 
-                      {/* // display yoocard subscriptions */}
-                      <div className="mb-4">
-                        <div className="py-2">
-                          <div className="flex justify-between">
-                            <p className="text-md font-bold">
-                              YooCard Subscriptions
-                            </p>
-                            <div>
-                              <Link href={"/subscriptions"}>
-                                <Button type={"button"}>View All</Button>
-                              </Link>
+                      <div className="py-4 flex gap-4 lg:flex-row flex-col">
+                        {/* // display yoocard subscriptions */}
+                        <div className="mb-4 lg:w-3/5 w-full pr-4 border-r-2 border-r-slate-100">
+                          <div className="py-2">
+                            <div className="flex justify-between">
+                              <p className="text-md font-bold">
+                                YooCard Subscriptions
+                              </p>
+                              <div>
+                                <Link href={"/subscriptions"}>
+                                  <Button type={"button"}>View All</Button>
+                                </Link>
+                              </div>
                             </div>
                           </div>
+                          {Dashboard?.Subscriptions && (
+                            <div className="border border-slate-100 rounded-md">
+                              <Table>
+                                <TableCaption>New Orders</TableCaption>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>firstname</TableHead>
+                                    <TableHead>lastname</TableHead>
+                                    <TableHead>Cards</TableHead>
+                                    <TableHead>Date</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {Dashboard?.Subscriptions &&
+                                    [
+                                      ...Dashboard?.Subscriptions
+                                        ?.subscriptions,
+                                    ].map((subscription, index) => (
+                                      <TableRow key={index}>
+                                        <TableCell>
+                                          {subscription?.user?.firstname}
+                                        </TableCell>
+                                        <TableCell>
+                                          {subscription?.user?.lastname}
+                                        </TableCell>
+                                        <TableCell>
+                                          {subscription &&
+                                            subscription?.cards?.length > 0 &&
+                                            subscription?.cards.map(
+                                              (card, index) => (
+                                                <p key={index}>{card.card}</p>
+                                              )
+                                            )}
+                                        </TableCell>
+                                        <TableCell>
+                                          {moment(
+                                            subscription?.createdAt
+                                          ).fromNow()}
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                </TableBody>
+                              </Table>
+                            </div>
+                          )}
                         </div>
-                        {Dashboard?.Subscriptions && (
-                          <div className="border border-slate-100 rounded-md">
-                            <Table>
-                              <TableCaption>New Orders</TableCaption>
-                              <TableHeader>
-                                <TableRow>
-                                  <TableHead>firstname</TableHead>
-                                  <TableHead>lastname</TableHead>
-                                  <TableHead>Cards</TableHead>
-                                  <TableHead>Date</TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                {Dashboard?.Subscriptions &&
-                                  [
-                                    ...Dashboard?.Subscriptions?.subscriptions,
-                                  ].map((subscription, index) => (
-                                    <TableRow key={index}>
-                                      <TableCell>
-                                        {subscription?.user?.firstname}
-                                      </TableCell>
-                                      <TableCell>
-                                        {subscription?.user?.lastname}
-                                      </TableCell>
-                                      <TableCell>
-                                        {subscription &&
-                                          subscription?.cards?.length > 0 &&
-                                          subscription?.cards.map(
-                                            (card, index) => (
-                                              <p key={index}>{card.card}</p>
-                                            )
-                                          )}
-                                      </TableCell>
-                                      <TableCell>
-                                        {moment(
-                                          subscription?.createdAt
-                                        ).fromNow()}
-                                      </TableCell>
-                                    </TableRow>
-                                  ))}
-                              </TableBody>
-                            </Table>
+
+                        {/* // display newsletter subscriptions */}
+                        <div className="mb-4 lg:w-2/5 w-full">
+                          <div className="py-2">
+                            <div className="flex justify-between">
+                              <p className="text-md font-bold">
+                                Newsletter Subscriptions
+                              </p>
+                              <div>
+                                <Link href={"/subscriptions"}>
+                                  <Button type={"button"}>View All</Button>
+                                </Link>
+                              </div>
+                            </div>
                           </div>
-                        )}
+
+                          {Dashboard?.Newsletters && (
+                            <div className="border border-slate-100 rounded-md">
+                              <Table>
+                                <TableCaption>Newsletters</TableCaption>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>email</TableHead>
+                                    <TableHead>Date</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {Dashboard?.Newsletters &&
+                                    [...Dashboard?.Newsletters].map(
+                                      (newsletter, index) => (
+                                        <TableRow key={index}>
+                                          <TableCell>
+                                            {newsletter?.email}
+                                          </TableCell>
+
+                                          <TableCell>
+                                            {moment(
+                                              newsletter?.createdAt
+                                            ).fromNow()}
+                                          </TableCell>
+                                        </TableRow>
+                                      )
+                                    )}
+                                </TableBody>
+                              </Table>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
