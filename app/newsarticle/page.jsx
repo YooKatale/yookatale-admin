@@ -1,6 +1,6 @@
 "use client";
 
-import { useNewsArticleCreatePostMutation } from "@Slices/NewsArticle";
+import { useNewsArticleCreatePostMutation } from "@Slices/newsArticle.js";
 
 import Navbar from "@components/Navbar";
 import Sidenav from "@components/Sidenav";
