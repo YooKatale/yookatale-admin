@@ -26,6 +26,8 @@ export default function Home() {
   const handleDataFetch = async () => {
     const res = await fetchDashboardData().unwrap();
 
+    console.log({ res });
+
     if (res?.status == "Success") {
       setDashboard(res?.data);
     }
@@ -205,7 +207,7 @@ export default function Home() {
                                 Newsletter Subscriptions
                               </p>
                               <div>
-                                <Link href={"/subscriptions"}>
+                                <Link href={"/newsletters"}>
                                   <Button type={"button"}>View All</Button>
                                 </Link>
                               </div>
@@ -244,6 +246,97 @@ export default function Home() {
                             </div>
                           )}
                         </div>
+                      </div>
+
+                      {/* // display data for schedules */}
+                      <div className="mb-4 w-full pr-4 border-r-2 border-r-slate-100">
+                        <div className="py-2">
+                          <div className="flex justify-between">
+                            <p className="text-md font-bold">Schedules</p>
+                            <div>
+                              <Link href={"/schedules"}>
+                                <Button type={"button"}>View All</Button>
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+
+                        {Dashboard?.Schedules && (
+                          <div className="border border-slate-100 rounded-md">
+                            <Table>
+                              <TableCaption>Users' Schedules</TableCaption>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>User</TableHead>
+                                  <TableHead>Schedule For</TableHead>
+                                  <TableHead>Schedule Days</TableHead>
+                                  <TableHead>Schedule Time</TableHead>
+                                  <TableHead>Products</TableHead>
+                                  <TableHead>Repeat Schedule</TableHead>
+                                  <TableHead>Date</TableHead>
+                                </TableRow>
+                              </TableHeader>
+
+                              <TableBody>
+                                {Dashboard?.Schedules &&
+                                  [...Dashboard?.Schedules?.schedules].map(
+                                    (schedule, index) => (
+                                      <TableRow key={index}>
+                                        <TableCell>
+                                          {`${schedule.user.firstname} ${schedule.user.lastname}`}
+                                        </TableCell>
+                                        <TableCell>
+                                          {schedule.scheduleFor}
+                                        </TableCell>
+                                        <TableCell>
+                                          {schedule.scheduleDays.map((day) => (
+                                            <p key={day} className="capitalize">
+                                              {day}
+                                            </p>
+                                          ))}
+                                        </TableCell>
+
+                                        <TableCell>
+                                          {schedule.scheduleTime}
+                                        </TableCell>
+                                        <TableCell>
+                                          {schedule.scheduleFor == "appointment"
+                                            ? schedule.products.map(
+                                                (product, index) => (
+                                                  <p
+                                                    className="capitalize"
+                                                    key={index}
+                                                  >
+                                                    {product.appointmentType}{" "}
+                                                    Appointment
+                                                  </p>
+                                                )
+                                              )
+                                            : schedule.products.map(
+                                                (product, index) => (
+                                                  <p key={index}>
+                                                    {product.name}
+                                                  </p>
+                                                )
+                                              )}
+                                        </TableCell>
+                                        <TableCell>
+                                          {schedule.repeatSchedule
+                                            ? "Yes"
+                                            : "No"}
+                                        </TableCell>
+                                        <TableCell>
+                                          {moment(
+                                            schedule?.createdAt
+                                          ).fromNow()}
+                                        </TableCell>
+                                      </TableRow>
+                                    )
+                                  )}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

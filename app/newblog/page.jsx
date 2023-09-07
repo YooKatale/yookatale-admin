@@ -7,7 +7,7 @@ import { Button } from "@components/ui/button";
 import { Input } from "@components/ui/input";
 import { Label } from "@components/ui/label";
 import { useToast } from "@components/ui/use-toast";
-import { quillFormats, quillModules } from "@constants/contant";
+import { quillFormats, quillModules } from "@constants/constant";
 import { Loader2Icon } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";

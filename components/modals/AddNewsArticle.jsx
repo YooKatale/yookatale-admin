@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@components/ui/button";
-import { quillFormats, quillModules } from "@constants/contant";
+import { quillFormats, quillModules } from "@constants/constant";
 import { X } from "lucide-react";
 import { useState } from "react";
 import ReactQuill, { Quill } from "react-quill";

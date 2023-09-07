@@ -1,6 +1,6 @@
 // "use client";
 
-import { BACKEND_URL } from "@constants/contant";
+import { BACKEND_URL } from "@constants/constant";
 import { apiSlice } from "./apiSlice";
 
 export const yoocardApiSlice = apiSlice.injectEndpoints({
