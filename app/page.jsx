@@ -3,6 +3,7 @@
 import Navbar from "@/components/Navbar";
 import Sidenav from "@/components/Sidenav";
 import { useDashboardDataMutation } from "@Slices/userApiSlice";
+import { useVendorGetMutation } from "@Slices/vendorApiSlice";
 import { Button } from "@components/ui/button";
 import {
   Table,
@@ -32,8 +33,11 @@ export default function Home() {
   const [Dashboard, setDashboard] = useState({});
   const [searchInput, setSearchInput] = useState("");
   const [filteredOrders, setFilteredOrders] = useState([]);
+  const [vendors, setVendors] = useState([]);
 
   const [fetchDashboardData] = useDashboardDataMutation();
+  const [vendorGet] = useVendorGetMutation();
+
 
   const handleDataFetch = async () => {
     try {
@@ -49,10 +53,25 @@ export default function Home() {
     }
   };
 
+  const handleVendorFetch = async () => {
+    try {
+      const res = await vendorGet().unwrap();
+
+      console.log("Displaying vendors data", res);
+
+      if (res?.status === "Success") {
+        setVendors(res?.data);
+      }
+    } catch (error) {
+      console.error("Error fetching dashboard data: ", error);
+    }
+  };
+
   useEffect(() => {
     handleDataFetch();
     filterOrdersByLocation();
-  }, [searchInput, Dashboard]);
+    handleVendorFetch();
+  }, [searchInput]);
 
   const filterOrdersByLocation = () => {
     if (!searchInput) {
@@ -133,7 +152,7 @@ export default function Home() {
                  </span>
                  <input
                    type="text"
-                   className="pl-10 pr-3 py-2 border rounded-md border-gray-200 focus:border-blue-500 focus:outline-none"
+                   className="pl-10 pr-3 py-2 border rounded-md border-gray-200 focus:border-blue-500 focus:outline-none w-1/4"
                    placeholder="Search for order by location..."
                    value={searchInput}
                    onChange={(e) => {
@@ -166,7 +185,7 @@ export default function Home() {
                                     <TableHead>payment</TableHead>
                                     <TableHead>total</TableHead>
                                     <TableHead>Date</TableHead>
-                                    <TableHead>Location</TableHead>
+                                    <TableHead>Delivery address</TableHead>
                                   </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -200,7 +219,40 @@ export default function Home() {
                             </div>
                           )}
                       </div>
-
+                      <div className="mb-4">
+                        <div className="py-2">
+                         <div className="flex justify-between">
+                          <p className="text-md font-bold">Vendors</p>
+                          </div>
+                        </div>
+                          {vendors.length > 0 && (
+                           <div className="border border-slate-100 rounded-md">
+                             <Table>
+                             <TableCaption>Vendor Data</TableCaption>
+                              <TableHeader>
+                                <TableRow>
+                                   <TableHead>Name</TableHead>
+                                   <TableHead>Address</TableHead>
+                                   <TableHead>Phone</TableHead>
+                                   <TableHead>Email</TableHead>
+                                   <TableHead>Transport</TableHead>
+                                   </TableRow>
+                                   </TableHeader>
+                                <TableBody>
+                                  {vendors.map((vendor, index) => (
+                                     <TableRow key={index}>
+                                       <TableCell>{vendor.name}</TableCell>
+                                       <TableCell>{vendor.address}</TableCell>
+                                       <TableCell>{vendor.phone}</TableCell>
+                                       <TableCell>{vendor.email}</TableCell>
+                                       <TableCell>{vendor.transport}</TableCell>
+                                       </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </div>
+                          )}
+                      </div>
                       <div className="py-4 flex gap-4 lg:flex-row flex-col">
                         {/* // display yoocard subscriptions */}
                         <div className="mb-4 lg:w-3/5 w-full pr-4 border-r-2 border-r-slate-100">
@@ -262,7 +314,7 @@ export default function Home() {
                             </div>
                           )}
                         </div>
-
+                         
                         {/* // display newsletter subscriptions */}
                         <div className="mb-4 lg:w-2/5 w-full">
                           <div className="py-2">
@@ -277,7 +329,6 @@ export default function Home() {
                               </div>
                             </div>
                           </div>
-
                           {Dashboard?.Newsletters && (
                             <div className="border border-slate-100 rounded-md">
                               <Table>
