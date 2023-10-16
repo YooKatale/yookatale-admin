@@ -17,25 +17,53 @@ import moment from "moment/moment";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import {
+  Box,
+  Input,
+  InputGroup,
+  InputLeftElement,
+} from "@chakra-ui/react";
+
+import {
+  FaSearch,
+} from "react-icons/fa";
 
 export default function Home() {
-  const [Dashboard, setDashboard] = useState([]);
+  const [Dashboard, setDashboard] = useState({});
+  const [searchInput, setSearchInput] = useState("");
+  const [filteredOrders, setFilteredOrders] = useState([]);
 
   const [fetchDashboardData] = useDashboardDataMutation();
 
   const handleDataFetch = async () => {
-    const res = await fetchDashboardData().unwrap();
+    try {
+      const res = await fetchDashboardData().unwrap();
 
-    console.log({ res });
+      console.log("Displaying dashboard data", res);
 
-    if (res?.status == "Success") {
-      setDashboard(res?.data);
+      if (res?.status === "Success") {
+        setDashboard(res?.data);
+      }
+    } catch (error) {
+      console.error("Error fetching dashboard data: ", error);
     }
   };
 
   useEffect(() => {
     handleDataFetch();
-  }, []);
+    filterOrdersByLocation();
+  }, [searchInput, Dashboard]);
+
+  const filterOrdersByLocation = () => {
+    if (!searchInput) {
+      setFilteredOrders(Dashboard?.PendingOrders?.orders || []);
+    } else {
+      const filtered = (Dashboard?.PendingOrders?.orders || []).filter((order) =>
+        order.deliveryAddress.address1.toLowerCase().includes(searchInput.toLowerCase())
+      );
+      setFilteredOrders(filtered);
+    }
+  };
 
   return (
     <>
@@ -84,6 +112,38 @@ export default function Home() {
                     </div>
                     <div className="py-4 px-2">
                       {/* // display pending orders */}
+                      <div className="mt-4">
+                    <form>
+                    <div className="relative">
+                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center">
+                     <svg
+                      className="h-6 w-6 text-gray-300"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                     >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                   </svg>
+                 </span>
+                 <input
+                   type="text"
+                   className="pl-10 pr-3 py-2 border rounded-md border-gray-200 focus:border-blue-500 focus:outline-none"
+                   placeholder="Search for order by location..."
+                   value={searchInput}
+                   onChange={(e) => {
+                     setSearchInput(e.target.value);
+                     filterOrdersByLocation();
+                    }}
+                  />
+                </div>
+               </form>
+             </div>
                       <div className="mb-4">
                         <div className="py-2">
                           <div className="flex justify-between">
@@ -106,10 +166,11 @@ export default function Home() {
                                     <TableHead>payment</TableHead>
                                     <TableHead>total</TableHead>
                                     <TableHead>Date</TableHead>
+                                    <TableHead>Location</TableHead>
                                   </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                  {[...Dashboard?.PendingOrders?.orders].map(
+                                  {filteredOrders.map(
                                     (order, index) => (
                                       <TableRow key={index}>
                                         <TableCell>
@@ -127,6 +188,9 @@ export default function Home() {
                                         <TableCell>{`UGX ${order?.total}`}</TableCell>
                                         <TableCell>
                                           {moment(order?.createdAt).fromNow()}
+                                        </TableCell>
+                                        <TableCell>
+                                          {order?.deliveryAddress.address1}
                                         </TableCell>
                                       </TableRow>
                                     )
