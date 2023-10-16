@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import Sidenav from "@/components/Sidenav";
 import { useDashboardDataMutation } from "@Slices/userApiSlice";
 import { useVendorGetMutation } from "@Slices/vendorApiSlice";
+import { usePartnerGetMutation } from "@Slices/partnersApiSlice";
 import { Button } from "@components/ui/button";
 import {
   Table,
@@ -34,9 +35,12 @@ export default function Home() {
   const [searchInput, setSearchInput] = useState("");
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [vendors, setVendors] = useState([]);
+  const [partners, setPartners] = useState([]);
 
   const [fetchDashboardData] = useDashboardDataMutation();
   const [vendorGet] = useVendorGetMutation();
+  const [partnerGet] = usePartnerGetMutation();
+
 
 
   const handleDataFetch = async () => {
@@ -67,10 +71,25 @@ export default function Home() {
     }
   };
 
+  const handlePartnerFetch = async () => {
+    try {
+      const res = await partnerGet().unwrap();
+
+      console.log("Displaying partners data", res);
+
+      if (res?.status === "Success") {
+        setPartners(res?.data);
+      }
+    } catch (error) {
+      console.error("Error fetching partner data: ", error);
+    }
+  };
+
   useEffect(() => {
     handleDataFetch();
     filterOrdersByLocation();
     handleVendorFetch();
+    handlePartnerFetch();
   }, [searchInput]);
 
   const filterOrdersByLocation = () => {
@@ -234,7 +253,6 @@ export default function Home() {
                                    <TableHead>Name</TableHead>
                                    <TableHead>Address</TableHead>
                                    <TableHead>Phone</TableHead>
-                                   <TableHead>Email</TableHead>
                                    <TableHead>Transport</TableHead>
                                    </TableRow>
                                    </TableHeader>
@@ -244,8 +262,41 @@ export default function Home() {
                                        <TableCell>{vendor.name}</TableCell>
                                        <TableCell>{vendor.address}</TableCell>
                                        <TableCell>{vendor.phone}</TableCell>
-                                       <TableCell>{vendor.email}</TableCell>
                                        <TableCell>{vendor.transport}</TableCell>
+                                       </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </div>
+                          )}
+                      </div>
+                      <div className="mb-4">
+                        <div className="py-2">
+                         <div className="flex justify-between">
+                          <p className="text-md font-bold">Drivers</p>
+                          </div>
+                        </div>
+                          {partners.length > 0 && (
+                           <div className="border border-slate-100 rounded-md">
+                             <Table>
+                             <TableCaption>Driver Data</TableCaption>
+                              <TableHeader>
+                                <TableRow>
+                                   <TableHead>Name</TableHead>
+                                   <TableHead>Address</TableHead>
+                                   <TableHead>Phone</TableHead>
+                                   <TableHead>Email</TableHead>
+                                   <TableHead>Transport</TableHead>
+                                   </TableRow>
+                                   </TableHeader>
+                                <TableBody>
+                                  {partners.map((partner, index) => (
+                                     <TableRow key={index}>
+                                       <TableCell>{partner.fullname}</TableCell>
+                                       <TableCell>{partner.location}</TableCell>
+                                       <TableCell>{partner.phone}</TableCell>
+                                       <TableCell>{partner.email}</TableCell>
+                                       <TableCell>{partner.transport}</TableCell>
                                        </TableRow>
                                   ))}
                                 </TableBody>
