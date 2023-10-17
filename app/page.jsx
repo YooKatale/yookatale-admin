@@ -381,14 +381,14 @@ partners.filter((partner) => {
                                     partners
                                     .filter((partner) => {
                                       if (!searchPartner) {
-                                        return true; // If searchPartner is empty, include all partners
+                                        return true;
                                       } else if (
                                         partner.location &&
                                         partner.location.toLowerCase().includes(searchPartner.toLowerCase())
                                       ) {
                                         return true;
                                       }
-                                      return false; // Exclude partners that don't match the search criteria
+                                      return false;
                                     })
                                     .map((partner, index) => (
                                       <TableRow key={index}>
