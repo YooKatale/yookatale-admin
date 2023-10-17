@@ -33,9 +33,11 @@ import {
 export default function Home() {
   const [Dashboard, setDashboard] = useState({});
   const [searchInput, setSearchInput] = useState("");
+  const [searchVendor, setSearchVendor] = useState("");
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [vendors, setVendors] = useState([]);
   const [partners, setPartners] = useState([]);
+  const [searchPartner, setSearchPartner] = useState("");
 
   const [fetchDashboardData] = useDashboardDataMutation();
   const [vendorGet] = useVendorGetMutation();
@@ -46,8 +48,6 @@ export default function Home() {
   const handleDataFetch = async () => {
     try {
       const res = await fetchDashboardData().unwrap();
-
-      console.log("Displaying dashboard data", res);
 
       if (res?.status === "Success") {
         setDashboard(res?.data);
@@ -61,21 +61,17 @@ export default function Home() {
     try {
       const res = await vendorGet().unwrap();
 
-      console.log("Displaying vendors data", res);
-
       if (res?.status === "Success") {
         setVendors(res?.data);
       }
     } catch (error) {
-      console.error("Error fetching dashboard data: ", error);
+      console.error("Error fetching vendor data: ", error);
     }
   };
 
   const handlePartnerFetch = async () => {
     try {
       const res = await partnerGet().unwrap();
-
-      console.log("Displaying partners data", res);
 
       if (res?.status === "Success") {
         setPartners(res?.data);
@@ -102,6 +98,24 @@ export default function Home() {
       setFilteredOrders(filtered);
     }
   };
+
+vendors.filter(vendor => {
+  if (searchVendor === "") {
+    return vendor;
+  } else if (vendor.address.toLowerCase().includes(searchVendor.toLowerCase())) {
+    return vendor;
+  }
+});
+
+partners.filter((partner) => {
+  if (searchPartner === "") {
+    return true;
+  } else if (partner?.location?.toLowerCase()?.includes(searchPartner.toLowerCase())) {
+    return true;
+  }
+  return false;
+});
+
 
   return (
     <>
@@ -239,6 +253,38 @@ export default function Home() {
                           )}
                       </div>
                       <div className="mb-4">
+                      <div className="mt-4">
+                          <form>
+                            <div className="relative">
+                              <span className="absolute inset-y-0 left-0 pl-3 flex items-center">
+                              <svg
+                               className="h-6 w-6 text-gray-300"
+                               xmlns="http://www.w3.org/2000/svg"
+                               fill="none"
+                               viewBox="0 0 24 24"
+                               stroke="currentColor"
+                              >
+                          <path
+                             strokeLinecap="round"
+                             strokeLinejoin="round"
+                             strokeWidth="2"
+                             d="M4 6h16M4 12h16M4 18h16"
+                           />
+                          </svg>
+                          </span>
+                      <input
+                        type="text"
+                        className="pl-10 pr-3 py-2 border rounded-md border-gray-200 focus:border-blue-500 focus:outline-none w-1/4"
+                        placeholder="Search for vendor by location..."
+                        value={searchVendor}
+                        onChange={(e) => {
+                          setSearchVendor(e.target.value)
+                          filterVendorsByLocation();
+                        }}
+                      />
+                     </div>
+                    </form>
+                   </div>
                         <div className="py-2">
                          <div className="flex justify-between">
                           <p className="text-md font-bold">Vendors</p>
@@ -254,23 +300,63 @@ export default function Home() {
                                    <TableHead>Address</TableHead>
                                    <TableHead>Phone</TableHead>
                                    <TableHead>Transport</TableHead>
+                                   <TableHead>Date</TableHead>
                                    </TableRow>
                                    </TableHeader>
                                 <TableBody>
-                                  {vendors.map((vendor, index) => (
-                                     <TableRow key={index}>
-                                       <TableCell>{vendor.name}</TableCell>
-                                       <TableCell>{vendor.address}</TableCell>
-                                       <TableCell>{vendor.phone}</TableCell>
-                                       <TableCell>{vendor.transport}</TableCell>
-                                       </TableRow>
-                                  ))}
+                                  {
+                                    vendors.filter(vendor => {
+                                      if (searchVendor === '') {
+                                        return vendor;
+                                      } else if (vendor.address.toLowerCase().includes(searchVendor.toLocaleLowerCase())) {
+                                        return vendor
+                                      }
+                                    }).map((vendor, index) => (
+                                      <TableRow key={index}>
+                                        <TableCell>{vendor.name}</TableCell>
+                                        <TableCell>{vendor.address}</TableCell>
+                                        <TableCell>{vendor.phone}</TableCell>
+                                        <TableCell>{vendor.transport}</TableCell>
+                                        <TableCell>
+                                           {moment(vendor?.createdAt).fromNow()}
+                                       </TableCell>
+                                        </TableRow>
+                                   ))
+                                  }
                                 </TableBody>
                               </Table>
                             </div>
                           )}
                       </div>
                       <div className="mb-4">
+                      <div className="mt-4">
+                        <form>
+                           <div className="relative">
+                           <span className="absolute inset-y-0 left-0 pl-3 flex items-center">
+                           <svg
+                           className="h-6 w-6 text-gray-300"
+                           xmlns="http://www.w3.org/2000/svg"
+                           fill="none"
+                           viewBox="0 0 24 24"
+                           stroke="currentColor"
+                           >
+                           <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M4 6h16M4 12h16M4 18h16"
+                          />
+                          </svg>
+                          </span>
+                         <input
+                           type="text"
+                           className="pl-10 pr-3 py-2 border rounded-md border-gray-200 focus:border-blue-500 focus:outline-none w-1/4"
+                           placeholder="Search for driver by location..."
+                           value={searchPartner}
+                           onChange={(e) => setSearchPartner(e.target.value)}                          />
+                        </div>
+                       </form>
+                      </div>
                         <div className="py-2">
                          <div className="flex justify-between">
                           <p className="text-md font-bold">Drivers</p>
@@ -287,18 +373,36 @@ export default function Home() {
                                    <TableHead>Phone</TableHead>
                                    <TableHead>Email</TableHead>
                                    <TableHead>Transport</TableHead>
+                                   <TableHead>Date</TableHead>
                                    </TableRow>
                                    </TableHeader>
                                 <TableBody>
-                                  {partners.map((partner, index) => (
-                                     <TableRow key={index}>
-                                       <TableCell>{partner.fullname}</TableCell>
-                                       <TableCell>{partner.location}</TableCell>
-                                       <TableCell>{partner.phone}</TableCell>
-                                       <TableCell>{partner.email}</TableCell>
-                                       <TableCell>{partner.transport}</TableCell>
-                                       </TableRow>
-                                  ))}
+                                  {
+                                    partners
+                                    .filter((partner) => {
+                                      if (!searchPartner) {
+                                        return true; // If searchPartner is empty, include all partners
+                                      } else if (
+                                        partner.location &&
+                                        partner.location.toLowerCase().includes(searchPartner.toLowerCase())
+                                      ) {
+                                        return true;
+                                      }
+                                      return false; // Exclude partners that don't match the search criteria
+                                    })
+                                    .map((partner, index) => (
+                                      <TableRow key={index}>
+                                        <TableCell>{partner.fullname || ''}</TableCell>
+                                        <TableCell>{partner.location || ''}</TableCell>
+                                        <TableCell>{partner.phone || ''}</TableCell>
+                                        <TableCell>{partner.email || ''}</TableCell>
+                                        <TableCell>{partner.transport || ''}</TableCell>
+                                        <TableCell>
+                                          {moment(partner?.createdAt).fromNow() || ''}
+                                        </TableCell>
+                                      </TableRow>
+                                    ))
+                                  }
                                 </TableBody>
                               </Table>
                             </div>
