@@ -25,10 +25,8 @@ import {
   InputGroup,
   InputLeftElement,
 } from "@chakra-ui/react";
-
-import {
-  FaSearch,
-} from "react-icons/fa";
+import { useRouter } from "next/navigation";
+import Product from "@components/product";
 
 export default function Home() {
   const [Dashboard, setDashboard] = useState({});
@@ -42,6 +40,9 @@ export default function Home() {
   const [fetchDashboardData] = useDashboardDataMutation();
   const [vendorGet] = useVendorGetMutation();
   const [partnerGet] = usePartnerGetMutation();
+
+  const router = useRouter();
+  // const { id } = router.query;
 
 
 
@@ -252,6 +253,7 @@ partners.filter((partner) => {
                             </div>
                           )}
                       </div>
+                      <Product router={router} />
                       <div className="mb-4">
                       <div className="mt-4">
                           <form>
