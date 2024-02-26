@@ -1,4 +1,5 @@
-import { useYoocardCreatePostMutation } from "@Slices/yoocacrdApiSlice";
+import { useadvertPlanCreatePostMutation } from "@Slices/yoocacrdApiSlice";
+import { useCreateAdvertisementPackageMutation } from "@Slices/advertisementApiSlice";
 import { Button } from "@components/ui/button";
 import { Input } from "@components/ui/input";
 import { Label } from "@components/ui/label";
@@ -11,64 +12,72 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@components/ui/select";
-import { Textarea } from "@components/ui/textarea";
 import { useToast } from "@components/ui/use-toast";
 import { Loader2, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
-const AddYoocard = ({ closeModal }) => {
-  const [isLoading, setLoading] = useState(false);
-  const [YooCard, setYooCard] = useState({
-    type: "",
-    name: "",
-    price: 0,
-    details: "",
-    previousPrice: 0,
-  });
-  const [formDetailsInputCount, setFormDetailsInputCount] = useState(1);
+const benefitPacks = [
+  { value: "access to pro sales", isChecked: false },
+  { value: "yookatale insights", isChecked: false },
+  { value: "emails & social media link", isChecked: false },
+  { value: "personal manager", isChecked: false },
+];
 
-  const [createCard] = useYoocardCreatePostMutation();
+const AddAdvertisementPackage = ({ closeModal }) => {
+  const [isLoading, setLoading] = useState(false);
+  const [selectedBenefits, setSelectedBenefits] = useState([]);
+  const [advertPlan, setAdvertPlan] = useState({
+    type: "",
+    adverts: 0,
+    period: "",
+    price: 0,
+  });
+
+  const [createPlan] = useCreateAdvertisementPackageMutation();
 
   const router = useRouter();
 
   const { toast } = useToast();
+  const handleCheckBox = (value) => {
+    const updatedBenefits = [...selectedBenefits];
+    const existingBenefitIndex = updatedBenefits.findIndex(
+      (benefit) => benefit.value === value
+    );
 
+    if (existingBenefitIndex !== -1) {
+      updatedBenefits.splice(existingBenefitIndex, 1);
+    } else {
+      updatedBenefits.push({ value, isChecked: true });
+    }
+
+    setSelectedBenefits(updatedBenefits);
+  };
+ 
   const submitHandler = async (e) => {
     e.preventDefault();
-    YooCard.type = e.target.type.value;
-
-    // compile card details data
-    let DetailsInputValues = [];
-    [...Array(parseInt(formDetailsInputCount))].forEach((count, index) => {
-      let inputName = `details${index + 1}`;
-
-      if (e.target[inputName].value !== "")
-        DetailsInputValues.push(e.target[inputName].value);
-    });
-
-    YooCard.details = DetailsInputValues;
-
+    advertPlan.type = e.target.type.value;
+    advertPlan.period = e.target.period.value
     setLoading((prevState) => (prevState ? false : true));
-
     try {
-      const res = await createCard(YooCard).unwrap();
+      const res = await createPlan({
+        ...advertPlan,
+        benefits: selectedBenefits,
+      }).unwrap();
       setLoading((prevState) => (prevState ? false : true));
       if (res?.status == "Success") {
         toast({
           title: "Success",
-          description: `Card created.`,
+          description: `Plan created.`,
         });
         // clear form input data
-        setYooCard({
+        setAdvertPlan({
           type: "",
-          name: "",
+          period: "",
+          adverts: 0,
           price: 0,
-          details: "",
-          previousPrice: 0,
         });
-        setFormDetailsInputCount(0);
-        router.push("/cards");
+        // router.push("/cards");
       }
     } catch (err) {
       // set loading to be false
@@ -95,7 +104,7 @@ const AddYoocard = ({ closeModal }) => {
             <X size={30} />
           </div>
           <div className="pt-8 pb-4">
-            <p className="text-center text-3xl font-thin">Add YooCard</p>
+            <p className="text-center text-3xl font-thin">Add A New Package</p>
           </div>
           <div className="py-2">
             <div className="flex">
@@ -104,83 +113,94 @@ const AddYoocard = ({ closeModal }) => {
                   <div className="grid grid-cols-2">
                     <div className="p-2">
                       <Label htmlFor="type" className="text-lg mb-1">
-                        Card Type
+                        Plan Type
                       </Label>
                       <Select
                         name="type"
                         onChange={(e) => {
-                          setYooCard({
-                            ...YooCard,
+                          setAdvertPlan({
+                            ...advertPlan,
                             [e.target.name]: e.target.value,
                           });
                         }}
                       >
                         <SelectTrigger className="w-full">
                           <SelectValue
-                            placeholder="Select card type"
-                            value={YooCard.type}
+                            placeholder="Select plan type"
+                            value={advertPlan.type}
                           />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
-                            <SelectLabel>Card Type</SelectLabel>
-                            <SelectItem value="premium">Premium</SelectItem>
-                            <SelectItem value="diamond">Diamond</SelectItem>
-                            <SelectItem value="gold">Gold</SelectItem>
-                            <SelectItem value="business">Business</SelectItem>
+                            <SelectLabel>Plan Type</SelectLabel>
+                            <SelectItem value="Basic">Basic</SelectItem>
+                            <SelectItem value="Vip">VIP</SelectItem>
                           </SelectGroup>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="p-2">
-                      <Label htmlFor="name" className="text-lg mb-1">
-                        Card Name
+                      <Label htmlFor="period" className="text-lg mb-1">
+                        Period
                       </Label>
-                      <Input
-                        type="text"
-                        id="name"
-                        placeholder="name is required"
-                        name="name"
-                        value={YooCard.name}
+                      <Select
+                        name="period"
                         onChange={(e) => {
-                          setYooCard({
-                            ...YooCard,
+                          setAdvertPlan({
+                            ...advertPlan,
                             [e.target.name]: e.target.value,
                           });
                         }}
-                      />
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue
+                            placeholder="Select period"
+                            value={advertPlan.period}
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectLabel>Plan Type</SelectLabel>
+                            <SelectItem value="weekly">Weekly</SelectItem>
+                            <SelectItem value="monthly">Monthly</SelectItem>
+                            <SelectItem value="3 months">3 Months</SelectItem>
+                            <SelectItem value="6 months">6 Months</SelectItem>
+                            <SelectItem value="1 year"> 1 year</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="p-2">
                       <Label htmlFor="price" className="text-lg mb-1">
-                        Card Price
+                        Plan Price
                       </Label>
                       <Input
                         type="number"
                         id="price"
                         placeholder="price is required"
                         name="price"
-                        value={YooCard.price}
+                        value={advertPlan.price}
                         onChange={(e) => {
-                          setYooCard({
-                            ...YooCard,
+                          setAdvertPlan({
+                            ...advertPlan,
                             [e.target.name]: e.target.value,
                           });
                         }}
                       />
                     </div>
                     <div className="p-2">
-                      <Label htmlFor="previousPrice" className="text-lg mb-1">
-                        Previous Price
+                      <Label htmlFor="adverts" className="text-lg mb-1">
+                        Number of Adverts
                       </Label>
                       <Input
                         type="number"
-                        id="previousPrice"
+                        id="adverts"
                         placeholder=""
-                        name="previousPrice"
-                        value={YooCard.previousPrice}
+                        name="adverts"
+                        value={advertPlan.previousPrice}
                         onChange={(e) => {
-                          setYooCard({
-                            ...YooCard,
+                          setAdvertPlan({
+                            ...advertPlan,
                             [e.target.name]: e.target.value,
                           });
                         }}
@@ -190,43 +210,32 @@ const AddYoocard = ({ closeModal }) => {
                   <div className="p-2">
                     <div className="flex justify-between pb-2">
                       <Label htmlFor="details" className="text-lg">
-                        Card Details
+                        Advert Plan Benefits
                       </Label>
-                      <div>
-                        <Button
-                          type={"button"}
-                          onClick={() =>
-                            setFormDetailsInputCount(
-                              (prev, curr) => (curr = prev + 1)
-                            )
-                          }
-                          className="text-md"
-                        >
-                          <Plus size={20} /> Input
-                        </Button>
-                      </div>
                     </div>
-                    <div className="grid grid-cols-3">
-                      {[...Array(parseInt(formDetailsInputCount))].map(
-                        (count, index) => (
-                          <div className="mr-2">
-                            <Input
-                              type="text"
-                              id={`details${index + 1}`}
-                              placeholder={`Input ${index + 1}`}
-                              name={`details${index + 1}`}
-                            />
-                          </div>
-                        )
-                      )}
+                    <div className="grid grid-cols-4">
+                      {benefitPacks.map((pack, index) => (
+                        <div class="flex items-center mb-4" key={index}>
+                          <input
+                            id="checkbox-3"
+                            type="checkbox"
+                            defaultChecked={pack.isChecked}
+                            className="w-4 h-4 rounded"
+                            onChange={() => handleCheckBox(pack.value)}
+                          />
+                          <label className="ms-2 text-sm md:text-lg font-medium">
+                            {pack.value}
+                          </label>
+                        </div>
+                      ))}
                     </div>
                     {/* <Textarea
                       name={"details"}
                       id={"details"}
-                      value={YooCard.details}
+                      value={advertPlan.details}
                       onChange={(e) => {
-                        setYooCard({
-                          ...YooCard,
+                        setAdvertPlan({
+                          ...advertPlan,
                           [e.target.name]: e.target.value,
                         });
                       }}
@@ -234,7 +243,7 @@ const AddYoocard = ({ closeModal }) => {
                   </div>
                   <div className="py-2">
                     <Button type="submit">
-                      {isLoading ? <Loader2 /> : ""}Add Card
+                      {isLoading ? <Loader2 /> : ""}Add Package
                     </Button>
                   </div>
                 </form>
@@ -247,4 +256,4 @@ const AddYoocard = ({ closeModal }) => {
   );
 };
 
-export default AddYoocard;
+export default AddAdvertisementPackage;

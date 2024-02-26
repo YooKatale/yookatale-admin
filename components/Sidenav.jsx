@@ -62,6 +62,26 @@ const Sidenav = () => {
             </Link>
           </div>
           <div className="py-2">
+            <Link href={"/advertisement"}>
+              <div className="flex">
+                <HiCreditCard size={25} />
+                <h3 className="mx-2 text-md font-bold text-gray-600">
+                  Advertisement
+                </h3>
+              </div>
+            </Link>
+          </div>
+          <div className="py-2">
+            <Link href={"/advert-packages"}>
+              <div className="flex">
+                <CreditCardIcon size={25} />
+                <h3 className="mx-2 text-md font-bold text-gray-600">
+                  Advert Packages
+                </h3>
+              </div>
+            </Link>
+          </div>
+          <div className="py-2">
             <Link href={"/cards"}>
               <div className="flex">
                 <CreditCardIcon size={25} />
