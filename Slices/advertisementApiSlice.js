@@ -18,6 +18,13 @@ export const advertismentApiSlice = apiSlice.injectEndpoints({
       }),
     }),
 
+    deleteAdvertisementPackage: builder.mutation({
+      query: (id) => ({
+        url: `${BACKEND_URL}/admin/advertisementpackages/delete/${id}`,
+        method: "DELETE",
+      }),
+    }),
+
     getAdvertisementPosts: builder.mutation({
       query: () => ({
         url: `${BACKEND_URL}/api/advertisment`,
@@ -31,4 +38,5 @@ export const {
   useCreateAdvertisementPackageMutation,
   useFetchAdvertisementPackagesMutation,
   useGetAdvertisementPostsMutation,
+  useDeleteAdvertisementPackageMutation,
 } = advertismentApiSlice;

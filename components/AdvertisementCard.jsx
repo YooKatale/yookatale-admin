@@ -1,4 +1,5 @@
 import React from "react";
+import { useToast } from "@components/ui/use-toast";
 import { Button } from "./ui/button";
 import {
   AlertDialog,
@@ -11,16 +12,37 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "./ui/alert-dialog";
+import { useDeleteAdvertisementPackageMutation } from "@Slices/advertisementApiSlice";
 
 const AdvertisementCard = ({ card }) => {
-  const handleDataDelete = () => {};
+  const { toast } = useToast();
+  const [deletePackage] = useDeleteAdvertisementPackageMutation();
+  const handleDataDelete = async () => {
+    try {
+      const res = await deletePackage(card._id).unwrap();
+      if (res?.status === "Success") {
+        toast({
+          title: "Success",
+          description: `Package deleted.`,
+        });
+      }
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Error occured",
+        description: err.data?.message
+          ? err.data?.message
+          : err.data || err.error,
+      });
+    }
+  };
   return (
     <>
       <div className="div">
         <div className="px-4 py-2 border border-slate-100 rounded-md mx-2 my-2">
           <div className="py-2 border-b-2 border-slate-100">
             <h3 className="text-lg font-bold">
-              {card.period }{" "}
+              {card.period}{" "}
               <span className="text-lg font-bold text-teal-700 capitalize">
                 {card?.type}
               </span>
@@ -28,9 +50,7 @@ const AdvertisementCard = ({ card }) => {
             <h3 className="text-lg mt-1">{card?.name}</h3>
           </div>
           <div className="pt-4 pb-6 border-b-2 border-slate-100 pl-2">
-          <p className="text-md my-2">
-               Adverts {card.adverts}
-              </p>
+            <p className="text-md my-2">Adverts {card.adverts}</p>
             {card?.benefits.map((detail, index) => (
               <p key={index} className="text-md my-2">
                 {detail.value}
