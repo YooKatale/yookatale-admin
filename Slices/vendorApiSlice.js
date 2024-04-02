@@ -15,5 +15,5 @@ export const vendorApiSlice = apiSlice.injectEndpoints({
 });
 
 export const {
-    useVendorGetMutation
+  useVendorGetMutation
 } = vendorApiSlice;

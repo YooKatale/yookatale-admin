@@ -1,5 +1,3 @@
-// "use client";
-
 import { BACKEND_URL } from "@constants/constant";
 import { apiSlice } from "./apiSlice";
 
