@@ -8,6 +8,10 @@ export const partnersPageApiSlice = apiSlice.injectEndpoints({
         url: `${BACKEND_URL}/api/partners`,
         method: "GET",
       }),
+      onError: (error) => {
+        console.error('Error fetching partners:', error);
+        throw error;
+      },
     }),
   }),
 });
@@ -15,6 +19,7 @@ export const partnersPageApiSlice = apiSlice.injectEndpoints({
 export const {
   usePartnerGetQuery,
 } = partnersPageApiSlice;
+
 
 
 
