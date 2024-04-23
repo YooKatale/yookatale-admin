@@ -22,6 +22,7 @@ import { useEffect, useState } from "react";
 import { Box, Input, InputGroup, InputLeftElement } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import Product from "@components/product";
+import { useSelector } from "react-redux";
 
 export default function Home() {
   const [Dashboard, setDashboard] = useState({});
@@ -38,6 +39,7 @@ export default function Home() {
 
   const router = useRouter();
   // const { id } = router.query;
+  const isOpen = useSelector((state) => state.sidebar.isOpen);
 
   const handleDataFetch = async () => {
     try {
@@ -119,8 +121,12 @@ export default function Home() {
 
   return (
     <>
-      <main className="max-w-full">
-        <div className="flex w-full max-h-screen">
+      <main
+        className={`ml-${isOpen ? "1/5" : "0"} transition-all duration-300`}
+      >
+        <div
+          className={`flex ${isOpen ? "w-full max-h-screen" : "w-4/5"} pt-12`}
+        >
           <Sidenav />
           <Navbar />
           <div className="flex w-full pt-12">

@@ -10,6 +10,7 @@ import { useLogoutMutation } from "@Slices/userApiSlice";
 import { logout } from "@Slices/authSlice";
 import { useToast } from "./ui/use-toast";
 import { useRouter } from "next/navigation";
+import { toggleSidebar } from "@Slices/sidebarSlice";
 
 const Navbar = () => {
   const [isLoading, setLoading] = useState({ operation: "", status: false });
@@ -20,6 +21,11 @@ const Navbar = () => {
   const router = useRouter();
 
   const dispatch = useDispatch();
+  const { isOpen } = useSelector((state) => state.sidebar);
+
+  const handleToggleSidebar = () => {
+    dispatch(toggleSidebar());
+  };
 
   const logoutHandler = async () => {
     // set loading to be true
@@ -61,7 +67,10 @@ const Navbar = () => {
         <div className="w-4/5">
           <div className="flex justify-between py-2 px-2">
             <div className="p-2">
-              <div className="cursor-pointer mx-2">
+              <div
+                className="cursor-pointer mx-2"
+                onClick={handleToggleSidebar}
+              >
                 <HiMenuAlt2 size={25} />
               </div>
             </div>
