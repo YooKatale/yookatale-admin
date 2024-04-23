@@ -129,20 +129,20 @@ export default function Home() {
         >
           <Sidenav />
           <Navbar />
-          <div className="flex w-full pt-12">
-            <div className="w-1/5"></div>
-            <div className="w-4/5 pt-4">
+          <div className="flex flex-col lg:flex-row w-full pt-12">
+            <div className="w-full lg:w-1/5"></div>
+            <div className="w-full lg:w-4/5 pt-4">
               <div className="w-full h-full">
                 {/* ------------------- main content here
             ---------------------------------------------------
             */}
                 <div className="px-2 py-4">
-                  <div className="p-2">
+                  <div className="p-2 flex justify-center sm:justify-start">
                     <p className="text-xl">Dashboard</p>
                   </div>
 
                   <div className="py-2">
-                    <div className="grid grid-cols-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                       <div className="border border-slate-100 rounded-sm p-3 mx-2">
                         <h3 className="text-2xl text-center text-gray-400 font-extrabold">
                           {Dashboard?.Products

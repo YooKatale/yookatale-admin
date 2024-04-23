@@ -22,7 +22,7 @@ const Sidenav = () => {
   return (
     <>
       {isOpen && (
-        <div className="p-4 w-1/5 bg-slate-50 h-screen max-h-screen overflow-y-auto overflow-x-hidden fixed z-20">
+        <div className="p-4 w-70 bg-slate-50 h-screen max-h-screen overflow-y-auto overflow-x-hidden fixed z-20">
           <div className="py-4">
             <div className="flex">
               <div className="px-2">
