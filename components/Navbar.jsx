@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { toggleSidebar } from "@Slices/sidebarSlice";
 
 const Navbar = () => {
+  const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1024);
   const [isLoading, setLoading] = useState({ operation: "", status: false });
   const [logoutApiCall] = useLogoutMutation();
 
@@ -59,12 +60,48 @@ const Navbar = () => {
     IsLoggedIn();
     IsAccountValid();
   }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        dispatch(toggleSidebar()); // Open sidebar for larger screens
+      } else {
+        dispatch(toggleSidebar()); // Close sidebar for smaller screens
+      }
+    };
+
+    handleResize(); // Check on mount
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsLargeScreen(window.innerWidth >= 1024);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   const { userInfo } = useSelector((state) => state.auth);
   return (
     <>
       <nav className="p-0  border-slate-100 border-b-2 fixed top-0 w-full bg-white z-10 flex justify-center items-center">
         <div className="flex justify-between items-center w-full py-2 px-2">
-          <div className="cursor-pointer mx-2" onClick={handleToggleSidebar}>
+          <div
+            className={
+              isLargeScreen ? "cursor-not-allowed mx-2" : "cursor-pointer mx-2"
+            }
+            onClick={!isLargeScreen ? handleToggleSidebar : null}
+          >
             <HiMenuAlt2 size={25} />
           </div>
           <div className="flex justify-end px-4">

@@ -13,11 +13,32 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect } from "react";
 import { HiCreditCard, HiMenuAlt2, HiOutlineDocumentAdd } from "react-icons/hi";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { toggleSidebar } from "@Slices/sidebarSlice";
 
 const Sidenav = () => {
   const isOpen = useSelector((state) => state.sidebar.isOpen);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        dispatch(toggleSidebar()); // Open sidebar for larger screens
+      } else {
+        dispatch(toggleSidebar()); // Close sidebar for smaller screens
+      }
+    };
+
+    handleResize(); // Check on mount
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   return (
     <>
