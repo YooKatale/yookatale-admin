@@ -63,7 +63,6 @@ const Navbar = () => {
   return (
     <>
       <nav className="p-0  border-slate-100 border-b-2 fixed top-0 w-full bg-white z-10 flex justify-center items-center">
-        {/* <div className="w-1/5"></div> */}
         <div className="w-4/5">
           <div className="flex justify-between py-2 px-2">
             <div className="p-2">
