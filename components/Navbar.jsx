@@ -63,33 +63,26 @@ const Navbar = () => {
   return (
     <>
       <nav className="p-0  border-slate-100 border-b-2 fixed top-0 w-full bg-white z-10 flex justify-center items-center">
-        <div className="w-4/5">
-          <div className="flex justify-between py-2 px-2">
-            <div className="p-2">
-              <div
-                className="cursor-pointer mx-2"
-                onClick={handleToggleSidebar}
-              >
-                <HiMenuAlt2 size={25} />
-              </div>
+        <div className="flex justify-between items-center w-full py-2 px-2">
+          <div className="cursor-pointer mx-2" onClick={handleToggleSidebar}>
+            <HiMenuAlt2 size={25} />
+          </div>
+          <div className="flex justify-end px-4">
+            <div className="pr-4 border-r border-slate-100">
+              <p className="text-sm font-thin m-0 p-0">Admin</p>
+              <p className="text-lg font-semibold m-0 p-0">
+                {userInfo?.username}
+              </p>
             </div>
-            <div className="flex justify-end px-4">
-              <div className="pr-4 border-r border-slate-100">
-                <p className="text-sm font-thin m-0 p-0">Admin</p>
-                <p className="text-lg font-semibold m-0 p-0">
-                  {userInfo?.username}
-                </p>
-              </div>
-              <div className="pl-2 pr-1 pt-1">
-                <Button onClick={logoutHandler}>
-                  {isLoading && isLoading.operation == "logout" ? (
-                    <Loader2 />
-                  ) : (
-                    <LogOut />
-                  )}{" "}
-                  Logout
-                </Button>
-              </div>
+            <div className="pl-2 pr-1 pt-1">
+              <Button onClick={logoutHandler}>
+                {isLoading && isLoading.operation == "logout" ? (
+                  <Loader2 />
+                ) : (
+                  <LogOut />
+                )}{" "}
+                Logout
+              </Button>
             </div>
           </div>
         </div>

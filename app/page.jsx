@@ -129,8 +129,8 @@ export default function Home() {
         >
           <Sidenav />
           <Navbar />
-          <div className="flex flex-col lg:flex-row w-full pt-12">
-            <div className="w-full lg:w-1/5"></div>
+          <div class="flex flex-col lg:flex-row lg:w-full pt-12 w-[140%]">
+            <div className="w-full lg:w-1/5 md:w-1/6"></div>
             <div className="w-full lg:w-4/5 pt-4">
               <div className="w-full h-full">
                 {/* ------------------- main content here
@@ -138,7 +138,7 @@ export default function Home() {
             */}
 
                 <div className="px-2 py-4">
-                  <div className="hidden sm:block">
+                  <div>
                     <div className="p-2 flex justify-center sm:justify-start">
                       <p className="text-xl">Dashboard</p>
                     </div>
