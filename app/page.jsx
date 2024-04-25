@@ -136,12 +136,12 @@ export default function Home() {
                 {/* ------------------- main content here
             ---------------------------------------------------
             */}
-                <div className="px-2 py-4">
-                  <div className="p-2 flex justify-center sm:justify-start">
-                    <p className="text-xl">Dashboard</p>
-                  </div>
 
-                  <div className="py-2">
+                <div className="px-2 py-4">
+                  <div className="hidden sm:block">
+                    <div className="p-2 flex justify-center sm:justify-start">
+                      <p className="text-xl">Dashboard</p>
+                    </div>
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                       <div className="border border-slate-100 rounded-sm p-3 mx-2">
                         <h3 className="text-2xl text-center text-gray-400 font-extrabold">
@@ -168,6 +168,9 @@ export default function Home() {
                         </p>
                       </div>
                     </div>
+                  </div>
+
+                  <div className="py-2">
                     <div className="py-4 px-2">
                       {/* // display pending orders */}
                       <div className="mt-4">
