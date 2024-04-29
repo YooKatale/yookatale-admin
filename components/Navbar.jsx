@@ -10,10 +10,10 @@ import { useLogoutMutation } from "@Slices/userApiSlice";
 import { logout } from "@Slices/authSlice";
 import { useToast } from "./ui/use-toast";
 import { useRouter } from "next/navigation";
-import { toggleSidebar } from "@Slices/sidebarSlice";
+import { toggleSidebar, openSidebar, closeSidebar } from "@Slices/sidebarSlice";
 
 const Navbar = () => {
-  const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1024);
+  const [isLargeScreen, setIsLargeScreen] = useState(false);
   const [isLoading, setLoading] = useState({ operation: "", status: false });
   const [logoutApiCall] = useLogoutMutation();
 
@@ -64,9 +64,9 @@ const Navbar = () => {
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
-        dispatch(toggleSidebar()); // Open sidebar for larger screens
+        dispatch(openSidebar()); // Open sidebar for larger screens
       } else {
-        dispatch(toggleSidebar()); // Close sidebar for smaller screens
+        dispatch(closeSidebar()); // Close sidebar for smaller screens
       }
     };
 

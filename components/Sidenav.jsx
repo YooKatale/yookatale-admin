@@ -16,7 +16,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { HiCreditCard, HiMenuAlt2, HiOutlineDocumentAdd } from "react-icons/hi";
 import { useDispatch, useSelector } from "react-redux";
-import { toggleSidebar } from "@Slices/sidebarSlice";
+import { openSidebar, closeSidebar } from "@Slices/sidebarSlice";
 
 const Sidenav = () => {
   const isOpen = useSelector((state) => state.sidebar.isOpen);
@@ -25,9 +25,9 @@ const Sidenav = () => {
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
-        dispatch(toggleSidebar()); // Open sidebar for larger screens
+        dispatch(openSidebar()); // Open sidebar for larger screens
       } else {
-        dispatch(toggleSidebar()); // Close sidebar for smaller screens
+        dispatch(closeSidebar()); // Close sidebar for smaller screens
       }
     };
 
