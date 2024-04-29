@@ -22,6 +22,7 @@ import { useEffect, useState } from "react";
 import { Box, Input, InputGroup, InputLeftElement } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import Product from "@components/product";
+import { useSelector } from "react-redux";
 
 export default function Home() {
   const [Dashboard, setDashboard] = useState({});
@@ -38,6 +39,7 @@ export default function Home() {
 
   const router = useRouter();
   // const { id } = router.query;
+  const isOpen = useSelector((state) => state.sidebar.isOpen);
 
   const handleDataFetch = async () => {
     try {
@@ -119,24 +121,28 @@ export default function Home() {
 
   return (
     <>
-      <main className="max-w-full">
-        <div className="flex w-full max-h-screen">
+      <main
+        className={`ml-${isOpen ? "1/5" : "0"} transition-all duration-300`}
+      >
+        <div
+          className={`flex ${isOpen ? "w-full max-h-screen" : "w-4/5"} pt-12`}
+        >
           <Sidenav />
           <Navbar />
-          <div className="flex w-full pt-12">
-            <div className="w-1/5"></div>
-            <div className="w-4/5 pt-4">
+          <div class="flex flex-col lg:flex-row lg:w-full pt-12 w-[140%]">
+            <div className="w-full lg:w-1/5 md:w-1/6"></div>
+            <div className="w-full lg:w-4/5 pt-4">
               <div className="w-full h-full">
                 {/* ------------------- main content here
             ---------------------------------------------------
             */}
-                <div className="px-2 py-4">
-                  <div className="p-2">
-                    <p className="text-xl">Dashboard</p>
-                  </div>
 
-                  <div className="py-2">
-                    <div className="grid grid-cols-4">
+                <div className="px-2 py-4">
+                  <div>
+                    <div className="p-2 flex justify-center sm:justify-start">
+                      <p className="text-xl">Dashboard</p>
+                    </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                       <div className="border border-slate-100 rounded-sm p-3 mx-2">
                         <h3 className="text-2xl text-center text-gray-400 font-extrabold">
                           {Dashboard?.Products
@@ -162,6 +168,9 @@ export default function Home() {
                         </p>
                       </div>
                     </div>
+                  </div>
+
+                  <div className="py-2">
                     <div className="py-4 px-2">
                       {/* // display pending orders */}
                       <div className="mt-4">
