@@ -16,34 +16,14 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { HiCreditCard, HiMenuAlt2, HiOutlineDocumentAdd } from "react-icons/hi";
 import { useDispatch, useSelector } from "react-redux";
-import { openSidebar, closeSidebar } from "@Slices/sidebarSlice";
 
 const Sidenav = () => {
   const isOpen = useSelector((state) => state.sidebar.isOpen);
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 768) {
-        dispatch(openSidebar()); // Open sidebar for larger screens
-      } else {
-        dispatch(closeSidebar()); // Close sidebar for smaller screens
-      }
-    };
-
-    handleResize(); // Check on mount
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
 
   return (
     <>
       {isOpen && (
-        <div className="p-4 w-70 bg-slate-50 h-screen max-h-screen overflow-y-auto overflow-x-hidden fixed z-20">
+        <div className="p-4 w-70 bg-slate-50 h-screen max-h-screen overflow-y-auto overflow-x-hidden fixed">
           <div className="py-4">
             <div className="flex">
               <div className="px-2">

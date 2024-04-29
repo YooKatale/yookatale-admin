@@ -22,7 +22,7 @@ const AdvertPackages = () => {
   const handleCardFetch = async () => {
     try {
       const res = await fetchCards().unwrap();
-      console.log('res', res);
+      console.log("res", res);
       if (res.success == true) {
         setYooCards(res.packages);
       }
@@ -53,7 +53,7 @@ const AdvertPackages = () => {
         <div className="flex w-full max-h-screen">
           <Sidenav />
           <Navbar />
-          <div className="flex w-full pt-12">
+          <div className="flex flex-col lg:flex-row lg:w-full pt-12 w-[140%]">
             <div className="w-1/5"></div>
             <div className="w-4/5 pt-4">
               <div className="w-full h-screen max-h-screen overflow-x-hidden overflow-y-auto container__hide__scrollbar">
