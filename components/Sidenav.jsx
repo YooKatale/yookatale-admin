@@ -13,17 +13,20 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect } from "react";
 import { HiCreditCard, HiMenuAlt2, HiOutlineDocumentAdd } from "react-icons/hi";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
-const Sidenav = () => {
+const Sidenav = ({ marginTop = false }) => {
   const isOpen = useSelector((state) => state.sidebar.isOpen);
 
   return (
     <>
       {isOpen && (
-        <div className="p-4 w-70 bg-slate-50 h-screen max-h-screen overflow-y-auto overflow-x-hidden fixed">
+        <div
+          className={`p-4 w-70 bg-slate-50 h-screen max-h-screen overflow-y-auto overflow-x-hidden fixed ${
+            marginTop && "mt-12"
+          }`}
+        >
           <div className="py-4">
             <div className="flex">
               <div className="px-2">

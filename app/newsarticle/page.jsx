@@ -72,7 +72,7 @@ const NewsArticle = () => {
     <>
       <main className="max-w-full">
         <div className="flex w-full">
-          <Sidenav />
+          <Sidenav marginTop={true} />
           <Navbar />
           <div className="flex flex-col lg:flex-row lg:w-full pt-12 w-[140%]">
             <div className="w-1/5"></div>

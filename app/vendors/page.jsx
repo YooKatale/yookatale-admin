@@ -25,7 +25,7 @@ const VendorPage = () => {
     <main className="max-w-full">
       <div className="flex w-full">
         <Navbar />
-        <Sidenav />
+        <Sidenav marginTop={true} />
         <div className="ml-72 p-8">
           <br />
           <br />

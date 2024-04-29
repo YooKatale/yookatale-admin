@@ -113,7 +113,7 @@ const Product = () => {
         <></>
       )}
       <main className="max-w-full">
-        <Sidenav />
+        <Sidenav marginTop={true} />
         <Navbar />
         {/* <AlertBox /> */}
         <div className="flex flex-col lg:flex-row lg:w-full pt-12 w-[140%]">
