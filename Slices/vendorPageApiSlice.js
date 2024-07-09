@@ -10,13 +10,26 @@ export const vendorPageApiSlice = apiSlice.injectEndpoints({
       }),
       transformResponse: (response) => {
         if (response.status === 'Success') {
-          return response.data; 
+          return response.data;
         } else {
-          throw new Error('Failed to fetch vendors'); 
+          throw new Error('Failed to fetch vendors');
+        }
+      },
+    }),
+    activateVendor: builder.mutation({
+      query: (vendorId) => ({
+        url: `${BACKEND_URL}/api/vendors/activate/${vendorId}`,
+        method: 'POST',
+      }),
+      transformResponse: (response) => {
+        if (response.status === 'Success') {
+          return response.data;
+        } else {
+          throw new Error('Failed to activate vendor');
         }
       },
     }),
   }),
 });
 
-export const { useFetchVendorsQuery } = vendorPageApiSlice;
+export const { useFetchVendorsQuery, useActivateVendorMutation } = vendorPageApiSlice;
