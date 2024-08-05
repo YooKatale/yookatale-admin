@@ -40,7 +40,7 @@ const Signin = () => {
       setLoading((prevState) => (prevState ? false : true));
 
       const res = await login({ username, password }).unwrap();
-
+alert(JSON.stringify(res))
       dispatch(setCredentials({ ...res }));
 
       // set loading to be false
