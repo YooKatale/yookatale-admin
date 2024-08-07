@@ -44,6 +44,12 @@ export const usersApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+    auditlogsget: builder.mutation({
+      query: () => ({
+        url: `${BACKEND_URL}/admin/auditlogs`,
+        method: "GET",
+      }),
+    })
   }),
 });
 
@@ -54,4 +60,5 @@ export const {
   useRegisterMutation,
   useAccountUpdateMutation,
   useDashboardDataMutation,
+  useAuditlogsgetMutation
 } = usersApiSlice;

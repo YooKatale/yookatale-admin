@@ -20,28 +20,33 @@ import {
 import { Button } from "@components/ui/button";
 import { useToast } from "@components/ui/use-toast";
 import moment from "moment";
-import { useRouter, useSearchParams } from "next/navigation";
+//import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { Suspense } from "react";
 import { useEffect, useState } from "react";
 
 const NewsblogPage = () => {
   const [deleteNewsblog] = useNewsblogDeleteMutation();
   const [fetchNewsblog] = useNewsblogFetchMutation();
-
+const [queryParameters, setqueryParameters]=useState()
   // create state to hold fetched Newsblog information
   const [Newsblog, setNewsblog] = useState({});
+  const [idparam, setIdparam]=useState()
 
   const { toast } = useToast();
 
   const router = useRouter();
 
   // use the useSearchParam hooks from next/navigation to get url params
-  const searchParam = useSearchParams();
+  //const searchParam = useSearchParams();
 
-  const param = searchParam.get("id");
+ // const param = searchParam.get("id");
+
+// const param =queryParameters.get("id")
 
   const handleDataFetch = async () => {
     try {
-      const res = await fetchNewsblog(param).unwrap();
+      const res = await fetchNewsblog(idparam).unwrap();
 
       if (res.status == "Success") {
         setNewsblog(res.data);
@@ -52,7 +57,7 @@ const NewsblogPage = () => {
   // function handle fetching data
   const handleDataDelete = async () => {
     try {
-      const res = await deleteNewsblog(param).unwrap();
+      const res = await deleteNewsblog(idparam).unwrap();
 
       if (res?.status == "Success") {
         toast({
@@ -75,11 +80,19 @@ const NewsblogPage = () => {
   };
 
   useEffect(() => {
-    handleDataFetch();
-  }, []);
+    if (typeof window !== 'undefined') {
+      const querysearch = new URLSearchParams(window.location.search);
+      const idParam = querysearch.get('id');
+      
+      if (idParam) {
+        setIdparam(idParam);
+        handleDataFetch();
+      }
+    }
+  }, [setIdparam, handleDataFetch]);
 
   return (
-    <>
+    <Suspense>
       <main className="max-w-full">
         <div className="flex w-full">
           <Sidenav />
@@ -191,7 +204,7 @@ const NewsblogPage = () => {
           </div>
         </div>
       </main>
-    </>
+    </Suspense>
   );
 };
 

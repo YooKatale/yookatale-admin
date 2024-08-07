@@ -1,7 +1,16 @@
 {
   "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "baseUrl": ".",
     "paths": {
       "@*": ["./*"]
-    }
-  }
+    },
+    "jsx": "preserve",
+    "allowJs": true,
+    //"checkJs": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  },
+  "exclude": ["node_modules", ".next"]
 }

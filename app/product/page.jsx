@@ -30,7 +30,7 @@ const Product = () => {
   //   const { userInfo } = useSelector((state) => state.auth);
   const [modalState, setModalState] = useState(false);
   const [modal, setModal] = useState("");
-
+  const [idparam, setIdparam]=useState()
   // create state to hold fetched Product information
   const [Product, setProduct] = useState({});
 
@@ -39,9 +39,9 @@ const Product = () => {
   const router = useRouter();
 
   // use the useSearchParam hooks from next/navigation to get url params
-  const searchParam = useSearchParams();
+  //const searchParam = useSearchParams();
 
-  const param = searchParam.get("id");
+  //const param = searchParam.get("id");
 
   // initialize mutation function to fetch product data from database
   const [fetchProduct] = useProductGetMutation();
@@ -50,7 +50,7 @@ const Product = () => {
   // function handle fetching data
   const handleDataFetch = async () => {
     try {
-      const res = await fetchProduct(param).unwrap();
+      const res = await fetchProduct(idparam).unwrap();
 
       if (res?.status == "Success") {
         setProduct({ ...res?.data });
@@ -70,7 +70,7 @@ const Product = () => {
   // function handle fetching data
   const handleDataDelete = async () => {
     try {
-      const res = await deleteProduct(param).unwrap();
+      const res = await deleteProduct(idparam).unwrap();
 
       if (res?.status == "Success") {
         toast({
@@ -102,6 +102,18 @@ const Product = () => {
   useEffect(() => {
     handleDataFetch();
   }, []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const querysearch = new URLSearchParams(window.location.search);
+      const idParam = querysearch.get('id');
+      
+      if (idParam) {
+        setIdparam(idParam);
+        handleDataFetch();
+      }
+    }
+  }, [setIdparam, handleDataFetch]);
 
   return (
     <>

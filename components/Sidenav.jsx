@@ -14,6 +14,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { HiCreditCard, HiMenuAlt2, HiOutlineDocumentAdd } from "react-icons/hi";
+import { SideNavRoutes } from "./NavRoutesConfig";
 
 const Sidenav = () => {
   return (
@@ -31,7 +32,21 @@ const Sidenav = () => {
           </div>
         </div>
         <div className="py-6 px-2">
-          <div className="py-2">
+          {SideNavRoutes.map((route, index)=>{
+            return(
+              <div className="py-2" key={index}>
+                <Link href={route.path}>
+                  <div className="flex">
+                    {route.icon}
+                    <h3 className="mx-2 text-md font-bold text-gray-600">
+                     {route.name}
+                    </h3>
+                  </div>
+                </Link>
+              </div>
+            )
+          })}
+          {/* <div className="py-2">
             <Link href={"/"}>
               <div className="flex">
                 <HiMenuAlt2 size={25} />
@@ -150,7 +165,7 @@ const Sidenav = () => {
                 </h3>
               </div>
             </Link>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
