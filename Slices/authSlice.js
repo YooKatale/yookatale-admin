@@ -36,6 +36,7 @@ import { createSlice } from "@reduxjs/toolkit";
 // export const { setCredentials, logout } = authSlice.actions;
 
 // export default authSlice.reducer;
+
 // Local storage helper functions
 const getUserInfoFromLocalStorage = () => {
   if (typeof window === "undefined") return null;
@@ -55,7 +56,7 @@ const clearUserInfoFromLocalStorage = () => {
 
 // Initial state
 const initialState = {
-  userInfo: getUserInfoFromLocalStorage() || {},
+  userInfo: getUserInfoFromLocalStorage() || null,
 };
 
 // Slice

@@ -273,7 +273,7 @@ if (Dashboard?.subscriptioncounts) {
     handleAuditLogsFetch()
     // handleVendorFetch();
     // handlePartnerFetch();
-  }, [searchInput]);
+  }, []);
 
   const sampleData=[]
 

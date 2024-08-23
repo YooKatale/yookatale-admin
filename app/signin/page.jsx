@@ -29,7 +29,7 @@ const Signin = () => {
   const { userInfo } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    if (userInfo) return router.push("/");
+   if (userInfo) return router.push("/");
   }, []);
 
   const submitHandler = async (e) => {
@@ -38,9 +38,7 @@ const Signin = () => {
     try {
       // set loading to be true
       setLoading((prevState) => (prevState ? false : true));
-
       const res = await login({ username, password }).unwrap();
-alert(JSON.stringify(res))
       dispatch(setCredentials({ ...res }));
 
       // set loading to be false
@@ -50,7 +48,6 @@ alert(JSON.stringify(res))
         title: "Logged In",
         description: `Successfully logged in as ${res?.lastname}`,
       });
-
       router.push("/");
     } catch (err) {
       // set loading to be false

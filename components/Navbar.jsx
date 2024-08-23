@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 const Navbar = () => {
   const [isLoading, setLoading] = useState({ operation: "", status: false });
   const [logoutApiCall] = useLogoutMutation();
-
+const  [isAuthenticated, setisAuthenticated]=useState(false)
   const { toast } = useToast();
 
   const router = useRouter();
@@ -50,7 +50,7 @@ const Navbar = () => {
   };
 
   useEffect(() => {
-    IsLoggedIn();
+    IsLoggedIn()
     IsAccountValid();
   }, []);
   const { userInfo } = useSelector((state) => state.auth);
