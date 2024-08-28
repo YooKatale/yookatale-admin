@@ -125,7 +125,7 @@ const AddYoocard = ({ closeModal }) => {
                           <SelectGroup>
                             <SelectLabel>Card Type</SelectLabel>
                             <SelectItem value="premium">Premium</SelectItem>
-                            <SelectItem value="diamond">Diamond</SelectItem>
+                            <SelectItem value="family">Family</SelectItem>
                             <SelectItem value="gold">Gold</SelectItem>
                             <SelectItem value="business">Business</SelectItem>
                           </SelectGroup>
