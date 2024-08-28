@@ -57,11 +57,11 @@ export const SideNavRoutes=[
         icon: <PenBoxIcon size={25} />,
         path: "/newsblogs"
       },
-      {
-        name: "Messages",
-        icon: <MessagesSquare size={25} />,
-        path: "/messages"
-      },
+      // {
+      //   name: "Messages",
+      //   icon: <MessagesSquare size={25} />,
+      //   path: "/messages"
+      // },
       {
         name: "Accounts",
         icon: <UsersIcon size={25} />,
