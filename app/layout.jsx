@@ -5,6 +5,7 @@ import Providers from "./provider";
 import { Toaster } from "@components/ui/toaster";
 import { ChakraProvider } from '@chakra-ui/react'
 import SidebarWithHeader from "@components/Sidenav";
+import { Suspense } from "react";
 const cabin = Cabin({ subsets: ["latin"] });
 
 export const metadata = {
@@ -18,9 +19,11 @@ export default function RootLayout({ children }) {
       <body className={cabin.className}>
         <ChakraProvider>
         <Providers>
+          <Suspense>
           <SidebarWithHeader >
-          {children}
+            {children}
           </SidebarWithHeader>
+          </Suspense>
           </Providers>
         <Toaster />
         </ChakraProvider>

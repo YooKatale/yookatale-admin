@@ -1,8 +1,7 @@
 "use client";
 
 import { useGetAdvertisementPostsMutation } from "@Slices/advertisementApiSlice";
-import Navbar from "@components/Navbar";
-import Sidenav from "@components/Sidenav";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,7 +27,7 @@ import { useToast } from "@components/ui/use-toast";
 import { Loader2, Loader2Icon } from "lucide-react";
 import moment from "moment";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 
 const Advertisement = () => {
   const [AdvertisementData, setAdvertisementData] = useState([]);
@@ -81,7 +80,7 @@ const Advertisement = () => {
     handleDataFetch();
   }, []);
   return (
-    <>
+    <Suspense fallback={<div>Loading...</div>}>
       <main className="max-w-full" style={{backgroundColor:"white", marginTop:20}}>
       <div className="px-2 py-4">
                   <div className="py-4 px-2">
@@ -207,7 +206,7 @@ const Advertisement = () => {
                   </div>
                 </div>
       </main>
-    </>
+    </Suspense>
   );
 };
 

@@ -23,6 +23,7 @@ import {
 import { Button } from "@components/ui/button";
 import { useToast } from "@components/ui/use-toast";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { useEffect, useState } from "react";
 
 const Product = () => {
@@ -116,7 +117,7 @@ const Product = () => {
   }, [setIdparam, handleDataFetch]);
 
   return (
-    <>
+    <Suspense>
       {/* --------------- display modal forms
         -------------------------------------------------- */}
       {modalState && modal === "edit" ? (
@@ -224,7 +225,7 @@ const Product = () => {
           </div>
         </div>
       </main>
-    </>
+    </Suspense>
   );
 };
 
