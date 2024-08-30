@@ -28,6 +28,7 @@ export default function RootLayout({ children }) {
         <Toaster />
         </ChakraProvider>
       </body>
+      
     </html>
   );
 }

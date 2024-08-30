@@ -50,8 +50,8 @@ const  [isAuthenticated, setisAuthenticated]=useState(false)
   };
 
   useEffect(() => {
-    IsLoggedIn()
-    IsAccountValid();
+    // IsLoggedIn()
+    // IsAccountValid();
   }, []);
   const { userInfo } = useSelector((state) => state.auth);
   return (

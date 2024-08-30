@@ -52,6 +52,7 @@ import { Loader2, LogOut } from "lucide-react";
 import { useLogoutMutation } from "@Slices/userApiSlice";
 import { logout } from "@Slices/authSlice";
 import { useToast } from "./ui/use-toast";
+import Signin from '@app/signin/page';
 
 
 
@@ -164,7 +165,7 @@ const SidebarContent = ({ onClose, ...rest }) => {
 
 
 
-const MobileNav = ({ onOpen, ...rest }) => {
+const MobileNav = ({ onOpen,userInfo, ...rest }) => {
 
   
 
@@ -172,7 +173,7 @@ const [isLoading, setLoading] = useState({ operation: "", status: false });
 const [logoutApiCall] = useLogoutMutation();
 const  [isAuthenticated, setisAuthenticated]=useState(false)
 const { toast } = useToast();
-
+const router = useRouter()
 
 
 const dispatch = useDispatch();
@@ -205,14 +206,9 @@ const logoutHandler = async () => {
   }
 };
 
-useEffect(() => {
-  IsLoggedIn()
-  IsAccountValid();
-}, []);
 
-const { userInfo } = useSelector((state) => state.auth);
   return (
-    <Box w={{ base: 'full'}} position={'fixed'} zIndex="10" >
+   <Box w={{ base: 'full'}} position={'fixed'} zIndex="10" >
     <Flex
       ml={{ base: 0, md: 60 }}
       px={{ base: 4, md: 4 }}
@@ -283,9 +279,14 @@ const { userInfo } = useSelector((state) => state.auth);
 
 const SidebarWithHeader = ({children, ...rest}) => {
   const { isOpen, onOpen, onClose } = useDisclosure()
-
+ 
+  useEffect(() => {
+    //IsLoggedIn()
+    IsAccountValid();
+  }, []);
+  const { userInfo } = useSelector((state) => state.auth);
   return (
-    <Box minH="100vh" bg={useColorModeValue('gray.100', 'gray.900')}>
+    userInfo?(<Box minH="100vh" bg={useColorModeValue('gray.100', 'gray.900')}>
       <SidebarContent onClose={() => onClose} display={{ base: 'none', md: 'block' }} />
       <Drawer
         isOpen={isOpen}
@@ -299,16 +300,20 @@ const SidebarWithHeader = ({children, ...rest}) => {
           <SidebarContent onClose={onClose} />
         </DrawerContent>
       </Drawer>
-      {/* mobilenav */}
+     
       <Box>
-      <MobileNav onOpen={onOpen} />
+      <MobileNav onOpen={onOpen} userInfo={userInfo}/>
       </Box>
       
       <Box ml={{ base: 0, md: 60 }} p="4">
         {children}
       </Box>
       
-    </Box>
+    </Box>):(
+<Box>
+  <Signin/>
+</Box>
+    )
   )
 }
 
