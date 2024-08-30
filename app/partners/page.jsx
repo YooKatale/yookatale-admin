@@ -8,6 +8,7 @@ import {
   useRejectPartnerMutation,
   useVerifyPartnerMutation,
 } from "@Slices/partnersPageApiSlice";
+import { Box } from "@chakra-ui/react";
 
 const PartnerPage = () => {
   const { data: partners, isLoading, isError, error } = useFetchPartnersQuery();
@@ -36,11 +37,8 @@ const PartnerPage = () => {
   };
 
   return (
-    <div className="flex">
-      <Sidenav />
-      <div className="flex flex-col w-full">
-        <Navbar />
-        <div className="w-full pl-0 lg:pl-72 bg-gray-100 p-4 sm:p-6 lg:p-8">
+    <Box className="flex">
+    
           {isLoading ? (
             <p className="text-gray-600 text-center">Loading...</p>
           ) : isError ? (
@@ -152,9 +150,8 @@ const PartnerPage = () => {
               )}
             </div>
           )}
-        </div>
-      </div>
-    </div>
+      
+    </Box>
   );
 };
 

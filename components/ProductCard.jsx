@@ -1,39 +1,54 @@
-// import React from 'react'
 
-import Image from "next/image";
+'use client'
 import Link from "next/link";
+import {
+  Box,
+  Text,
+  useColorModeValue,
+  Flex,
+  
+  Image,
+} from '@chakra-ui/react'
 
-const ProductCard = ({ product }) => {
+
+function ProductCard({ product }) {
   return (
-    <>
-      <div className="border border-slate-100 rounded-md mx-2 my-2">
-        <div className="flex justify-center items-center">
-          <div className="m-auto text-center h-40 py-2">
-            <Link href={`/product?id=${product._id}`}>
-              <img
+    <Flex p={2} w="full" alignItems="center" justifyContent="center">
+      <Box
+    
+        bg={useColorModeValue('white', 'gray.800')}
+        maxW="sm"
+        borderWidth="1px"
+        rounded="lg"
+        shadow="lg"
+        position="relative">
+        <Box 
+            bg={useColorModeValue('gray.100', 'gray.700')}
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Link href={`/product?id=${product._id}`} passHref>
+              <Image
+              roundedTop="lg"
                 src={product?.images[0]}
-                alt="image"
-                className="object-contain w-auto h-full"
+                alt={`Picture of ${product?.name}`}                
+                style={{height:'130px', width:"180px"}}
+                objectFit="cover"
+                borderRadius="md"
               />
             </Link>
-            {/* <Image
-              src={`${product?.images}`}
-              width={130}
-              height={120}
-              alt="image"
-              className="object-contain w-full h-auto"
-            /> */}
-          </div>
-        </div>
-        <div className="pt-2 pb-4">
-          <p className="text-lg text-center font-extralight">{product?.name}</p>
-          <h3 className="mx-2 text-lg text-center font-bold">
-            UGX {product?.price}
-          </h3>
-        </div>
-      </div>
-    </>
-  );
-};
+          </Box>
+        <Box p="6" >        
+          <Flex mt="1" justifyContent="space-between" alignContent="center">
+            <Text>{product?.name}</Text>
+          </Flex>
+          <Flex justifyContent="space-between" alignContent="center">
+          <Text> UGX {product?.price}</Text>
+          </Flex>
+        </Box>
+      </Box>
+    </Flex>
+  )
+}
 
 export default ProductCard;

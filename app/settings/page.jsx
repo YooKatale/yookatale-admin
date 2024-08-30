@@ -1,5 +1,6 @@
 "use client";
 
+import { Box } from "@chakra-ui/react";
 import Navbar from "@components/Navbar";
 import Sidenav from "@components/Sidenav";
 import UpdateAccount from "@components/modals/UpdateAccount";
@@ -28,17 +29,8 @@ const Settings = () => {
       ) : (
         <></>
       )}
-      <main className="max-w-full">
-        <div className="flex w-full">
-          <Sidenav />
-          <Navbar />
-          <div className="flex w-full pt-12">
-            <div className="w-1/5"></div>
-            <div className="w-4/5 pt-4">
-              {/* ------------------- main content here
-            ---------------------------------------------------
-            */}
-              <div className="px-2 py-4">
+      <Box>
+      <div className="px-2 py-4">
                 <div className="p-1 flex border-b-2 border-slate-100">
                   <div className="flex px-3 py-1 border-r-2 border-slate-100 mr-4">
                     <User2Icon size={25} />
@@ -119,10 +111,7 @@ const Settings = () => {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </main>
+      </Box>
     </>
   );
 };

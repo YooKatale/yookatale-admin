@@ -94,16 +94,7 @@ const [queryParameters, setqueryParameters]=useState()
   return (
     <Suspense>
       <main className="max-w-full">
-        <div className="flex w-full">
-          <Sidenav />
-          <Navbar />
-          <div className="flex w-full pt-12">
-            <div className="w-1/5"></div>
-            <div className="w-4/5 pt-4">
-              {/* ------------------- main content here
-            ---------------------------------------------------
-            */}
-              <div className="px-2 py-4">
+      <div className="px-2 py-4">
                 <div className="p-2 flex justify-between">
                   <div>{/* <p className="text-xl">Newsblogs</p> */}</div>
                   <div className="flex justify-end">
@@ -200,9 +191,6 @@ const [queryParameters, setqueryParameters]=useState()
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
       </main>
     </Suspense>
   );

@@ -1,175 +1,315 @@
-// import React from 'react'
-"use client";
+
+ "use client";
+ import React from 'react'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+ import Image from "next/image";
+ import Link from "next/link";
+ import { SideNavRoutes } from "./NavRoutesConfig";
+ import PerfectScrollbar from 'react-perfect-scrollbar'
+ import 'react-perfect-scrollbar/dist/css/styles.css'
+
 
 import {
-  CreditCardIcon,
-  LucideSalad,
-  MessagesSquare,
-  PenBoxIcon,
-  Settings2,
-  User2Icon,
-  Users2Icon,
-  UsersIcon,
-} from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { HiCreditCard, HiMenuAlt2, HiOutlineDocumentAdd } from "react-icons/hi";
-import { SideNavRoutes } from "./NavRoutesConfig";
+  IconButton,
+  Avatar,
+  Box,
+  CloseButton,
+  Flex,
+  HStack,
+  VStack,
+  Icon,
+  useColorModeValue,
+  Text,
+  Drawer,
+  DrawerContent,
+  useDisclosure,
+  BoxProps,
+  FlexProps,
+  Menu,
+  MenuButton,
+  MenuDivider,
+  MenuItem,
+  MenuList,
+  Stack,
+} from '@chakra-ui/react'
+import {
+  FiHome,
+  FiTrendingUp,
+  FiCompass,
+  FiStar,
+  FiSettings,
+  FiMenu,
+  FiBell,
+  FiChevronDown,
+} from 'react-icons/fi'
+import { IconType } from 'react-icons'
+import { IsAccountValid, IsLoggedIn } from "@middleware/middleware";
+import { useEffect, useState } from "react";
+import { HiMenuAlt2 } from "react-icons/hi";
+import { useDispatch, useSelector } from "react-redux";
+import { Button } from "./ui/button";
+import { Loader2, LogOut } from "lucide-react";
+import { useLogoutMutation } from "@Slices/userApiSlice";
+import { logout } from "@Slices/authSlice";
+import { useToast } from "./ui/use-toast";
 
-const Sidenav = () => {
+
+
+
+const NavItem = ({ icon, path, children, index, size, ...rest }) => {
+  const [routepath, setRoutepath]=useState("")
+  const [isActive, setisActive]=useState(false)
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  
+  const handleClick = async(e, path2) => {
+  //router.push(path2)
+ // setRoutepath(path2)
+  setisActive(path===pathname?true:false)
+  }
+
+  
+  
+  useEffect(() => {
+    if (path === pathname) {
+      setisActive(true);
+    } else {
+      setisActive(false);
+      setRoutepath(pathname);
+    }
+    
+  }, [pathname]);
+
+  
   return (
-    <div className="p-4 w-1/5 bg-slate-50 h-screen max-h-screen overflow-y-auto overflow-x-hidden fixed z-20">
-      <div className="py-4">
-        <div className="flex">
-          <div className="px-2">
-            <Image
-              src={"/assets/icons/logo1.png"}
-              height={90}
-              width={90}
-              className="object-contain"
-              alt="logo"
+    <Link href={path} passHref key={index} onClick={(e)=>handleClick(e,path)}>
+      <Box
+        as="a"
+        style={{ textDecoration: 'none' }}
+        _focus={{ boxShadow: 'none' }}
+        {...rest}
+        onClick={(e)=>handleClick(e,path)}
+      >
+        <Flex
+          align="center"
+          p="4"
+          mx="4"
+          my={index==size-1?"10":0}
+          borderRadius="lg"
+          role="group"
+          cursor="pointer"
+          bg={isActive ? 'green.600' : 'transparent'}
+          color={isActive ? 'white' : 'inherit'}
+          
+          _hover={{
+            bg: isActive ? 'green.600' : 'gray.100',
+          }}
+        >
+          {icon && (
+            <Icon
+              mr="2"
+              fontSize="20"
+              _groupHover={{
+                //color: 'white',
+              }}
+              as={icon}
             />
-          </div>
-        </div>
-        <div className="py-6 px-2">
-          {SideNavRoutes.map((route, index)=>{
-            return(
-              <div className="py-2" key={index}>
-                <Link href={route.path}>
-                  <div className="flex">
-                    {route.icon}
-                    <h3 className="mx-2 text-md font-bold text-gray-600">
-                     {route.name}
-                    </h3>
-                  </div>
-                </Link>
-              </div>
-            )
-          })}
-          {/* <div className="py-2">
-            <Link href={"/"}>
-              <div className="flex">
-                <HiMenuAlt2 size={25} />
-                <h3 className="mx-2 text-md font-bold text-gray-600">
-                  Dashboard
-                </h3>
-              </div>
-            </Link>
-          </div>
-          <div className="py-2">
-            <Link href={"/products"}>
-              <div className="flex">
-                <LucideSalad size={25} />
-                <h3 className="mx-2 text-md font-bold text-gray-600">
-                  Products
-                </h3>
-              </div>
-            </Link>
-          </div>
-          <div className="py-2">
-            <Link href={"/vendors"}>
-              <div className="flex">
-                <Users2Icon size={25} />
-                <h3 className="mx-2 text-md font-bold text-gray-600">
-                  Vendors
-                </h3>
-              </div>
-            </Link>
-          </div>
-          <div className="py-2">
-            <Link href={"/partners"}>
-              <div className="flex">
-                <UsersIcon size={25} />
-                <h3 className="mx-2 text-md font-bold text-gray-600">
-                  Delivery Partners
-                </h3>
-              </div>
-            </Link>
-          </div>
-          <div className="py-2">
-            <Link href={"/subscriptions"}>
-              <div className="flex">
-                <HiCreditCard size={25} />
-                <h3 className="mx-2 text-md font-bold text-gray-600">
-                  Subscriptions
-                </h3>
-              </div>
-            </Link>
-          </div>
-          <div className="py-2">
-            <Link href={"/advertisement"}>
-              <div className="flex">
-                <HiCreditCard size={25} />
-                <h3 className="mx-2 text-md font-bold text-gray-600">
-                  Advertisement
-                </h3>
-              </div>
-            </Link>
-          </div>
-          <div className="py-2">
-            <Link href={"/advert-packages"}>
-              <div className="flex">
-                <CreditCardIcon size={25} />
-                <h3 className="mx-2 text-md font-bold text-gray-600">
-                  Advert Packages
-                </h3>
-              </div>
-            </Link>
-          </div>
-          <div className="py-2">
-            <Link href={"/cards"}>
-              <div className="flex">
-                <CreditCardIcon size={25} />
-                <h3 className="mx-2 text-md font-bold text-gray-600">
-                  Yoo Cards
-                </h3>
-              </div>
-            </Link>
-          </div>
-          <div className="py-2">
-            <Link href={"/newsblogs"}>
-              <div className="flex">
-                <PenBoxIcon size={25} />
-                <h3 className="mx-2 text-md font-bold text-gray-600">
-                  News Blog
-                </h3>
-              </div>
-            </Link>
-          </div>
-          <div className="py-2">
-            <Link href={"/messages"}>
-              <div className="flex">
-                <MessagesSquare size={25} />
-                <h3 className="mx-2 text-md font-bold text-gray-600">
-                  Messages
-                </h3>
-              </div>
-            </Link>
-          </div>
-          <div className="py-2">
-            <Link href={"/accounts"}>
-              <div className="flex">
-                <UsersIcon size={25} />
-                <h3 className="mx-2 text-md font-bold text-gray-600">
-                  Accounts
-                </h3>
-              </div>
-            </Link>
-          </div>
-          <div className="py-2">
-            <Link href={"/settings"}>
-              <div className="flex">
-                <Settings2 size={25} />
-                <h3 className="mx-2 text-md font-bold text-gray-600">
-                  Settings
-                </h3>
-              </div>
-            </Link>
-          </div> */}
-        </div>
-      </div>
-    </div>
-  );
+          )}
+          {children}
+        </Flex>
+      </Box>
+    </Link>
+  )
+}
+const SidebarContent = ({ onClose, ...rest }) => {
+  return (
+    <Box
+      transition="3s ease"
+      bg={useColorModeValue('white', 'gray.900')}
+      borderRight="1px"
+      borderRightColor={useColorModeValue('gray.200', 'gray.700')}
+      w={{ base: 'full', md: 60 }}
+      pos="fixed"
+      h="full"
+      {...rest}>
+      <Flex h="20" alignItems="center" mx="8" justifyContent="space-between">
+        <Image
+          src={"/assets/icons/logo1.png"}
+          height={90}
+          width={90}
+          className="object-contain"
+          alt="logo"
+          style={{alignSelf:'center', justifyContent:'center'}}
+        />
+        <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} />
+      </Flex>
+      <PerfectScrollbar options={{ suppressScrollX: true }}>
+        <Box height={300}>
+          {SideNavRoutes.map((link, index) => (
+            <NavItem 
+            key={link.name} 
+            icon={link.icon} 
+            path={link.path} 
+            index={index} 
+            size={SideNavRoutes.length}>
+            {link.name}
+            </NavItem>
+          ))}
+        </Box>
+      </PerfectScrollbar>
+    </Box>
+  )
+}
+
+
+
+const MobileNav = ({ onOpen, ...rest }) => {
+
+  
+
+const [isLoading, setLoading] = useState({ operation: "", status: false });
+const [logoutApiCall] = useLogoutMutation();
+const  [isAuthenticated, setisAuthenticated]=useState(false)
+const { toast } = useToast();
+
+
+
+const dispatch = useDispatch();
+
+const logoutHandler = async () => {
+  // set loading to be true
+  setLoading({ ...isLoading, operation: "logout", status: true });
+
+  try {
+    const res = await logoutApiCall().unwrap();
+
+    // set loading to be false
+    setLoading({ ...isLoading, operation: "", status: false });
+
+    dispatch(logout());
+
+    router.push("/signin");
+  } catch (err) {
+    console.log({ err });
+    // set loading to be false
+    setLoading({ ...isLoading, operation: "", status: false });
+
+    toast({
+      variant: "destructive",
+      title: "Error occured",
+      description: err.data?.message
+        ? err.data?.message
+        : err.data || err.error,
+    });
+  }
 };
 
-export default Sidenav;
+useEffect(() => {
+  IsLoggedIn()
+  IsAccountValid();
+}, []);
+
+const { userInfo } = useSelector((state) => state.auth);
+  return (
+    <Box w={{ base: 'full'}} position={'fixed'} zIndex="10" >
+    <Flex
+      ml={{ base: 0, md: 60 }}
+      px={{ base: 4, md: 4 }}
+      height="20"
+      alignItems="center"
+      bg={useColorModeValue('white', 'gray.900')}
+      borderBottomWidth="1px"
+      borderBottomColor={useColorModeValue('gray.200', 'gray.700')}
+      justifyContent={{ base: 'space-between', md: 'flex-end' }}
+      {...rest}>
+      <IconButton
+        display={{ base: 'flex', md: 'none' }}
+        onClick={onOpen}
+        variant="outline"
+        aria-label="open menu"
+        icon={<FiMenu />}
+      />
+
+
+      <HStack spacing={{ base: '0', md: '6' }} >
+        <IconButton size="lg" variant="ghost" aria-label="open menu" icon={<FiBell />} />
+        <Flex alignItems={'center'}>
+          <Menu>
+            <MenuButton py={2} transition="all 0.3s" _focus={{ boxShadow: 'none' }}>
+              <HStack>
+                {/* JULIUS Future -> Include user Avar */}
+                <VStack
+                  display={{ base: 'none', md: 'flex' }}
+                  alignItems="flex-start"
+                  spacing="1px"
+                  ml="2">
+                  <Text fontSize="sm">{userInfo?.username}</Text>
+                  <Text fontSize="xs" color="gray.600">
+                  {userInfo?.account.toUpperCase()}
+                  </Text>
+                </VStack>
+                <Box display={{ base: 'none', md: 'flex' }}>
+                  <FiChevronDown />
+                </Box>
+              </HStack>
+            </MenuButton>
+            <MenuList
+              bg={useColorModeValue('white', 'gray.900')}
+              borderColor={useColorModeValue('gray.200', 'gray.700')}>
+              <MenuItem><Link href={'/settings'}>Profile</Link></MenuItem>
+              {/* <MenuItem>Settings</MenuItem>
+              <MenuItem>Billing</MenuItem> */}
+              <MenuDivider />
+             
+
+              <MenuItem onClick={logoutHandler}>
+                  {isLoading && isLoading.operation == "logout" ? (
+                    <Loader2 />
+                  ) : (
+                    <LogOut />
+                  )}{" "}
+                  Logout
+                </MenuItem>
+
+            </MenuList>
+          </Menu>
+        </Flex>
+      </HStack>
+    </Flex>
+    </Box>
+  )
+}
+
+const SidebarWithHeader = ({children, ...rest}) => {
+  const { isOpen, onOpen, onClose } = useDisclosure()
+
+  return (
+    <Box minH="100vh" bg={useColorModeValue('gray.100', 'gray.900')}>
+      <SidebarContent onClose={() => onClose} display={{ base: 'none', md: 'block' }} />
+      <Drawer
+        isOpen={isOpen}
+        placement="left"
+        onClose={onClose}
+        returnFocusOnClose={false}
+        onOverlayClick={onClose}
+        size="full"
+        >
+        <DrawerContent>
+          <SidebarContent onClose={onClose} />
+        </DrawerContent>
+      </Drawer>
+      {/* mobilenav */}
+      <Box>
+      <MobileNav onOpen={onOpen} />
+      </Box>
+      
+      <Box ml={{ base: 0, md: 60 }} p="4">
+        {children}
+      </Box>
+      
+    </Box>
+  )
+}
+
+export default SidebarWithHeader

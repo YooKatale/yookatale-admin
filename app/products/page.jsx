@@ -6,6 +6,7 @@ import Sidenav from "@/components/Sidenav";
 import AddProduct from "@/components/modals/AddProduct";
 import { Button } from "@/components/ui/button";
 import { useProductsGetMutation } from "@Slices/productApiSlice";
+import { Box, useColorModeValue } from "@chakra-ui/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
@@ -37,25 +38,18 @@ const Products = () => {
   };
 
   return (
-    <>
-      {/* --------------- display modal forms
-        -------------------------------------------------- */}
+    <Box
+    bg={useColorModeValue('gray.90', 'white.900')}
+          boxShadow={'lg'}
+          marginTop={"10"}
+    >
+     
       {modalState && modal === "addProduct" ? (
         <AddProduct closeModal={setModalState} />
       ) : (
         <></>
       )}
-      <main className="max-w-full">
-        <div className="flex w-full">
-          <Sidenav />
-          <Navbar />
-          <div className="flex w-full pt-12">
-            <div className="w-1/5"></div>
-            <div className="w-4/5 pt-4">
-              {/* ------------------- main content here
-            ---------------------------------------------------
-            */}
-              <div className="px-2 py-4">
+      <div className="px-2 py-4">
                 <div className="p-2 flex justify-between">
                   <div>{/* <p className="text-xl">Products</p> */}</div>
                   <div className="flex justify-end">
@@ -85,11 +79,7 @@ const Products = () => {
                   )}
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </main>
-    </>
+    </Box>
   );
 };
 

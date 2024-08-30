@@ -4,6 +4,7 @@ import {
   useSubscriptionsApproveMutation,
   useSubscriptionsFetchMutation,
 } from "@Slices/yoocacrdApiSlice";
+import { Box, useColorModeValue } from "@chakra-ui/react";
 import Navbar from "@components/Navbar";
 import Sidenav from "@components/Sidenav";
 import {
@@ -85,15 +86,8 @@ const Subscriptions = () => {
   }, []);
 
   return (
-    <main className="max-w-full">
-      <div className="flex w-full max-h-screen">
-        <Sidenav />
-        <Navbar />
-        <div className="flex w-full pt-12">
-          <div className="w-1/5"></div>
-          <div className="w-4/5 pt-4">
-            <div className="w-full h-full">
-              <div className="px-2 py-4">
+    <Box className="max-w-full" bg={useColorModeValue('white', 'transparent')} p={8} mt={"3"}>
+      <div className="px-2 py-4">
                 <div className="py-2 border-b-2 border-slate-100 flex">
                   <div className="mr-2">
                     <Button className="text-md" type="button">
@@ -213,11 +207,7 @@ const Subscriptions = () => {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </main>
+    </Box>
   );
 };
 

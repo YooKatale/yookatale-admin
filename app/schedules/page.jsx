@@ -1,6 +1,7 @@
 "use client";
 
 import { useFetchSchedulesMutation } from "@Slices/schedulesApi";
+import { Box } from "@chakra-ui/react";
 import Navbar from "@components/Navbar";
 import Sidenav from "@components/Sidenav";
 import { Button } from "@components/ui/button";
@@ -70,44 +71,8 @@ const Schedule = () => {
   }, []);
   return (
     <>
-      <main className="max-w-full">
-        <div className="flex w-full max-h-screen">
-          <Sidenav />
-          <Navbar />
-          <div className="flex w-full pt-12">
-            <div className="w-1/5"></div>
-            <div className="w-4/5 pt-4">
-              <div className="w-full h-full">
-                {/* ------------------- main content here
-            ---------------------------------------------------
-            */}
-                <div className="px-2 py-4">
-                  {/* <div className="py-2 border-b-2 border-slate-100 flex">
-                    <div className="mr-2">
-                      <Button className={"text-md"} type={"button"}>
-                        YooCards
-                      </Button>
-                    </div>
-                  </div> */}
-
-                  <div className="py-4 px-2">
-                    {/* <div className="flex pt-4">
-                      <div className="mr-2">
-                        <Button className={"text-md"} type={"button"}>
-                          Pending
-                        </Button>
-                      </div>
-                    </div> */}
-
-                    <div className="pt-2 flex justify-between">
-                      <div>
-                        <p className="text-lg font-bold">Users' Schedules</p>
-                      </div>
-
-                      <div></div>
-                    </div>
-
-                    <div className="pt-2 pr-4 pb-4 pl-2 max-h-96 overflow-x-hidden overflow-y-auto">
+      <Box className="max-w-full">
+      <div className="pt-2 pr-4 pb-4 pl-2 max-h-96 overflow-x-hidden overflow-y-auto">
                       {ScheduleData && (
                         <div className="border border-slate-100 rounded-md">
                           <Table>
@@ -180,13 +145,7 @@ const Schedule = () => {
                         </div>
                       )}
                     </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
+      </Box>
     </>
   );
 };

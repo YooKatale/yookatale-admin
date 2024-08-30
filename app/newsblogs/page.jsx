@@ -1,6 +1,7 @@
 "use client";
 
 import { useNewsblogsFetchMutation } from "@Slices/newsblogApiSlice";
+import { Box, useColorModeValue } from "@chakra-ui/react";
 import Navbar from "@components/Navbar";
 import Sidenav from "@components/Sidenav";
 import { Button } from "@components/ui/button";
@@ -37,29 +38,14 @@ const NewsblogsPage = () => {
 
   return (
     <>
-      {/* --------------- display modal forms
-        -------------------------------------------------- */}
-      {/* {modalState && modal === "addNewsblog" ? (
-        <AddNewsblog closeModal={setModalState} />
-      ) : (
-        <></>
-      )} */}
-      <main className="max-w-full">
-        <div className="flex w-full">
-          <Sidenav />
-          <Navbar />
-          <div className="flex w-full pt-12">
-            <div className="w-1/5"></div>
-            <div className="w-4/5 pt-4">
-              {/* ------------------- main content here
-            ---------------------------------------------------
-            */}
-              <div className="px-2 py-4">
+      
+      <Box className="max-w-full" mt={"10"}>
+      <div className="px-2 py-4">
                 <div className="p-2 flex justify-between">
                   <div>{/* <p className="text-xl">Products</p> */}</div>
                   <div className="flex justify-end">
                     <Link href={"/newblog"}>
-                      <Button className="mx-2 text-lg">
+                      <Button className=" text-lg">
                         Create new Newsblog
                       </Button>
                     </Link>
@@ -69,9 +55,11 @@ const NewsblogsPage = () => {
                   <div className="grid grid-cols-3">
                     {Newsblogs.length > 0 &&
                       Newsblogs.map((newsblog, index) => (
-                        <div
+                        <Box
                           className="m-4 border border-slate-100 rounded-md"
                           key={index}
+                          bg={useColorModeValue('white','gray.90')}
+                          
                         >
                           <a href={`/newsblog?id=${newsblog?._id}`}>
                             <div className="">
@@ -99,15 +87,12 @@ const NewsblogsPage = () => {
                               </div>
                             </div>
                           </a>
-                        </div>
+                        </Box>
                       ))}
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </main>
+      </Box>
     </>
   );
 };

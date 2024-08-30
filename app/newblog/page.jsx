@@ -1,6 +1,7 @@
 "use client";
 
 import { useNewsblogCreatePostMutation } from "@Slices/newsblogApiSlice";
+import { Box } from "@chakra-ui/react";
 import Navbar from "@components/Navbar";
 import Sidenav from "@components/Sidenav";
 import { Button } from "@components/ui/button";
@@ -69,24 +70,13 @@ const Newblog = () => {
 
   return (
     <>
-      <main className="max-w-full">
-        <div className="flex w-full">
-          <Sidenav />
-          <Navbar />
-          <div className="flex w-full pt-12">
-            <div className="w-1/5"></div>
-            <div className="w-4/5 pt-4">
-              {/* ------------------- main content here
-          ---------------------------------------------------
-          */}
-              <div className="px-2 py-4">
+      <Box className="max-w-full" mt={12} backgroundColor={"white"} p={4}>
+      <div className="px-2 py-4">
                 <div className="p-0 flex justify-between">
                   <div>{/* <p className="text-xl">Products</p> */}</div>
                 </div>
-                <div className="py-4 px-2">
-                  <div className="py-4">
-                    <p className="text-2xl">Create new Newsblog</p>
-                  </div>
+                <div className="py-4 px-2" >
+                <p className="text-2xl">Create new Newsblog</p>
                   <div className="py-4 border border-slate-100 rounded-md">
                     <form onSubmit={handleSubmit} encType="multipart/form-data">
                       <div className="grid grid-cols-3">
@@ -98,6 +88,7 @@ const Newblog = () => {
                             type="text"
                             id="author"
                             name="author"
+                            
                             value={NewsblogForm.author}
                             onChange={(e) =>
                               setNewsblogForm({
@@ -141,6 +132,7 @@ const Newblog = () => {
                           onChange={setEditorValue}
                           modules={quillModules}
                           formats={quillFormats}
+                          
                         />
                       </div>
                       <div className="p-2">
@@ -153,10 +145,7 @@ const Newblog = () => {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </main>
+      </Box>
     </>
   );
 };

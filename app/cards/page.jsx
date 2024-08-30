@@ -50,8 +50,7 @@ const SubscriptionCards = () => {
       )}
       <main className="max-w-full">
         <div className="flex w-full max-h-screen">
-          <Sidenav />
-          <Navbar />
+          
           <div className="flex w-full pt-12">
             <div className="w-1/5"></div>
             <div className="w-4/5 pt-4">

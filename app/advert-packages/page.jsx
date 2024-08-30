@@ -49,18 +49,8 @@ const AdvertPackages = () => {
       ) : (
         <></>
       )}
-      <main className="max-w-full">
-        <div className="flex w-full max-h-screen">
-          <Sidenav />
-          <Navbar />
-          <div className="flex w-full pt-12">
-            <div className="w-1/5"></div>
-            <div className="w-4/5 pt-4">
-              <div className="w-full h-screen max-h-screen overflow-x-hidden overflow-y-auto container__hide__scrollbar">
-                {/* ------------------- main content here
-            ---------------------------------------------------
-            */}
-                <div className="py-4 px-4">
+      <main className="max-w-full" style={{backgroundColor:"white"}}>
+      <div className="py-4 px-4">
                   <div className="py-2 flex justify-end border-b-2 border-slate-100">
                     <Button
                       className="text-base"
@@ -79,10 +69,6 @@ const AdvertPackages = () => {
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </main>
     </>
   );

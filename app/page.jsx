@@ -19,7 +19,7 @@ import moment from "moment/moment";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Box, Input, InputGroup, InputLeftElement } from "@chakra-ui/react";
+import { Box, Input, InputGroup, InputLeftElement, useColorModeValue } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import Product from "@components/product";
 
@@ -118,19 +118,14 @@ export default function Home() {
   });
 
   return (
-    <>
-      <main className="max-w-full">
-        <div className="flex w-full max-h-screen">
-          <Sidenav />
-          <Navbar />
-          <div className="flex w-full pt-12">
-            <div className="w-1/5"></div>
-            <div className="w-4/5 pt-4">
-              <div className="w-full h-full">
-                {/* ------------------- main content here
-            ---------------------------------------------------
-            */}
-                <div className="px-2 py-4">
+    
+      <Box 
+      bg={useColorModeValue('white', 'transparent')}
+      p={8}
+      w={"100%"}
+      mt={"6"}
+      >
+      <div className="px-2 py-4">
                   <div className="p-2">
                     <p className="text-xl">Dashboard</p>
                   </div>
@@ -630,11 +625,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
-    </>
+      </Box>
+    
   );
 }

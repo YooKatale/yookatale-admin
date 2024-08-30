@@ -9,6 +9,7 @@ import {
 } from "@Slices/vendorPageApiSlice";
 import { useVendorGetMutation } from "@Slices/vendorApiSlice";
 import VendorDetailsPopup from "@components/VendorDetailsPopup";
+import { Box } from "@chakra-ui/react";
 
 const VendorPage = () => {
   const { data: vendors, isLoading, isError, error } = useFetchVendorsQuery();
@@ -34,13 +35,12 @@ const VendorPage = () => {
   };
 
   return (
-    <div>
-      <Navbar />
-      <Sidenav />
-      <div className="ml-72 p-8">
-        <br />
-        <br />
-        <br />
+    <Box marginTop={20}
+    
+    >
+      
+      <div >
+        
         <h1 className="text-2xl font-bold mb-4 text-center">
           Registered Vendors
         </h1>
@@ -49,7 +49,7 @@ const VendorPage = () => {
         ) : isError ? (
           <p>Error: {error.message}</p>
         ) : vendors && vendors.length > 0 ? (
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b-2 border-r">
@@ -64,12 +64,12 @@ const VendorPage = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b-2 border-r">
                   Email
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b-2 border-r">
+                {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b-2 border-r">
                   Category
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b-2 border-r">
+                </th> */}
+                {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b-2 border-r">
                   Verified
-                </th>
+                </th> */}
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b-2">
                   Actions
                 </th>
@@ -94,10 +94,10 @@ const VendorPage = () => {
                   <td className="px-6 py-4 whitespace-nowrap border-b border-r">
                     {vendor.email}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap border-b border-r">
+                  {/* <td className="px-6 py-4 whitespace-nowrap border-b border-r">
                     {vendor.category}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap border-b border-r">
+                  </td> */}
+                  {/* <td className="px-6 py-4 whitespace-nowrap border-b border-r">
                     {vendor.status === "Verified" ? (
                       <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                         Verified
@@ -107,7 +107,7 @@ const VendorPage = () => {
                         Not Verified
                       </span>
                     )}
-                  </td>
+                  </td> */}
                   <td className="px-6 py-4 whitespace-nowrap border-b">
                     {vendor.status === "Unverified" && (
                       <button
@@ -137,7 +137,7 @@ const VendorPage = () => {
           onClose={() => setIsPopupOpen(false)}
         />
       )}
-    </div>
+    </Box>
   );
 };
 

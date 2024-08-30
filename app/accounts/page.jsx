@@ -53,55 +53,17 @@ const Accounts = () => {
 
   return (
     <>
-      {/* --------------- display modal forms
-        -------------------------------------------------- */}
+      
       {modalState && modal === "addAccount" ? (
         <AddAccount closeModal={setModalState} />
       ) : (
         <></>
       )}
-      <main className="max-w-full">
-        <Sidenav />
-        <Navbar />
-        {/* <AlertBox /> */}
-        <div className="flex w-full pt-12">
-          <div className="w-1/5"></div>
-          <div className="w-4/5 pt-4">
-            {/* ------------------- main content here
-            ---------------------------------------------------
-            */}
-            <div className="py-4 px-4">
+      <main className="max-w-full" style={{marginTop:39, backgroundColor:"white"}}>
+       
+      <div className="py-4 px-4">
               <div className="py-4 flex justify-end">
-                {/* <Button className="mx-2 text-base bg-red-500">
-                  Delete Product
-                </Button> */}
-                <>
-                  {/* <AlertDialog>
-                    <AlertDialogTrigger className="text-white bg-red-500 px-3 rounded-md">
-                      Delete Product
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          Are you absolutely sure?
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone. This will permanently
-                          delete the {Product ? Product?.name : ""} product
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          className="text-white bg-red-500 px-3 rounded-md"
-                          onClick={handleDataDelete}
-                        >
-                          Continue
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog> */}
-                </>
+                
                 <Button
                   className="mx-2 text-base"
                   onClick={() => handleModal("addAccount")}
@@ -154,8 +116,6 @@ const Accounts = () => {
                 )}
               </div>
             </div>
-          </div>
-        </div>
       </main>
     </>
   );
