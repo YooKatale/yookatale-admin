@@ -1,15 +1,15 @@
 // import React from 'react'
 "use client";
 import { IsAccountValid, IsLoggedIn } from "@middleware/middleware";
+import { logout } from "@Slices/authSlice";
+import { useLogoutMutation } from "@Slices/userApiSlice";
+import { Loader2, LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { HiMenuAlt2 } from "react-icons/hi";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "./ui/button";
-import { Loader2, LogOut } from "lucide-react";
-import { useLogoutMutation } from "@Slices/userApiSlice";
-import { logout } from "@Slices/authSlice";
 import { useToast } from "./ui/use-toast";
-import { useRouter } from "next/navigation";
 
 const Navbar = () => {
   const [isLoading, setLoading] = useState({ operation: "", status: false });
