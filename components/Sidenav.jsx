@@ -66,7 +66,7 @@ const NavItem = ({ icon, path, children, index, size, ...rest }) => {
   
   const handleClick = async(e, path2) => {
   //router.push(path2)
- // setRoutepath(path2)
+  setRoutepath(path2)
   setisActive(path===pathname?true:false)
   }
 
@@ -94,15 +94,13 @@ const NavItem = ({ icon, path, children, index, size, ...rest }) => {
       >
         <Flex
           align="center"
-          p="4"
-          mx="4"
-          my={index==size-1?"10":0}
+          m="4"
+          p={3}
           borderRadius="lg"
           role="group"
           cursor="pointer"
           bg={isActive ? 'green.600' : 'transparent'}
           color={isActive ? 'white' : 'inherit'}
-          
           _hover={{
             bg: isActive ? 'green.600' : 'gray.100',
           }}
@@ -126,40 +124,48 @@ const NavItem = ({ icon, path, children, index, size, ...rest }) => {
 const SidebarContent = ({ onClose, ...rest }) => {
   return (
     <Box
-      transition="3s ease"
-      bg={useColorModeValue('white', 'gray.900')}
-      borderRight="1px"
-      borderRightColor={useColorModeValue('gray.200', 'gray.700')}
-      w={{ base: 'full', md: 60 }}
-      pos="fixed"
-      h="full"
-      {...rest}>
-      <Flex h="20" alignItems="center" mx="8" justifyContent="space-between">
-        <Image
-          src={"/assets/icons/logo1.png"}
-          height={90}
-          width={90}
-          className="object-contain"
-          alt="logo"
-          style={{alignSelf:'center', justifyContent:'center'}}
-        />
-        <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} />
-      </Flex>
-      <PerfectScrollbar options={{ suppressScrollX: true }}>
-        <Box height={300}>
-          {SideNavRoutes.map((link, index) => (
-            <NavItem 
-            key={link.name} 
-            icon={link.icon} 
-            path={link.path} 
-            index={index} 
-            size={SideNavRoutes.length}>
-            {link.name}
-            </NavItem>
-          ))}
-        </Box>
-      </PerfectScrollbar>
-    </Box>
+  transition="3s ease"
+  bg={useColorModeValue('white', 'gray.900')}
+  borderRight="1px"
+  borderRightColor={useColorModeValue('gray.200', 'gray.700')}
+  w={{ base: 'full', md: 60 }}
+  height="100%"
+  position={'fixed'}
+  {...rest}
+>
+  <Flex h="20" alignItems="center" mx="8" justifyContent="space-between">
+    <Image
+      src="/assets/icons/logo1.png"
+      height={90}
+      width={90}
+      className="object-contain"
+      alt="logo"
+    />
+    <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} />
+  </Flex>
+  <Box overflowY="auto" >
+  <PerfectScrollbar options={{ suppressScrollX: true }}  >
+  <Box
+     maxHeight="calc(100vh - 100px)"
+    px={2}
+    py={2}
+  >
+    {SideNavRoutes.map((link, index) => (
+      <NavItem
+        key={link.name}
+        icon={link.icon}
+        path={link.path}
+        index={index}
+        size={SideNavRoutes.length}
+      >
+        {link.name}
+      </NavItem>
+    ))}
+  </Box>
+  </PerfectScrollbar>
+</Box>
+</Box>
+    
   )
 }
 
@@ -171,7 +177,7 @@ const MobileNav = ({ onOpen,userInfo, ...rest }) => {
 
 const [isLoading, setLoading] = useState({ operation: "", status: false });
 const [logoutApiCall] = useLogoutMutation();
-const  [isAuthenticated, setisAuthenticated]=useState(false)
+
 const { toast } = useToast();
 const router = useRouter()
 
@@ -279,19 +285,23 @@ const logoutHandler = async () => {
 
 const SidebarWithHeader = ({children, ...rest}) => {
   const { isOpen, onOpen, onClose } = useDisclosure()
- 
+  const  [isAuthenticated, setisAuthenticated]=useState(false)
+  const { userInfo, loading } = useSelector((state) => state.auth);
   useEffect(() => {
-    //IsLoggedIn()
+    userInfo._id !==undefined && setisAuthenticated(true)
+    IsLoggedIn()
     IsAccountValid();
   }, []);
-  const { userInfo } = useSelector((state) => state.auth);
+
+  
   return (
-    userInfo?(<Box minH="100vh" bg={useColorModeValue('gray.100', 'gray.900')}>
+    isAuthenticated?(<Box bg={useColorModeValue('gray.100', 'gray.900')}>
       <SidebarContent onClose={() => onClose} display={{ base: 'none', md: 'block' }} />
       <Drawer
         isOpen={isOpen}
         placement="left"
         onClose={onClose}
+        closeOnEsc
         returnFocusOnClose={false}
         onOverlayClick={onClose}
         size="full"

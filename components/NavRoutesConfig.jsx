@@ -74,26 +74,26 @@ export const SideNavRoutes=[
       icon: Settings2 ,
       path: "/settings"
     },
+    // {
+    //   name: "Reports",
+    //   icon: ClipboardCheck,
+    //   path: "/reports"
+    // },
+    // {
+    //   name: "Sales Reports",
+    //   icon: BaggageClaim,
+    //   path: "/salesreports"
+    // },
     {
-      name: "Reports",
-      icon: ClipboardCheck,
-      path: "/reports"
-    },
-    {
-      name: "Sales Reports",
-      icon: BaggageClaim,
-      path: "/salesreports"
-    },
-    {
-      name: "Marketing Reports",
+      name: "Daily Reports",
       icon: Store,
-      path: "/marketingreports"
+      path: "/dailyreports"
     } ,
-    {
-      name: "HR Reports",
-      icon: Users2Icon,
-      path: "/hrreports"
-    }
+    // {
+    //   name: "Human Resource",
+    //   icon: Users2Icon,
+    //   path: "/hrreports"
+    // }
   ]
 export const SideNavRoutesx=[
     {
@@ -167,13 +167,13 @@ export const SideNavRoutesx=[
         path: "/salesreports"
       },
       {
-        name: "Marketing Reports",
-        icon: <Store size={25} />,
-        path: "/marketingreports"
-      } ,
-      {
         name: "HR Reports",
         icon: <Users2Icon size={25} />,
         path: "/hrreports"
-      }
+      },
+      {
+        name: "Marketing Reportsg",
+        icon: <Store size={25} />,
+        path: "/marketingreports"
+      } ,
 ]

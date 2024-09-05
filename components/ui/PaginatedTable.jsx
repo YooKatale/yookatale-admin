@@ -112,7 +112,7 @@ const PaginatedTable = ({ data, columns, rowsPerPage }) => {
   return (
     <div>
       <Table>
-        <TableHeader>
+        <TableHeader >
           <tr>
             {columns.map((column, index) => (
               <TableHead key={index}>{column}</TableHead>

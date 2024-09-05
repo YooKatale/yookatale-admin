@@ -49,7 +49,7 @@ const VendorPage = () => {
         ) : isError ? (
           <p>Error: {error.message}</p>
         ) : vendors && vendors.length > 0 ? (
-          <table className="divide-y divide-gray-200">
+          <table className="divide-y divide-gray-200 paginated"> 
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b-2 border-r">
