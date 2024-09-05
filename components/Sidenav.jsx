@@ -284,12 +284,17 @@ const logoutHandler = async () => {
 }
 
 const SidebarWithHeader = ({children, ...rest}) => {
+  const router = useRouter()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const  [isAuthenticated, setisAuthenticated]=useState(false)
   const { userInfo, loading } = useSelector((state) => state.auth);
   useEffect(() => {
-    userInfo._id !==undefined && setisAuthenticated(true)
-    IsLoggedIn()
+    if(userInfo?._id !==undefined ){
+     setisAuthenticated(true)
+    }else{
+      router.push("/signin")
+    }
+    //IsLoggedIn()
     IsAccountValid();
   }, []);
 
