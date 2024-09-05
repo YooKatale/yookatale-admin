@@ -64,7 +64,7 @@ const Signin = () => {
         username: username,
         password: password
       }
-      alert(JSON.stringify(data))
+      
       const res = await login(data).unwrap();
       dispatch(setCredentials({ ...res }));
 
