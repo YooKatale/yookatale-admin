@@ -9,6 +9,7 @@ import AddAdvertisementPackage from "@components/modals/AddAdvertisementPackage"
 import { Button } from "@components/ui/button";
 import { PlusIcon } from "lucide-react";
 import React, { useEffect, useState } from "react";
+import { Flex } from "@chakra-ui/react";
 
 const AdvertPackages = () => {
   const [modalState, setModalState] = useState(false);
@@ -49,7 +50,7 @@ const AdvertPackages = () => {
       ) : (
         <></>
       )}
-      <main className="max-w-full" style={{backgroundColor:"white"}}>
+      <Flex minH={'100vh'} style={{ marginTop: '4em' }}>
       <div className="py-4 px-4">
                   <div className="py-2 flex justify-end border-b-2 border-slate-100">
                     <Button
@@ -69,7 +70,7 @@ const AdvertPackages = () => {
                     </div>
                   </div>
                 </div>
-      </main>
+      </Flex>
     </>
   );
 };

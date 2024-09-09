@@ -36,8 +36,6 @@ const Signin = () => {
   const [isLoading, setLoading] = useState(false);
 
   const router = useRouter();
-
-  // const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const [login] = useLoginMutation();
@@ -47,13 +45,14 @@ const Signin = () => {
   const { userInfo } = useSelector((state) => state.auth);
 
   useEffect(() => {
+    router.prefetch('/')
    if (userInfo) {
     //return router.replace("/")
    }else{
     return router.replace("/signin")
    }
   }, []);
-
+  
   const submitHandler = async (e) => {
     e.preventDefault();
 
@@ -64,18 +63,18 @@ const Signin = () => {
         username: username,
         password: password
       }
-      
       const res = await login(data).unwrap();
       dispatch(setCredentials({ ...res }));
-
       // set loading to be false
       setLoading((prevState) => (prevState ? false : true));
-
+      if (typeof window !== 'undefined') {
+      window.location.href = '/';
+     }
       toast({
         title: "Logged In",
         description: `Successfully logged in as ${res?.lastname}`,
       });
-      router.replace("/");
+      
     } catch (err) {
       // set loading to be false
       setLoading((prevState) => (prevState ? false : true));
@@ -91,59 +90,6 @@ const Signin = () => {
   const [showPassword, setShowPassword] = useState(false)
   return (
     <>
-      {/* <main>
-        <div className="flex bg-slate-100 h-screen">
-          <div className="m-auto w-3/5 shadow-md bg-white p-6 max-h-full h-4/5">
-            <div className="pt-6 pb-2">
-              <p className="text-center text-2xl font-bold">YooKatale Admin-Auth</p>
-              <p className="text-center text-xl mt-1">Sign in to continue</p>
-            </div>
-            <div className="pt-6 pb-2">
-              <form onSubmit={submitHandler}>
-                <div className="flex">
-                  <div className="m-auto w-4/5 px-6 pt-4">
-                    <div className="py-2">
-                      <Label htmlFor="username" className="text-lg mb-1">
-                        Username
-                      </Label>
-                      <Input
-                        type="text"
-                        id="username"
-                        placeholder="Username is required"
-                        name="username"
-                        onChange={(e) => setUsername(e.target.value)}
-                      />
-                    </div>
-                    <div className="py-2">
-                      <Label htmlFor="password" className="text-lg mb-1">
-                        Password
-                      </Label>
-                      <Input
-                        type="password"
-                        id="password"
-                        placeholder="password is required"
-                        name="password"
-                        onChange={(e) => setPassword(e.target.value)}
-                      />
-                    </div>
-                    <div className="py-4">
-                      <Button type="submit" className="text-lg">
-                        {isLoading ? (
-                          <Loader2 className="animate-spin mx-2" />
-                        ) : (
-                          ""
-                        )}
-                        Sign In
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </main> */}
-
       <Flex
       minH={'100vh'}
       align={'center'}
