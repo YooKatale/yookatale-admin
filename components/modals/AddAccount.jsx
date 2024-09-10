@@ -215,17 +215,13 @@ const AddAccount = ({ closeModal }) => {
                             <SelectLabel>Account Types</SelectLabel>
                             <SelectItem value="admin">Admin</SelectItem>
                             <SelectItem value="iam">IAM</SelectItem>
+                            <SelectItem value="editor">Editor</SelectItem>
                           </SelectGroup>
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
-                  {/* <div className="p-2">
-                    <Label htmlFor="images" className="text-lg mb-1">
-                      Product Images
-                    </Label>
-                    <Input type="file" id="images" name="images" multiple />
-                  </div> */}
+                  
                   <div className="py-2">
                     <Button type="submit">
                       {isLoading ? <Loader2 /> : ""}Add User

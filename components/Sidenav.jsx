@@ -290,7 +290,7 @@ const SidebarWithHeader = ({children, ...rest}) => {
   const { userInfo, loading } = useSelector((state) => state.auth);
   useEffect(() => {
     if(userInfo?._id !==undefined ){
-      router.push("/")
+      //router.push("/")
      setisAuthenticated(true)
     }else{
       router.push("/signin")
