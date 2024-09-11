@@ -159,8 +159,8 @@ const handledeleteUserAccountQuery = async (id) => {
                       <Th>Phone</Th>
                       <Th> Gender</Th>
                       <Th>Account Type</Th>
-                      {userInfo?.account==='editor' &&
-                      <Th style={{ textAlign: "center" }}>Actions</Th>}
+                     
+                      <Th style={{ textAlign: "center" }}>Actions</Th>
                     </Tr>
                   </Thead>
             <Tbody>
@@ -173,9 +173,9 @@ const handledeleteUserAccountQuery = async (id) => {
                   <Td >{account.gender}</Td>
                   <Td >{account.accountType}</Td>
                   <Td >
-                    {userInfo?.account==='editor' &&
+                    
                    <div style={{display: 'flex', justifyContent: 'center' }}>
-                  
+                   {userInfo?.account==='editor' || userInfo?.account==='admin'?
                     <Button
                       title="Edit"
                       bg="transparent"
@@ -186,6 +186,8 @@ const handledeleteUserAccountQuery = async (id) => {
                     
                     <EditIcon fontSize={20} color={useColorModeValue('orange.200')}/>
                     </Button>
+                    :null}
+                     {userInfo?.account==='admin' &&
                     <Button
                    bg="transparent"
                    color={'white'}
@@ -194,9 +196,9 @@ const handledeleteUserAccountQuery = async (id) => {
                     onClick={()=>handledeleteUserAccountQuery(account._id)} 
                   >
                     <DeleteIcon fontSize={20} color={'red'}/> 
-                  </Button>
+                  </Button>}
                   </div>
-                 }
+                 
                     
                   </Td>
                 </Tr>
