@@ -52,7 +52,7 @@ export const usersApiSlice = apiSlice.injectEndpoints({
     }),
     updateAdminUserAccount: builder.mutation({
       query: (data)=>({
-        url: `${BACKEND_URL}/admin/updateAdminUserAccount/${data._id}`,
+        url: `${BACKEND_URL}/admin/updateAdminUserAccount`,
         method: "PUT",
         body: data,
       })
