@@ -49,7 +49,20 @@ export const usersApiSlice = apiSlice.injectEndpoints({
         url: `${BACKEND_URL}/admin/auditlogs`,
         method: "GET",
       }),
-    })
+    }),
+    updateAdminUserAccount: builder.mutation({
+      query: (data)=>({
+        url: `${BACKEND_URL}/admin/updateAdminUserAccount/${data._id}`,
+        method: "PUT",
+        body: data,
+      })
+    }),
+    deleteUserAccount: builder.mutation({
+      query: (data) => ({
+        url: `${BACKEND_URL}/admin/deleteAdminUserAccount/${data}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 
@@ -60,5 +73,7 @@ export const {
   useRegisterMutation,
   useAccountUpdateMutation,
   useDashboardDataMutation,
-  useAuditlogsgetMutation
+  useAuditlogsgetMutation,
+  useUpdateAdminUserAccountMutation,
+  useDeleteUserAccountMutation
 } = usersApiSlice;

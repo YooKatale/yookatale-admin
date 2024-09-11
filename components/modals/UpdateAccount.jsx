@@ -214,7 +214,7 @@ const UpdateAccount = ({ closeModal }) => {
                       <Label htmlFor="account" className="text-lg mb-1">
                         Account Type
                       </Label>
-                      <Select name="account">
+                      <Select name="account" disabled>
                         <SelectTrigger className="w-full">
                           <SelectValue
                             placeholder="Select account type"

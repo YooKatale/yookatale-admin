@@ -47,6 +47,7 @@ const AddProduct = ({ closeModal }) => {
         });
 
         router.push("/products");
+        closeModal()
       }
     } catch (err) {
       // set loading to be false

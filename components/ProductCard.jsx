@@ -8,47 +8,49 @@ import {
   Flex,
   
   Image,
+  HStack,
+  Stack,
+  Grid,
+  GridItem,
 } from '@chakra-ui/react'
 
-
+import numeral from "numeral"
 function ProductCard({ product }) {
   return (
-    <Flex p={2} w="full" alignItems="center" justifyContent="center">
-      <Box
-    
-        bg={useColorModeValue('white', 'gray.800')}
-        maxW="sm"
-        borderWidth="1px"
-        rounded="lg"
-        shadow="lg"
-        position="relative">
-        <Box 
-            bg={useColorModeValue('gray.100', 'gray.700')}
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Link href={`/product?id=${product._id}`} passHref>
-              <Image
-              roundedTop="lg"
-                src={product?.images[0]}
-                alt={`Picture of ${product?.name}`}                
-                style={{height:'130px', width:"180px"}}
-                objectFit="cover"
-                borderRadius="md"
-              />
-            </Link>
-          </Box>
-        <Box p="6" >        
-          <Flex mt="1" justifyContent="space-between" alignContent="center">
-            <Text>{product?.name}</Text>
-          </Flex>
-          <Flex justifyContent="space-between" alignContent="center">
-          <Text> UGX {product?.price}</Text>
-          </Flex>
-        </Box>
-      </Box>
-    </Flex>
-  )
+   
+    <Box
+  bg={useColorModeValue('white', 'gray.800')}
+  width="100%" 
+  borderWidth="1px"
+  rounded="lg"
+  shadow="lg"
+  position="relative"
+>
+  <Box
+    bg={useColorModeValue('gray.100', 'gray.700')}
+    display="flex"
+    alignItems="center"
+    justifyContent="center"
+  >
+    <Link href={`/product?id=${product._id}`} passHref>
+      <Image
+        roundedTop="lg"
+        src={product?.images[0]}
+        alt={`Picture of ${product?.name}`}
+        width="100%" 
+         height="100%"
+        objectFit="cover"
+        borderRadius="md"
+      />
+    </Link>
+  </Box>
+  <Box padding={2} textAlign="center">
+    <Text fontSize={19} fontWeight="500">{product?.name}</Text>
+    <Text pb={2}>UGX {numeral(product?.price).format(',')}</Text>
+  </Box>
+</Box>
+
+  );
 }
 
 export default ProductCard;

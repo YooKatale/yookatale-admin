@@ -10,7 +10,7 @@ import { useProductCreateMutation } from "@Slices/productApiSlice";
 import { useToast } from "@components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import {
-  Select,
+  //Select,
   SelectContent,
   SelectGroup,
   SelectItem,
@@ -18,12 +18,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@components/ui/select";
-import { useState } from "react";
-import { useRegisterMutation } from "@Slices/userApiSlice";
+import { useEffect, useState } from "react";
+import { useRegisterMutation, useUpdateAdminUserAccountMutation } from "@Slices/userApiSlice";
+import { Select } from "@chakra-ui/react";
 
-const AddAccount = ({ closeModal }) => {
+const AddAccount = ({ closeModal, accountData, editmode, reloadAccounts }) => {
   const [isLoading, setLoading] = useState(false);
   const [User, setUser] = useState({
+    _id:"",
     firstname: "",
     lastname: "",
     email: "",
@@ -35,45 +37,52 @@ const AddAccount = ({ closeModal }) => {
   const router = useRouter();
 
   const [registerUser] = useRegisterMutation();
-
+const [updateUser]=useUpdateAdminUserAccountMutation()
   const { toast } = useToast();
 
   const { userInfo } = useSelector((state) => state.auth);
-
+  const closeModalAndUpdate=()=>{
+    setUser({
+      _id:"",
+      firstname: "",
+      lastname: "",
+      email: "",
+      phone: "",
+      gender: "",
+      accountType: "",
+    });
+     closeModal(false)
+  }
+  
   const submitHandler = async (e) => {
     e.preventDefault();
 
-    User.gender = e.target.gender.value;
-    User.accountType = e.target.accountType.value;
+    // User.gender = e.target.gender.value;
+    // User.accountType = e.target.accountType.value;
 
-    setLoading((prevState) => (prevState ? false : true));
+    setLoading(true);
 
     try {
-      const res = await registerUser(User).unwrap();
+    
+      
+      const res = await (editmode ? updateUser(User).unwrap() : registerUser(User).unwrap());
+      
+      
 
-      setLoading((prevState) => (prevState ? false : true));
-
-      if (res?.status == "Success") {
+      if (res?.status == "Success"){
+        setLoading(false);
         toast({
           title: "Success",
-          description: `Account created successfully. Password emailed to ${res?.data}`,
+          description: `Account ${editmode?"Edited":"Created"} Successfully. ${editmode?"":`Password emailed to ${res?.data}`}`,
         });
-
         // clear form input data
-        setUser({
-          firstname: "",
-          lastname: "",
-          email: "",
-          phone: "",
-          gender: "",
-          accountType: "",
-        });
-
+        closeModalAndUpdate()
+        reloadAccounts()
         router.push("/accounts");
       }
     } catch (err) {
       // set loading to be false
-      setLoading((prevState) => (prevState ? false : true));
+      setLoading(false);
 
       toast({
         variant: "destructive",
@@ -85,18 +94,36 @@ const AddAccount = ({ closeModal }) => {
     }
   };
 
+  useEffect(()=>{
+if(editmode){
+  setUser({ ...User, _id:accountData._id,firstname:accountData.firstname, 
+    lastname:accountData.lastname,accountType:accountData.accountType, 
+    email:accountData.email, gender:accountData.gender, phone:accountData.phone })
+ // setUser({...User, accountData})
+}
+  },[accountData])
+
+const handleSelect=(name,e)=>{
+  const fieldname = name==="accounType"?User.accountType:User.gender
+  if(name==="accounType"){
+  setUser({...User.accountType,  e })
+  }else{
+    setUser({ ...User.gender,  e })
+  }
+}
   return (
     <>
       <div className="p-8 flex bg-none justify-center items-center fixed z-30 top-0 left-0 right-0 bottom-0">
         <div className="m-auto w-4/5 h-full p-4 bg-white overflow-y-auto overflow-x-hidden rounded-md shadow-md relative">
           <div
             className="absolute top-4 right-8 cursor-pointer"
-            onClick={() => closeModal(false)}
+            //onClick={() => closeModal(false)}
+            onClick={closeModalAndUpdate}
           >
             <X size={30} />
           </div>
           <div className="pt-8 pb-4">
-            <p className="text-center text-3xl font-thin">Add New User</p>
+            <p className="text-center text-3xl font-thin">{editmode? "Edit User": "Add New User" }</p>
           </div>
           <div className="py-2">
             <div className="flex">
@@ -163,68 +190,47 @@ const AddAccount = ({ closeModal }) => {
                         }
                       />
                     </div>
+                    
                     <div className="p-2">
-                      <Label htmlFor="gender" className="text-lg mb-1">
-                        Gender
-                      </Label>
-                      <Select
-                        name="gender"
-                        onChange={(e) =>
-                          setUser({
-                            ...User,
-                            [e.target.name]: e.target.value,
-                          })
-                        }
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue
-                            placeholder="Select gender"
-                            value={User.gender}
-                          />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            <SelectLabel>Category</SelectLabel>
-                            <SelectItem value="male">Male</SelectItem>
-                            <SelectItem value="female">Female</SelectItem>
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
+                    <Label htmlFor="gender" className="text-lg mb-1">Gender</Label>
+                    <Select
+                     
+                      name="gender"
+                      value={User.gender}
+                      onChange={(e) =>
+                        setUser({ ...User, [e.target.name]: e.target.value })
+                      }
+                    >
+                       <option disabled></option>
+                      <option value='male'>Male</option>
+                      <option value='female'>Female</option>
+                    </Select>
                     </div>
+
                     <div className="p-2">
-                      <Label htmlFor="account" className="text-lg mb-1">
-                        Account Type
-                      </Label>
-                      <Select
-                        name="accountType"
-                        onChange={(e) =>
-                          setUser({
-                            ...User,
-                            [e.target.name]: e.target.value,
-                          })
-                        }
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue
-                            placeholder="Select account type"
-                            value={User.accountType}
-                          />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            <SelectLabel>Account Types</SelectLabel>
-                            <SelectItem value="admin">Admin</SelectItem>
-                            <SelectItem value="iam">IAM</SelectItem>
-                            <SelectItem value="editor">Editor</SelectItem>
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
+                    <Label htmlFor="gender" className="text-lg mb-1">Account Type</Label>
+                    <Select
+                      name="accountType"
+                      value={User.accountType}
+                      onChange={(e) =>
+                        setUser({ ...User, [e.target.name]: e.target.value })
+                      }
+                    >
+                      <option disabled></option>
+                      <option value='admin'>Admin</option>
+                      <option value='iam'>IAM</option>
+                      <option value='editor'>Editor</option>
+                    </Select>
                     </div>
+                   
                   </div>
+
+                  
                   
                   <div className="py-2">
                     <Button type="submit">
-                      {isLoading ? <Loader2 /> : ""}Add User
+                      {isLoading ? <Loader2 /> : ""}
+                      {editmode?"Update User":"Add User"}
                     </Button>
                   </div>
                 </form>
