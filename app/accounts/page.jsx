@@ -58,10 +58,15 @@ const[deleteAccount]=useDeleteUserAccountMutation()
   const [editmode, setEditmode]=useState(false)
 const [accountToDelete, setAccountToDelete]=useState(null)
  const openEditMode =(data)=>{
-
+if(data.accountType==="admin" && userInfo?.account ==="editor"){
+  alert('You cannot Edit this account')
+  return;
+}else{
   handleModal("editAccount")
-   setEditmode(true)
-  setaccountData(data)
+  setEditmode(true)
+ setaccountData(data)
+}
+  
   
  
   }
