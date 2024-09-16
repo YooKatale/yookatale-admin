@@ -215,7 +215,7 @@ const AddAdvertisementPackage = ({ closeModal }) => {
                     </div>
                     <div className="grid grid-cols-4">
                       {benefitPacks.map((pack, index) => (
-                        <div class="flex items-center mb-4" key={index}>
+                        <div className="flex items-center mb-4" key={index}>
                           <input
                             id="checkbox-3"
                             type="checkbox"

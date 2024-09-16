@@ -117,7 +117,6 @@ const handleSelect=(name,e)=>{
         <div className="m-auto w-4/5 h-full p-4 bg-white overflow-y-auto overflow-x-hidden rounded-md shadow-md relative">
           <div
             className="absolute top-4 right-8 cursor-pointer"
-            //onClick={() => closeModal(false)}
             onClick={closeModalAndUpdate}
           >
             <X size={30} />

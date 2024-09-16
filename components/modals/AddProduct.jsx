@@ -35,9 +35,7 @@ const AddProduct = ({ closeModal }) => {
     e.preventDefault();
     try {
       const form = e.target;
-
       const NewFormData = new FormData(form);
-
       const res = await createProduct(NewFormData).unwrap();
 
       if (res?.status == "Success") {
@@ -45,7 +43,6 @@ const AddProduct = ({ closeModal }) => {
           title: "Success",
           description: "Product added successfully",
         });
-
         router.push("/products");
         closeModal()
       }
@@ -154,6 +151,17 @@ const AddProduct = ({ closeModal }) => {
                         id="price"
                         placeholder="Price is required"
                         name="price"
+                      />
+                    </div>
+                    <div className="p-2">
+                      <Label htmlFor="price" className="text-lg mb-1">
+                        Quantity
+                      </Label>
+                      <Input
+                        type="text"
+                        id="quantity"
+                        placeholder="Quantity"
+                        name="quantity"
                       />
                     </div>
                   </div>

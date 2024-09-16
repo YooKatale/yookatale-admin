@@ -12,9 +12,11 @@ import {
   Stack,
   Grid,
   GridItem,
+  Button,
 } from '@chakra-ui/react'
 
 import numeral from "numeral"
+import { DeleteIcon, Trash2 } from "lucide-react";
 function ProductCard({ product }) {
   return (
    
@@ -26,6 +28,8 @@ function ProductCard({ product }) {
   shadow="lg"
   position="relative"
 >
+      
+
   <Box
     bg={useColorModeValue('gray.100', 'gray.700')}
     display="flex"
@@ -44,6 +48,9 @@ function ProductCard({ product }) {
       />
     </Link>
   </Box>
+  <Button style={{ position: 'relative', backgroundColor:useColorModeValue('transparent', 'gray.900') }}>
+        <Trash2 color="red" />
+        </Button>
   <Box padding={2} textAlign="center">
     <Text fontSize={19} fontWeight="500">{product?.name}</Text>
     <Text pb={2}>UGX {numeral(product?.price).format(',')}</Text>
