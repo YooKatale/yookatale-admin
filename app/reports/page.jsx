@@ -1,14 +1,14 @@
 "use client";
-import React, { useState, useEffect } from 'react'
+import {
+  Stat,
+  StatHelpText,
+  StatLabel,
+  StatNumber,
+} from '@chakra-ui/react';
 import Navbar from "@components/Navbar";
 import Sidenav from "@components/Sidenav";
-import {
-    Stat,
-    StatLabel,
-    StatNumber,
-    StatHelpText,
-  } from '@chakra-ui/react'
-  import { useAuditlogsgetMutation, useDashboardDataMutation } from "@Slices/userApiSlice";
+import { useAuditlogsgetMutation, useDashboardDataMutation } from "@Slices/userApiSlice";
+import React, { useEffect, useState } from 'react';
 //   import { useVendorGetMutation } from "@Slices/vendorApiSlice";
 // import { usePartnerGetMutation } from "@Slices/partnersApiSlice";
 // import { useRouter } from "next/navigation";
@@ -35,6 +35,9 @@ const ProductCategories = [
     "meals",
     "popular",
     "topdeals",
+    "discover",
+    "promotional",
+    "recommended",
   ];
   
   const columns = ['user', 'action', 'description', 'risklevel', 'usercategory', 'date'];
