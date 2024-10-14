@@ -13,11 +13,59 @@ import {
   Grid,
   GridItem,
   Button,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
 } from '@chakra-ui/react'
 
 import numeral from "numeral"
 import { DeleteIcon, Trash2 } from "lucide-react";
-function ProductCard({ product }) {
+import { useToast } from "@components/ui/use-toast";
+import { useEffect, useState } from "react";
+import { useProductDeleteMutation } from "@Slices/productApiSlice";
+function ProductCard({ product, handleProductFetch }) {
+const {toast}=useToast()
+  const { isOpen: isSubmitReviewConfirmOpen, onOpen: openSubmitReviewConfirm, onClose: closeSubmitReviewConfirm } = useDisclosure();
+  const [productToDelete, setProductToDelete]=useState("")
+  const [Product, setProduct]=useState({})
+  const[deleteProduct]=useProductDeleteMutation()
+  const handleOpenDeleteConfirm=()=>{
+    openSubmitReviewConfirm()
+  }
+
+  
+  const deleteUserProduct = async (e) => {
+    e.preventDefault();
+    closeSubmitReviewConfirm()
+    try {
+      const res = await deleteProduct(productToDelete).unwrap()
+      if (res?.status == "Success") {
+        toast({
+          title: "Success",
+          description: `Product Deleted Successfully`,
+        });
+        handleProductFetch();
+      }
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Error occured",
+        description: err.data?.message
+          ? err.data?.message
+          : err.data || err.error,
+      });
+    }
+  }
+
+  useEffect(() => {
+    product?._id !== undefined && setProduct(product)
+  }, [product])
+  
   return (
    
     <Box
@@ -48,13 +96,36 @@ function ProductCard({ product }) {
       />
     </Link>
   </Box>
-  <Button style={{ position: 'relative', backgroundColor:useColorModeValue('transparent', 'gray.900') }}>
+      <Button
+        style={{
+          position: 'relative',
+          backgroundColor: useColorModeValue('transparent', 'gray.900')
+        }}
+        onClick={()=>{handleOpenDeleteConfirm(); setProductToDelete(product?._id)}}
+      >
         <Trash2 color="red" />
-        </Button>
+      </Button>
   <Box padding={2} textAlign="center">
     <Text fontSize={19} fontWeight="500">{product?.name}</Text>
     <Text pb={2}>UGX {numeral(product?.price).format(',')}</Text>
   </Box>
+
+
+
+  <Modal isOpen={isSubmitReviewConfirmOpen} onClose={closeSubmitReviewConfirm}>
+        <ModalOverlay />
+        <ModalContent textAlign={'center'}>
+          <ModalHeader >Confirm Delete Product</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Text>Are you sure you want to delete this product?</Text>
+          </ModalBody>
+          <ModalFooter display="flex" justifyContent="space-between" mx={6} pb={6}>
+            <Button variant={'outline'} size={'sm'} colorScheme="blue" onClick={closeSubmitReviewConfirm}>Cancel</Button>
+            <Button variant={'outline'} size={'sm'} colorScheme="red"  ml={3} onClick={(e)=>deleteUserProduct(e)}>Delete</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
 </Box>
 
   );

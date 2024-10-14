@@ -7,7 +7,7 @@ import {
 
 import Navbar from "@components/Navbar";
 import Sidenav from "@components/Sidenav";
-import EditProducut from "@components/modals/EditProduct";
+import EditProduct from "@components/modals/EditProduct";
 
 import {
   AlertDialog,
@@ -20,15 +20,16 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@components/ui/alert-dialog";
-import { Button } from "@components/ui/button";
 import { useToast } from "@components/ui/use-toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { useEffect, useState } from "react";
 
+import { Box, Button, Flex, Grid, Image, Text } from "@chakra-ui/react";
+import ImageZoom from "@components/ImageZoom";
+import { EditIcon } from "@chakra-ui/icons";
+import { FormatCurr } from "@lib/utils";
 const Product = () => {
-  // get user information stored in the localstorage
-  //   const { userInfo } = useSelector((state) => state.auth);
   const [modalState, setModalState] = useState(false);
   const [modal, setModal] = useState("");
   const [idparam, setIdparam]=useState()
@@ -37,22 +38,13 @@ const Product = () => {
 
   const { toast } = useToast();
 
-  const router = useRouter();
-
-  // use the useSearchParam hooks from next/navigation to get url params
-  //const searchParam = useSearchParams();
-
-  //const param = searchParam.get("id");
-
-  // initialize mutation function to fetch product data from database
   const [fetchProduct] = useProductGetMutation();
   const [deleteProduct] = useProductDeleteMutation();
-
-  // function handle fetching data
-  const handleDataFetch = async () => {
+  // Fetch products
+  const handleDataFetch = async (id) => {
     try {
-      const res = await fetchProduct(idparam).unwrap();
-
+      const res = await fetchProduct(id).unwrap();
+    
       if (res?.status == "Success") {
         setProduct({ ...res?.data });
       }
@@ -67,164 +59,87 @@ const Product = () => {
     }
   };
 
-  // function to delete product
-  // function handle fetching data
-  const handleDataDelete = async () => {
-    try {
-      const res = await deleteProduct(idparam).unwrap();
-
-      if (res?.status == "Success") {
-        toast({
-          variant: "teal",
-          title: "Success",
-          description: "Product deleted successfully",
-        });
-
-        router.push("/products");
-      }
-    } catch (err) {
-      toast({
-        variant: "destructive",
-        title: "Error occured",
-        description: err.data?.message
-          ? err.data?.message
-          : err.data || err.error,
-      });
-    }
-  };
-
-  // function to set modal data
+  
+  // function to control modal
   const handleModal = (modal) => {
     setModalState((prevState) => (prevState ? false : true));
     setModal(modal);
   };
 
-  // fetch product categories
-  useEffect(() => {
-    handleDataFetch();
-  }, []);
-
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const querysearch = new URLSearchParams(window.location.search);
       const idParam = querysearch.get('id');
-      
       if (idParam) {
-        setIdparam(idParam);
-        handleDataFetch();
+        handleDataFetch(querysearch.get('id'));
       }
     }
-  }, [setIdparam, handleDataFetch]);
+  }, []);
+
 
   return (
     <Suspense>
-      {/* --------------- display modal forms
-        -------------------------------------------------- */}
-      {modalState && modal === "edit" ? (
-        <EditProducut product={Product} closeModal={setModalState} />
-      ) : (
-        <></>
+      <Box mt={20}>
+      {modalState && modal === "edit" && (
+        <EditProduct product={Product} closeModal={setModalState} />
       )}
-      <main className="max-w-full">
-        <Sidenav />
-        <Navbar />
-        {/* <AlertBox /> */}
-        <div className="flex w-full pt-12">
-          <div className="w-1/5"></div>
-          <div className="w-4/5 pt-4">
-            {/* ------------------- main content here
-            ---------------------------------------------------
-            */}
-            <div className="py-4 px-4">
-              <div className="py-4 flex justify-end">
-                {/* <Button className="mx-2 text-base bg-red-500">
-                  Delete Product
-                </Button> */}
-                <>
-                  <AlertDialog>
-                    <AlertDialogTrigger className="text-white bg-red-500 px-3 rounded-md">
-                      Delete Product
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          Are you absolutely sure?
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone. This will permanently
-                          delete the {Product ? Product?.name : ""} product
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          className="text-white bg-red-500 px-3 rounded-md"
-                          onClick={handleDataDelete}
-                        >
-                          Continue
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </>
-                <Button
-                  className="mx-2 text-base"
-                  onClick={() => handleModal("edit")}
-                >
-                  Edit Product
-                </Button>
-              </div>
-              <div className="flex">
-                <div className="w-6/12">
-                  <div className="flex justify-center items-center px-4">
-                    <img
-                      src={`${Product?.images ? Product?.images[0] : ""}`}
-                      alt=""
-                      className="w-full h-auto"
-                    />
-                  </div>
-                  <div className="py-2 grid grid-cols-4">
-                    {Product?.images ? (
-                      Product?.images.length > 0 ? (
-                        Product?.images.map((image, index) => (
-                          <div
-                            key={index}
-                            className="p-2 mr-2 border border-slate-100 rounded-sm flex justify-center items-center"
-                          >
-                            <img
-                              src={`${image}`}
-                              alt=""
-                              className="w-full h-auto"
-                            />
-                          </div>
-                        ))
-                      ) : (
-                        <></>
-                      )
-                    ) : (
-                      <></>
-                    )}
-                  </div>
-                </div>
-                <div className="w-6/12 px-2 py-4">
-                  <div className="my-1 py-1">
-                    <h2 className="text-3xl font-extrabold">{Product?.name}</h2>
-                  </div>
-                  <div className="my-1 py-1">
-                    <p className="text-2xl">UGX {Product?.price}</p>
-                  </div>
-                  <div className="my-1 py-1">
-                    <p className="text-lg">{Product?.category}</p>
-                  </div>
-                  <div className="my-1 pt-4">
-                    <p className="text-lg">{Product?.description}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
+     
+              <Flex>
+              {/* Left section (Images) */}
+              <Box w="50%" height={"50%"}>
+                <Flex justify="center" align="center" px={4}>
+                  <Image
+                    src={Product?.images ? Product?.images[0] : ""}
+                    alt="Product Image"
+                    w="100%"
+                    h="2%"
+                  />
+                </Flex>
+                <Grid templateColumns="repeat(4, 1fr)" gap={2} py={2} mx={4}>
+                  {Product?.images && Product?.images.length > 0 ? (
+                    Product?.images.map((image, index) => (
+                      <Box
+                        key={index}
+                        p={2}
+                        mr={2}
+                        border="1px"
+                        borderColor="gray.200"
+                        borderRadius="sm"
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                      >
+                        {/* Product pictures zoom section */}
+                        <ImageZoom imgSrc={image} />
+                      </Box>
+                    ))
+                  ) : null}
+                </Grid>
+              </Box>
+
+              {/* Right section (Product Details) */}
+              <Box w="50%" px={2} py={4}>
+                <Flex justify="space-between" align="center">
+                  <Text fontSize="2xl" fontWeight="bold" textTransform={"capitalize"}>
+                    {Product?.name}
+                  </Text>
+                  <Button variant={"outline"} border={"1px solid #2196F3"} _hover={{bg:"#2196F3", color:"#fff"}} onClick={() => handleModal("edit")}>
+                    <EditIcon mr={1}/>
+                    Edit Product
+                  </Button>
+                </Flex>
+                <Box my={1} py={1}>
+                  <Text fontSize={18}>UGX { FormatCurr(Product?.price)}</Text>
+                </Box>
+                <Box my={1} py={1}>
+                  <Text fontSize="lg">{Product?.category}</Text>
+                </Box>
+                <Box my={1} pt={4}>
+                  <Text fontSize="lg">{Product?.description}</Text>
+                </Box>
+              </Box>
+            </Flex>
+            </Box>
     </Suspense>
   );
 };

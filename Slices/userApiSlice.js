@@ -75,5 +75,5 @@ export const {
   useDashboardDataMutation,
   useAuditlogsgetMutation,
   useUpdateAdminUserAccountMutation,
-  useDeleteUserAccountMutation
+  useDeleteUserAccountMutation,
 } = usersApiSlice;
