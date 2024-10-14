@@ -22,10 +22,14 @@ import {
   SelectValue,
 } from "@components/ui/select";
 import { useState } from "react";
+import axios from "axios";
+import { DB_URL } from "@config/config";
+import { BACKEND_URL } from "@constants/constant";
 
-const EditProducut = ({ closeModal, product }) => {
+const EditProduct = ({ closeModal, product }) => {
   const [isLoading, setLoading] = useState(false);
   const [Product, setProduct] = useState({
+    id: product._id,
     name: product.name,
     category: product.category,
     subCategory: product.subCategory,
@@ -41,24 +45,30 @@ const EditProducut = ({ closeModal, product }) => {
 
   const { userInfo } = useSelector((state) => state.auth);
 
-  const submitHandler = async (e) => {
-    // set loading to be true
+  const submitHandlerd = async (e) => {
+    
     setLoading({ ...isLoading, operation: "", status: false });
 
     e.preventDefault();
-    try {
-      const form = e.target;
-
+    const form = e.target;
       const NewFormData = new FormData(form);
-
-      // append form values if empty
+      const formDataObject = {};
+  // Loop through the FormData entries
+  for (const [key, value] of NewFormData.entries()) {
+    if (value instanceof File) {
+      // Log any file present
+      console.log(`${key}:`, value); 
+      formDataObject[key] = value;
+    } else {
+      formDataObject[key] = value;
+    }
+  }
+    try {
+      //append form values if empty
       NewFormData.append("product", JSON.stringify(Product));
-
-      const res = await editProduct(NewFormData).unwrap();
-
+      const res = await editProduct(formDataObject).unwrap();
       // set loading to be false
       setLoading({ ...isLoading, operation: "", status: false });
-
       if (res?.status == "Success") {
         toast({
           title: "Success",
@@ -70,7 +80,6 @@ const EditProducut = ({ closeModal, product }) => {
     } catch (err) {
       // set loading to be false
       setLoading((prevState) => (prevState ? false : true));
-
       toast({
         variant: "destructive",
         title: "Error occured",
@@ -80,7 +89,47 @@ const EditProducut = ({ closeModal, product }) => {
       });
     }
   };
+  const submitHandler = async (e) => {
+    e.preventDefault(); // Prevent default form submission
+    const config = {
+      headers: {
+          'content-type': 'multipart/form-data'
+      }
+  };
+    setLoading({ ...isLoading, operation: "", status: false });
+  
+    const form = e.target;
+    const NewFormData = new FormData(form); // Create FormData from form
+  
+    // Append the product details to FormData
+    //NewFormData.append("product", JSON.stringify(Product));
+    try {
+      // Send the form data through the mutation
+      //const res = await editProduct(NewFormData).unwrap(); // Pass FormData directly
+      const res = await axios.put(`${BACKEND_URL}/admin/product/edit/${Product.id}`, NewFormData, config);
+      // Stop loading
+      setLoading({ ...isLoading, operation: "", status: false });
 
+      // Handle success
+      if (res.data?.status === "Success") {
+        toast({
+          title: "Success",
+          description: "Product edited successfully",
+        });
+        router.push("/products");
+      }
+    } catch (err) {
+      // Stop loading
+      setLoading({ ...isLoading, operation: "", status: false });
+  
+      // Handle errors
+      toast({
+        variant: "destructive",
+        title: "Error occurred",
+        description: err.data?.error,
+      });
+    }
+  };
   return (
     <>
       <div className="p-8 flex bg-none justify-center items-center fixed z-30 top-0 left-0 right-0 bottom-0">
@@ -251,4 +300,4 @@ const EditProducut = ({ closeModal, product }) => {
   );
 };
 
-export default EditProducut;
+export default EditProduct;
