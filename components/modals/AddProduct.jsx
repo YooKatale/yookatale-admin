@@ -77,7 +77,7 @@ const AddProduct = ({ closeModal }) => {
             <div className="flex">
               <div className="m-auto py-2 w-4/5">
                 <form onSubmit={submitHandler} encType="multipart/form-data">
-                  <div className="grid grid-cols-2">
+                  <div className="grid grid-cols-3 gap-2">
                     <div className="p-2">
                       <Label htmlFor="name" className="text-lg mb-1">
                         Product Name
@@ -154,14 +154,41 @@ const AddProduct = ({ closeModal }) => {
                       />
                     </div>
                     <div className="p-2">
-                      <Label htmlFor="price" className="text-lg mb-1">
+                      <Label htmlFor="quantity" className="text-lg mb-1">
                         Quantity
                       </Label>
                       <Input
-                        type="text"
+                        type="number"
                         id="quantity"
                         placeholder="Quantity"
                         name="quantity"
+                        required
+                      />
+                    </div>
+                    <div className="p-2">
+                      <Label htmlFor="unit" className="text-lg mb-1">
+                        Unit (e.g., kg, pieces, litres)
+                      </Label>
+                      <Input
+                        type="text"
+                        id="unit"
+                        placeholder="Unit"
+                        name="unit"
+                        defaultValue="kg"
+                      />
+                    </div>
+                    <div className="p-2">
+                      <Label htmlFor="discountPercentage" className="text-lg mb-1">
+                        Discount Percentage (%)
+                      </Label>
+                      <Input
+                        type="number"
+                        id="discountPercentage"
+                        placeholder="Discount Percentage"
+                        name="discountPercentage"
+                        defaultValue="0"
+                        min="0"
+                        max="100"
                       />
                     </div>
                   </div>

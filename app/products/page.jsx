@@ -127,91 +127,68 @@ const Products = () => {
     }
 });
   return (
-    // <Flex minH={'100vh'} style={{ marginTop: '4em' }}>
-    //   <Stack mx={'auto'} width={'100%'} py={4} px={1}>
+    <Flex minH={'100vh'} style={{ marginTop: '4em' }}>
+      <Stack mx={'auto'} width={'100%'} py={4} px={1}>
     
      
-    //   {modalState && modal === "addProduct" ? (
-    //     <AddProduct closeModal={closeModalFromCHild} />
-    //   ) : (
-    //     <></>
-    //   )}
-    //     <div className="p-2 flex justify-between" style={{
-    //       backgroundColor: 'white',
-    //       padding: 8,
-    //     }}>
-    //       <div className="flex" style={{ padding: 10 }}>
-    //         <Heading size={'lg'} style={{ fontSize: 20, fontWeight: '500' }}>Add new product</Heading>
-    //       </div>
-    //       <div className="flex justify-end" >
-    //         <Button
-    //           type='submit'
-    //           size="md"
-    //           bg={'blue.400'}
-    //           color={'white'}
-    //           _hover={{
-    //             bg: 'blue.500',
-    //           }}
-    //           onClick={() => handleModal("addProduct")}
-    //         >
-    //           <PlusIcon size={15} /> New product
-    //         </Button>
-    //       </div>
-    //     </div>
+      {modalState && modal === "addProduct" ? (
+        <AddProduct closeModal={closeModalFromCHild} />
+      ) : (
+        <></>
+      )}
+        <div className="p-2 flex justify-between" style={{
+          backgroundColor: 'white',
+          padding: 8,
+        }}>
+          <div className="flex" style={{ padding: 10 }}>
+            <Heading size={'lg'} style={{ fontSize: 20, fontWeight: '500' }}>Products Management</Heading>
+          </div>
+          <div className="flex justify-end" >
+            <Button
+              type='submit'
+              size="md"
+              bg={'blue.400'}
+              color={'white'}
+              _hover={{
+                bg: 'blue.500',
+              }}
+              onClick={() => handleModal("addProduct")}
+            >
+              <PlusIcon size={15} /> New product
+            </Button>
+          </div>
+        </div>
                 
 
-    //     <div className="py-4 px-2">
-    //       {Products?.length > 0 ? (
-    //         <Grid
-    //           templateColumns={{ base: 'repeat(2, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' }}
-    //           gap={4}
-    //         >
-    //           {Products.map((product, index) => (
-    //             <GridItem>
-    //               <ProductCard key={product._id} product={product} handleProductFetch={handleProductFetch}/>
-    //             </GridItem>
-    //           ))}
-    //         </Grid>
-    //       ) : (
-    //         <Box py={14} w="full">
-    //           <Text fontSize="2xl" textAlign="center">
-    //             No products currently
-    //           </Text>
-    //         </Box>
-    //       )}
-    //     </div>
+        <div className="py-4 px-2">
+          {Products?.length > 0 ? (
+            <Grid
+              templateColumns={{ base: 'repeat(2, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' }}
+              gap={4}
+            >
+              {Products.map((product, index) => (
+                <GridItem key={product._id}>
+                  <ProductCard product={product} handleProductFetch={handleProductFetch}/>
+                </GridItem>
+              ))}
+            </Grid>
+          ) : (
+            <Box py={14} w="full">
+              <Text fontSize="2xl" textAlign="center">
+                No products currently
+              </Text>
+            </Box>
+          )}
+        </div>
 
         
           
            
     
-    // </Stack>
+    </Stack>
 
    
-    // </Flex>
-    <GridItem>
-    {/* <DxGrid rows={data1} columns={columns}>
-                      <SearchState defaultValue="" />
-                      <IntegratedFiltering />
-                      <PagingState defaultCurrentPage={0} defaultPageSize={5} />
-                      <IntegratedPaging />
-                      <SortingState />
-                      <IntegratedSorting />
-                      <GroupingState />
-                      <IntegratedGrouping />
-                      <DragDropProvider />
-                      <IntegratedSorting />
-                      <Table />
-                      <TableHeaderRow showSortingControls />
-                      <TableColumnVisibility />
-                      <Toolbar />
-                      <SearchPanel />
-                      <PagingPanel pageSizes={pageSizes} />
-                      <GroupingPanel showGroupingControls />
-                      <TableGroupRow />
-                      <ColumnChooser />
-                    </DxGrid> */}
-    </GridItem>
+    </Flex>
   );
 };
 
