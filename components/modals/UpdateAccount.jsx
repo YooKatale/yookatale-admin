@@ -289,3 +289,4 @@ const UpdateAccount = ({ closeModal }) => {
 };
 
 export default UpdateAccount;
+
