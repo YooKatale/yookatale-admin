@@ -7,6 +7,7 @@ import { Button } from "../ui/button";
 import { X } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useProductCreateMutation } from "@Slices/productApiSlice";
+import { useCategoriesGetMutation } from "@Slices/categoryApiSlice";
 import { useToast } from "@components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import {
@@ -18,24 +19,48 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@components/ui/select";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const AddProduct = ({ closeModal }) => {
   const [isLoading, setLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
 
   const router = useRouter();
 
   const [createProduct] = useProductCreateMutation();
+  const [fetchCategories] = useCategoriesGetMutation();
 
   const { toast } = useToast();
 
   const { userInfo } = useSelector((state) => state.auth);
+
+  // Fetch categories on component mount
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const res = await fetchCategories().unwrap();
+        if (res?.success && res?.categories) {
+          setCategories(res.categories);
+        }
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+      }
+    };
+    loadCategories();
+  }, []);
 
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
       const form = e.target;
       const NewFormData = new FormData(form);
+      
+      // Manually add the selected category since Select component doesn't work with FormData directly
+      if (selectedCategory) {
+        NewFormData.set('category', selectedCategory);
+      }
+      
       const res = await createProduct(NewFormData).unwrap();
 
       if (res?.status == "Success") {
@@ -93,62 +118,33 @@ const AddProduct = ({ closeModal }) => {
                       <Label htmlFor="category" className="text-lg mb-1">
                         Product Category
                       </Label>
-                      <Select name="category">
+                      <Select 
+                        value={selectedCategory} 
+                        onValueChange={setSelectedCategory}
+                      >
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select a category" />
                         </SelectTrigger>
                         <SelectContent className="max-h-80 overflow-y-auto">
                           <SelectGroup>
-                            <SelectLabel>Collections</SelectLabel>
-                            <SelectItem value="bulk-products">
-                              Bulk Products
-                            </SelectItem>
-                            <SelectItem value="popular-products">
-                              Popular Products
-                            </SelectItem>
-                            <SelectItem value="discover-products">
-                              Discover Products
-                            </SelectItem>
-                            <SelectItem value="promotional-products">
-                              Promotional Products
-                            </SelectItem>
-                            <SelectItem value="recommended-products">
-                              Recommended Products
-                            </SelectItem>
-                            <SelectLabel>Food Types</SelectLabel>
-                            <SelectItem value="fruits">Fruits</SelectItem>
-                            <SelectItem value="meats">Meats</SelectItem>
-                            <SelectItem value="dairy">Dairy</SelectItem>
-                            <SelectItem value="vegetables">Vegetables</SelectItem>
-                            <SelectItem value="fats-and-oils">
-                              Fats &amp; Oils
-                            </SelectItem>
-                            <SelectItem value="roughages">Roughages</SelectItem>
-                            <SelectItem value="root-tubers">
-                              Root Tubers
-                            </SelectItem>
-                            <SelectItem value="grains-and-flour">
-                              Grains &amp; Flour
-                            </SelectItem>
-                            <SelectItem value="spices-and-herbs">
-                              Spices &amp; Herbs
-                            </SelectItem>
-                            <SelectLabel>Meals &amp; Drinks</SelectLabel>
-                            <SelectItem value="juice">Juice</SelectItem>
-                            <SelectItem value="cuisines">Cuisines</SelectItem>
-                            <SelectItem value="breakfast">Breakfast</SelectItem>
-                            <SelectItem value="lunch-meals">Lunch Meals</SelectItem>
-                            <SelectItem value="supper-meals">Supper Meals</SelectItem>
-                            <SelectItem value="supplements">Supplements</SelectItem>
+                            <SelectLabel>Available Categories</SelectLabel>
+                            {categories.length > 0 ? (
+                              categories.map((category) => (
+                                <SelectItem 
+                                  key={category._id} 
+                                  value={category.name.toLowerCase().split(/[\s-]+/)[0]}
+                                >
+                                  {category.name}
+                                </SelectItem>
+                              ))
+                            ) : (
+                              <SelectItem value="no-category" disabled>
+                                No categories available
+                              </SelectItem>
+                            )}
                           </SelectGroup>
                         </SelectContent>
                       </Select>
-                      {/* <Input
-                        type="text"
-                        id="category"
-                        placeholder="Category of product"
-                        name="category"
-                      /> */}
                     </div>
                     <div className="p-2">
                       <Label htmlFor="subCategory" className="text-lg mb-1">

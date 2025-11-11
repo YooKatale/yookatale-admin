@@ -10,7 +10,8 @@ import {
   UsersIcon,
   ClipboardCheck, 
   BaggageClaim,
-  Store
+  Store,
+  FolderTree
 } from "lucide-react";
 import { HiCreditCard, HiMenuAlt2, HiOutlineDocumentAdd } from "react-icons/hi";
 export const SideNavRoutes=[
@@ -23,6 +24,11 @@ export const SideNavRoutes=[
       name: "Products",
       icon: LucideSalad,
       path: "/products"
+    },
+    {
+      name: "Categories",
+      icon: FolderTree,
+      path: "/categories"
     },
     {
       name: "Vendors",

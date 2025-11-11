@@ -10,6 +10,7 @@ import {
   useProductCreateMutation,
   useProductEditMutation,
 } from "@Slices/productApiSlice";
+import { useCategoriesGetMutation } from "@Slices/categoryApiSlice";
 import { useToast } from "@components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import {
@@ -21,13 +22,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@components/ui/select";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { DB_URL } from "@config/config";
 import { BACKEND_URL } from "@constants/constant";
 
 const EditProduct = ({ closeModal, product }) => {
   const [isLoading, setLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
   const [Product, setProduct] = useState({
     id: product._id,
     name: product.name,
@@ -40,10 +42,26 @@ const EditProduct = ({ closeModal, product }) => {
   const router = useRouter();
 
   const [editProduct] = useProductEditMutation();
+  const [fetchCategories] = useCategoriesGetMutation();
 
   const { toast } = useToast();
 
   const { userInfo } = useSelector((state) => state.auth);
+
+  // Fetch categories on component mount
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const res = await fetchCategories().unwrap();
+        if (res?.success && res?.categories) {
+          setCategories(res.categories);
+        }
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+      }
+    };
+    loadCategories();
+  }, []);
 
   const submitHandlerd = async (e) => {
     
@@ -100,6 +118,11 @@ const EditProduct = ({ closeModal, product }) => {
   
     const form = e.target;
     const NewFormData = new FormData(form); // Create FormData from form
+  
+    // Manually add the selected category since Select component doesn't work with FormData directly
+    if (Product.category) {
+      NewFormData.set('category', Product.category);
+    }
   
     // Append the product details to FormData
     //NewFormData.append("product", JSON.stringify(Product));
@@ -177,72 +200,40 @@ const EditProduct = ({ closeModal, product }) => {
                       <Label htmlFor="category" className="text-lg mb-1">
                         Product Category
                       </Label>
-                      <Select name="category">
+                      <Select 
+                        value={Product.category}
+                        onValueChange={(value) =>
+                          setProduct({
+                            ...Product,
+                            category: value,
+                          })
+                        }
+                      >
                         <SelectTrigger className="w-full">
                           <SelectValue
-                            // placeholder="Select a category"
-                            placeholder={product?.category}
-                            value={Product.category}
-                            onChange={(e) =>
-                              setProduct({
-                                ...Product,
-                                [e.target.name]: e.target.value,
-                              })
-                            }
+                            placeholder={product?.category || "Select a category"}
                           />
                         </SelectTrigger>
                         <SelectContent className="max-h-80 overflow-y-auto">
                           <SelectGroup>
-                            <SelectLabel>Collections</SelectLabel>
-                            <SelectItem value="bulk-products">
-                              Bulk Products
-                            </SelectItem>
-                            <SelectItem value="popular-products">
-                              Popular Products
-                            </SelectItem>
-                            <SelectItem value="discover-products">
-                              Discover Products
-                            </SelectItem>
-                            <SelectItem value="promotional-products">
-                              Promotional Products
-                            </SelectItem>
-                            <SelectItem value="recommended-products">
-                              Recommended Products
-                            </SelectItem>
-                            <SelectLabel>Food Types</SelectLabel>
-                            <SelectItem value="fruits">Fruits</SelectItem>
-                            <SelectItem value="meats">Meats</SelectItem>
-                            <SelectItem value="dairy">Dairy</SelectItem>
-                            <SelectItem value="vegetables">Vegetables</SelectItem>
-                            <SelectItem value="fats-and-oils">
-                              Fats &amp; Oils
-                            </SelectItem>
-                            <SelectItem value="roughages">Roughages</SelectItem>
-                            <SelectItem value="root-tubers">
-                              Root Tubers
-                            </SelectItem>
-                            <SelectItem value="grains-and-flour">
-                              Grains &amp; Flour
-                            </SelectItem>
-                            <SelectItem value="spices-and-herbs">
-                              Spices &amp; Herbs
-                            </SelectItem>
-                            <SelectLabel>Meals &amp; Drinks</SelectLabel>
-                            <SelectItem value="juice">Juice</SelectItem>
-                            <SelectItem value="cuisines">Cuisines</SelectItem>
-                            <SelectItem value="breakfast">Breakfast</SelectItem>
-                            <SelectItem value="lunch-meals">Lunch Meals</SelectItem>
-                            <SelectItem value="supper-meals">Supper Meals</SelectItem>
-                            <SelectItem value="supplements">Supplements</SelectItem>
+                            <SelectLabel>Available Categories</SelectLabel>
+                            {categories.length > 0 ? (
+                              categories.map((category) => (
+                                <SelectItem 
+                                  key={category._id} 
+                                  value={category.name.toLowerCase().split(/[\s-]+/)[0]}
+                                >
+                                  {category.name}
+                                </SelectItem>
+                              ))
+                            ) : (
+                              <SelectItem value="no-category" disabled>
+                                No categories available
+                              </SelectItem>
+                            )}
                           </SelectGroup>
                         </SelectContent>
                       </Select>
-                      {/* <Input
-                        type="text"
-                        id="category"
-                        placeholder="Category of product"
-                        name="category"
-                      /> */}
                     </div>
                     <div className="p-2">
                       <Label htmlFor="subCategory" className="text-lg mb-1">
