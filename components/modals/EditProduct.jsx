@@ -191,29 +191,49 @@ const EditProduct = ({ closeModal, product }) => {
                             }
                           />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-h-80 overflow-y-auto">
                           <SelectGroup>
-                            <SelectLabel>Category</SelectLabel>
-                            <SelectItem value="roughages">Roughages</SelectItem>
+                            <SelectLabel>Collections</SelectLabel>
+                            <SelectItem value="bulk-products">
+                              Bulk Products
+                            </SelectItem>
+                            <SelectItem value="popular-products">
+                              Popular Products
+                            </SelectItem>
+                            <SelectItem value="discover-products">
+                              Discover Products
+                            </SelectItem>
+                            <SelectItem value="promotional-products">
+                              Promotional Products
+                            </SelectItem>
+                            <SelectItem value="recommended-products">
+                              Recommended Products
+                            </SelectItem>
+                            <SelectLabel>Food Types</SelectLabel>
                             <SelectItem value="fruits">Fruits</SelectItem>
-                            <SelectItem value="root tubers">
-                              Root tubers
-                            </SelectItem>
-                            <SelectItem value="vegetables">
-                              Vegetables
-                            </SelectItem>
-                            <SelectItem value="grains and flour">
-                              Grains and flour
-                            </SelectItem>
                             <SelectItem value="meats">Meats</SelectItem>
-                            <SelectItem value="fats and oils">
-                              Fats and oils
+                            <SelectItem value="dairy">Dairy</SelectItem>
+                            <SelectItem value="vegetables">Vegetables</SelectItem>
+                            <SelectItem value="fats-and-oils">
+                              Fats &amp; Oils
                             </SelectItem>
-                            <SelectItem value="herbs and spices">
-                              Herbs and Spice
+                            <SelectItem value="roughages">Roughages</SelectItem>
+                            <SelectItem value="root-tubers">
+                              Root Tubers
                             </SelectItem>
+                            <SelectItem value="grains-and-flour">
+                              Grains &amp; Flour
+                            </SelectItem>
+                            <SelectItem value="spices-and-herbs">
+                              Spices &amp; Herbs
+                            </SelectItem>
+                            <SelectLabel>Meals &amp; Drinks</SelectLabel>
                             <SelectItem value="juice">Juice</SelectItem>
-                            <SelectItem value="meals">Meals</SelectItem>
+                            <SelectItem value="cuisines">Cuisines</SelectItem>
+                            <SelectItem value="breakfast">Breakfast</SelectItem>
+                            <SelectItem value="lunch-meals">Lunch Meals</SelectItem>
+                            <SelectItem value="supper-meals">Supper Meals</SelectItem>
+                            <SelectItem value="supplements">Supplements</SelectItem>
                           </SelectGroup>
                         </SelectContent>
                       </Select>
