@@ -71,10 +71,20 @@ const [updateUser]=useUpdateAdminUserAccountMutation()
 
       if (res?.status == "Success"){
         setLoading(false);
+        
+        // Show appropriate message based on email status
+        const message = res?.message || 
+          `Account ${editmode?"Edited":"Created"} Successfully. ${editmode?"":`Credentials emailed to ${res?.data}`}`;
+        
         toast({
           title: "Success",
-          description: `Account ${editmode?"Edited":"Created"} Successfully. ${editmode?"":`Password emailed to ${res?.data}`}`,
+          description: message,
+          variant: res?.message?.includes("email failed") ? "warning" : "default",
         });
+        
+        // Log for debugging
+        console.log("Account operation response:", res);
+        
         // clear form input data
         closeModalAndUpdate()
         reloadAccounts()
