@@ -518,11 +518,156 @@ export default function Home() {
           </Card>
         </motion.div>
 
-        {/* Additional sections */}
-        <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={6} mt={8}>
+        {/* Additional sections - Products, Vendors, Partners */}
+        <Grid templateColumns={{ base: "1fr", lg: "1fr" }} gap={6} mt={8}>
           <motion.div variants={itemVariants}>
-            <Product router={router} />
+            <Product />
           </motion.div>
+        </Grid>
+
+        {/* Vendors and Partners Section */}
+        <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={6} mt={8}>
+          {/* Vendors */}
+          {vendors.length > 0 && (
+            <motion.div variants={itemVariants}>
+              <Card
+                bg="white"
+                borderRadius="xl"
+                boxShadow="0 4px 20px rgba(0, 0, 0, 0.08)"
+                border="1px solid"
+                borderColor="gray.100"
+              >
+                <CardHeader pb={4}>
+                  <HStack justify="space-between">
+                    <VStack align="start" spacing={1}>
+                      <Heading size="md" color="gray.800">
+                        Vendors
+                      </Heading>
+                      <Text fontSize="sm" color="gray.600">
+                        Active vendor list
+                      </Text>
+                    </VStack>
+                    <InputGroup maxW="250px">
+                      <InputLeftElement pointerEvents="none">
+                        <Search size={18} color="gray" />
+                      </InputLeftElement>
+                      <Input
+                        placeholder="Search vendors..."
+                        value={searchVendor}
+                        onChange={(e) => setSearchVendor(e.target.value)}
+                        borderRadius="lg"
+                        borderColor="gray.300"
+                        _focus={{ borderColor: "green.500", boxShadow: "0 0 0 1px #48BB78" }}
+                      />
+                    </InputGroup>
+                  </HStack>
+                </CardHeader>
+                <CardBody pt={0}>
+                  <Box overflowX="auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Address</TableHead>
+                          <TableHead>Phone</TableHead>
+                          <TableHead>Date</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {vendors
+                          .filter((vendor) => {
+                            if (!searchVendor) return vendor;
+                            return vendor.address?.toLowerCase().includes(searchVendor.toLowerCase());
+                          })
+                          .slice(0, 5)
+                          .map((vendor, index) => (
+                            <TableRow key={index} _hover={{ bg: "gray.50" }}>
+                              <TableCell fontWeight="600">{vendor.name}</TableCell>
+                              <TableCell fontSize="sm" color="gray.600">{vendor.address}</TableCell>
+                              <TableCell>{vendor.phone}</TableCell>
+                              <TableCell fontSize="sm" color="gray.600">
+                                {moment(vendor?.createdAt).fromNow()}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                      </TableBody>
+                    </Table>
+                  </Box>
+                </CardBody>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Partners */}
+          {partners.length > 0 && (
+            <motion.div variants={itemVariants}>
+              <Card
+                bg="white"
+                borderRadius="xl"
+                boxShadow="0 4px 20px rgba(0, 0, 0, 0.08)"
+                border="1px solid"
+                borderColor="gray.100"
+              >
+                <CardHeader pb={4}>
+                  <HStack justify="space-between">
+                    <VStack align="start" spacing={1}>
+                      <Heading size="md" color="gray.800">
+                        Delivery Partners
+                      </Heading>
+                      <Text fontSize="sm" color="gray.600">
+                        Active driver list
+                      </Text>
+                    </VStack>
+                    <InputGroup maxW="250px">
+                      <InputLeftElement pointerEvents="none">
+                        <Search size={18} color="gray" />
+                      </InputLeftElement>
+                      <Input
+                        placeholder="Search partners..."
+                        value={searchPartner}
+                        onChange={(e) => setSearchPartner(e.target.value)}
+                        borderRadius="lg"
+                        borderColor="gray.300"
+                        _focus={{ borderColor: "green.500", boxShadow: "0 0 0 1px #48BB78" }}
+                      />
+                    </InputGroup>
+                  </HStack>
+                </CardHeader>
+                <CardBody pt={0}>
+                  <Box overflowX="auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Location</TableHead>
+                          <TableHead>Phone</TableHead>
+                          <TableHead>Date</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {partners
+                          .filter((partner) => {
+                            if (!searchPartner) return true;
+                            return partner.location?.toLowerCase().includes(searchPartner.toLowerCase());
+                          })
+                          .slice(0, 5)
+                          .map((partner, index) => (
+                            <TableRow key={index} _hover={{ bg: "gray.50" }}>
+                              <TableCell fontWeight="600">{partner.fullname || "N/A"}</TableCell>
+                              <TableCell fontSize="sm" color="gray.600">{partner.location || "N/A"}</TableCell>
+                              <TableCell>{partner.phone || "N/A"}</TableCell>
+                              <TableCell fontSize="sm" color="gray.600">
+                                {moment(partner?.createdAt).fromNow()}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                      </TableBody>
+                    </Table>
+                  </Box>
+                </CardBody>
+              </Card>
+            </motion.div>
+          )}
         </Grid>
       </motion.div>
       </Box>
