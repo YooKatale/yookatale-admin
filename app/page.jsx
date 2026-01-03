@@ -276,7 +276,7 @@ export default function Home() {
   }
 
   return (
-    <Box bg="gray.50" minH="100vh" p={{ base: 4, md: 6 }}>
+    <Box bg="gray.50" minH="100vh">
       <motion.div
         variants={containerVariants}
         initial="hidden"

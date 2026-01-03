@@ -74,7 +74,7 @@ const Navbar = () => {
       bg="white"
       borderBottom="1px solid"
       borderColor="gray.200"
-      zIndex={1000}
+      zIndex={999}
       boxShadow="0 2px 8px rgba(0, 0, 0, 0.05)"
       px={{ base: 4, md: 6 }}
     >

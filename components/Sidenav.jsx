@@ -258,7 +258,7 @@ const SidebarWithHeader = ({ children, ...rest }) => {
         top={0}
         left={0}
         right={0}
-        zIndex="1000"
+        zIndex={999}
         bg="white"
         boxShadow="0 2px 8px rgba(0, 0, 0, 0.1)"
         height="80px"
@@ -379,15 +379,22 @@ const SidebarWithHeader = ({ children, ...rest }) => {
           </DrawerContent>
         </Drawer>
 
-        <Box>
+        {/* Top Navbar - Only show on desktop, MobileNav handles mobile */}
+        <Box display={{ base: 'none', md: 'block' }}>
+          <Navbar />
+        </Box>
+
+        {/* Mobile Navbar */}
+        <Box display={{ base: 'block', md: 'none' }}>
           <MobileNav onOpen={onOpen} userInfo={userInfo} />
         </Box>
 
         {/* Main Content with proper spacing for navbar */}
         <Box
           ml={{ base: 0, md: 64 }}
-          pt={{ base: 20, md: 24 }}
-          p={{ base: 4, md: 6 }}
+          pt={{ base: 24, md: 28 }}
+          px={{ base: 4, md: 6 }}
+          pb={6}
           minH="calc(100vh - 80px)"
         >
           {children}

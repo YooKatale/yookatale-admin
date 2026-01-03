@@ -22,7 +22,6 @@ export default function RootLayout({ children }) {
         <Providers>
           <Suspense>
           <SidebarWithHeader>
-            <Navbar />
             {children}
           </SidebarWithHeader>
           </Suspense>
