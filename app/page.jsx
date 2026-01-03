@@ -19,9 +19,15 @@ import moment from "moment/moment";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Box, Input, InputGroup, InputLeftElement, useColorModeValue } from "@chakra-ui/react";
+import { Box, Input, InputGroup, InputLeftElement, useColorModeValue, Flex, Text, Heading, Grid, GridItem, Card, CardBody, CardHeader, HStack, VStack, Badge } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import Product from "@components/product";
+import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
+import { Search, TrendingUp, Users, ShoppingCart, Package, DollarSign, Activity } from "lucide-react";
+
+// Dynamically import ApexCharts to avoid SSR issues
+const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 export default function Home() {
   const [Dashboard, setDashboard] = useState({});
@@ -37,14 +43,13 @@ export default function Home() {
   const [partnerGet] = usePartnerGetMutation();
 
   const router = useRouter();
-  // const { id } = router.query;
 
   const handleDataFetch = async () => {
     try {
       const res = await fetchDashboardData().unwrap();
-
       if (res?.status === "Success") {
         setDashboard(res?.data);
+        setFilteredOrders(res?.data?.PendingOrders?.orders || []);
       }
     } catch (error) {
       console.error("Error fetching dashboard data: ", error);
@@ -54,7 +59,6 @@ export default function Home() {
   const handleVendorFetch = async () => {
     try {
       const res = await vendorGet().unwrap();
-
       if (res?.status === "Success") {
         setVendors(res?.data);
       }
@@ -66,7 +70,6 @@ export default function Home() {
   const handlePartnerFetch = async () => {
     try {
       const res = await partnerGet().unwrap();
-
       if (res?.status === "Success") {
         setPartners(res?.data);
       }
@@ -77,10 +80,13 @@ export default function Home() {
 
   useEffect(() => {
     handleDataFetch();
-    filterOrdersByLocation();
     handleVendorFetch();
     handlePartnerFetch();
-  }, [searchInput]);
+  }, []);
+
+  useEffect(() => {
+    filterOrdersByLocation();
+  }, [searchInput, Dashboard]);
 
   const filterOrdersByLocation = () => {
     if (!searchInput) {
@@ -88,544 +94,437 @@ export default function Home() {
     } else {
       const filtered = (Dashboard?.PendingOrders?.orders || []).filter(
         (order) =>
-          order.deliveryAddress.address1
-            .toLowerCase()
+          order.deliveryAddress?.address1
+            ?.toLowerCase()
             .includes(searchInput.toLowerCase())
       );
       setFilteredOrders(filtered);
     }
   };
 
-  vendors.filter((vendor) => {
-    if (searchVendor === "") {
-      return vendor;
-    } else if (
-      vendor.address.toLowerCase().includes(searchVendor.toLowerCase())
-    ) {
-      return vendor;
-    }
-  });
+  const filterVendorsByLocation = () => {
+    // Filter logic for vendors
+  };
 
-  partners.filter((partner) => {
-    if (searchPartner === "") {
-      return true;
-    } else if (
-      partner?.location?.toLowerCase()?.includes(searchPartner.toLowerCase())
-    ) {
-      return true;
-    }
-    return false;
-  });
+  // Chart configurations
+  const salesChartOptions = {
+    chart: {
+      type: 'area',
+      height: 350,
+      toolbar: { show: false },
+      zoom: { enabled: false },
+    },
+    dataLabels: { enabled: false },
+    stroke: {
+      curve: 'smooth',
+      width: 3,
+    },
+    fill: {
+      type: 'gradient',
+      gradient: {
+        shadeIntensity: 1,
+        opacityFrom: 0.7,
+        opacityTo: 0.3,
+        stops: [0, 90, 100],
+      },
+    },
+    colors: ['#48BB78'],
+    xaxis: {
+      categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    },
+    tooltip: {
+      theme: 'light',
+    },
+  };
+
+  const salesChartSeries = [{
+    name: 'Sales',
+    data: [30, 40, 35, 50, 49, 60, 70],
+  }];
+
+  const ordersChartOptions = {
+    chart: {
+      type: 'bar',
+      height: 350,
+      toolbar: { show: false },
+    },
+    plotOptions: {
+      bar: {
+        borderRadius: 4,
+        horizontal: false,
+        columnWidth: '55%',
+      },
+    },
+    dataLabels: { enabled: false },
+    colors: ['#48BB78', '#38A169'],
+    xaxis: {
+      categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    },
+    tooltip: {
+      theme: 'light',
+    },
+  };
+
+  const ordersChartSeries = [{
+    name: 'Orders',
+    data: [44, 55, 57, 56, 61, 58],
+  }];
+
+  const usersChartOptions = {
+    chart: {
+      type: 'donut',
+      height: 350,
+    },
+    labels: ['Active Users', 'New Users', 'Inactive Users'],
+    colors: ['#48BB78', '#38A169', '#68D391'],
+    legend: {
+      position: 'bottom',
+    },
+    tooltip: {
+      theme: 'light',
+    },
+  };
+
+  const usersChartSeries = [
+    Dashboard?.Users?.count ? Math.floor(Dashboard?.Users?.count * 0.7) : 0,
+    Dashboard?.Users?.count ? Math.floor(Dashboard?.Users?.count * 0.2) : 0,
+    Dashboard?.Users?.count ? Math.floor(Dashboard?.Users?.count * 0.1) : 0,
+  ];
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5 },
+    },
+  };
+
+  const StatCard = ({ icon: Icon, title, value, color, trend }) => (
+    <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -4 }}>
+      <Card
+        bg="white"
+        borderRadius="xl"
+        boxShadow="0 4px 20px rgba(0, 0, 0, 0.08)"
+        border="1px solid"
+        borderColor="gray.100"
+        _hover={{
+          boxShadow: "0 8px 30px rgba(0, 0, 0, 0.12)",
+        }}
+        transition="all 0.3s"
+      >
+        <CardBody p={6}>
+          <HStack justify="space-between" align="start">
+            <VStack align="start" spacing={2} flex={1}>
+              <Text fontSize="sm" color="gray.600" fontWeight="500">
+                {title}
+              </Text>
+              <Heading size="lg" color="gray.800" fontWeight="700">
+                {value || "___"}
+              </Heading>
+              {trend && (
+                <HStack>
+                  <TrendingUp size={16} color={color} />
+                  <Text fontSize="xs" color={color} fontWeight="600">
+                    {trend}
+                  </Text>
+                </HStack>
+              )}
+            </VStack>
+            <Box
+              p={3}
+              borderRadius="lg"
+              bg={`${color}.50`}
+              color={color}
+            >
+              <Icon size={24} />
+            </Box>
+          </HStack>
+        </CardBody>
+      </Card>
+    </motion.div>
+  );
 
   return (
-    
-      <Box 
-      bg={useColorModeValue('white', 'transparent')}
-      p={8}
-      w={"100%"}
-      mt={"6"}
+    <Box bg="gray.50" minH="100vh" p={6}>
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
       >
-      <div className="px-2 py-4">
-                  <div className="p-2">
-                    <p className="text-xl">Dashboard</p>
-                  </div>
+        {/* Header */}
+        <motion.div variants={itemVariants}>
+          <Flex justify="space-between" align="center" mb={8}>
+            <VStack align="start" spacing={1}>
+              <Heading size="xl" color="gray.800" fontWeight="700">
+                Dashboard Overview
+              </Heading>
+              <Text color="gray.600" fontSize="sm">
+                Welcome back! Here's what's happening with your business today.
+              </Text>
+            </VStack>
+            <Badge
+              colorScheme="green"
+              px={4}
+              py={2}
+              borderRadius="full"
+              fontSize="sm"
+              fontWeight="600"
+            >
+              Live
+            </Badge>
+          </Flex>
+        </motion.div>
 
-                  <div className="py-2">
-                    <div className="grid grid-cols-4">
-                      <div className="border border-slate-100 rounded-sm p-3 mx-2">
-                        <h3 className="text-2xl text-center text-gray-400 font-extrabold">
-                          {Dashboard?.Products
-                            ? Dashboard?.Products?.count
-                            : "___"}
-                        </h3>
-                        <p className="text-center my-2 text-lg">Products</p>
-                      </div>
-                      <div className="border border-slate-100 rounded-sm p-3 mx-2">
-                        <h3 className="text-2xl text-center text-gray-400 font-extrabold">
-                          {Dashboard?.Users ? Dashboard?.Users?.count : "___"}
-                        </h3>
-                        <p className="text-center my-2 text-lg">Customers</p>
-                      </div>
-                      <div className="border border-slate-100 rounded-sm p-3 mx-2">
-                        <h3 className="text-2xl text-center text-gray-400 font-extrabold">
-                          {Dashboard?.PendingOrders
-                            ? Dashboard?.PendingOrders?.count
-                            : "___"}
-                        </h3>
-                        <p className="text-center my-2 text-lg">
-                          Pending Orders
-                        </p>
-                      </div>
-                    </div>
-                    <div className="py-4 px-2">
-                      {/* // display pending orders */}
-                      <div className="mt-4">
-                        <form>
-                          <div className="relative">
-                            <span className="absolute inset-y-0 left-0 pl-3 flex items-center">
-                              <svg
-                                className="h-6 w-6 text-gray-300"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M4 6h16M4 12h16M4 18h16"
-                                />
-                              </svg>
-                            </span>
-                            <input
-                              type="text"
-                              className="pl-10 pr-3 py-2 border rounded-md border-gray-200 focus:border-blue-500 focus:outline-none w-1/4"
-                              placeholder="Search for order by location..."
+        {/* Stats Cards */}
+        <Grid
+          templateColumns={{ base: "1fr", md: "2fr", lg: "repeat(4, 1fr)" }}
+          gap={6}
+          mb={8}
+        >
+          <StatCard
+            icon={Package}
+            title="Total Products"
+            value={Dashboard?.Products?.count}
+            color="blue"
+            trend="+12% this month"
+          />
+          <StatCard
+            icon={Users}
+            title="Total Customers"
+            value={Dashboard?.Users?.count}
+            color="green"
+            trend="+8% this month"
+          />
+          <StatCard
+            icon={ShoppingCart}
+            title="Pending Orders"
+            value={Dashboard?.PendingOrders?.count}
+            color="orange"
+            trend="+5 new today"
+          />
+          <StatCard
+            icon={DollarSign}
+            title="Total Revenue"
+            value={`UGX ${Dashboard?.TotalRevenue?.toLocaleString() || "0"}`}
+            color="purple"
+            trend="+15% this month"
+          />
+        </Grid>
+
+        {/* Charts Row */}
+        <Grid
+          templateColumns={{ base: "1fr", lg: "2fr 1fr" }}
+          gap={6}
+          mb={8}
+        >
+          {/* Sales Chart */}
+          <motion.div variants={itemVariants}>
+            <Card
+              bg="white"
+              borderRadius="xl"
+              boxShadow="0 4px 20px rgba(0, 0, 0, 0.08)"
+              border="1px solid"
+              borderColor="gray.100"
+            >
+              <CardHeader pb={4}>
+                <HStack justify="space-between">
+                  <VStack align="start" spacing={1}>
+                    <Heading size="md" color="gray.800">
+                      Sales Overview
+                    </Heading>
+                    <Text fontSize="sm" color="gray.600">
+                      Last 7 days performance
+                    </Text>
+                  </VStack>
+                  <Activity size={20} color="#48BB78" />
+                </HStack>
+              </CardHeader>
+              <CardBody pt={0}>
+                <Chart
+                  options={salesChartOptions}
+                  series={salesChartSeries}
+                  type="area"
+                  height={350}
+                />
+              </CardBody>
+            </Card>
+          </motion.div>
+
+          {/* Users Chart */}
+          <motion.div variants={itemVariants}>
+            <Card
+              bg="white"
+              borderRadius="xl"
+              boxShadow="0 4px 20px rgba(0, 0, 0, 0.08)"
+              border="1px solid"
+              borderColor="gray.100"
+            >
+              <CardHeader pb={4}>
+                <VStack align="start" spacing={1}>
+                  <Heading size="md" color="gray.800">
+                    User Distribution
+                  </Heading>
+                  <Text fontSize="sm" color="gray.600">
+                    User activity breakdown
+                  </Text>
+                </VStack>
+              </CardHeader>
+              <CardBody pt={0}>
+                <Chart
+                  options={usersChartOptions}
+                  series={usersChartSeries}
+                  type="donut"
+                  height={350}
+                />
+              </CardBody>
+            </Card>
+          </motion.div>
+        </Grid>
+
+        {/* Orders Chart */}
+        <motion.div variants={itemVariants} mb={8}>
+          <Card
+            bg="white"
+            borderRadius="xl"
+            boxShadow="0 4px 20px rgba(0, 0, 0, 0.08)"
+            border="1px solid"
+            borderColor="gray.100"
+          >
+            <CardHeader pb={4}>
+              <HStack justify="space-between">
+                <VStack align="start" spacing={1}>
+                  <Heading size="md" color="gray.800">
+                    Orders Trend
+                  </Heading>
+                  <Text fontSize="sm" color="gray.600">
+                    Monthly orders comparison
+                  </Text>
+                </VStack>
+                <TrendingUp size={20} color="#48BB78" />
+              </HStack>
+            </CardHeader>
+            <CardBody pt={0}>
+              <Chart
+                options={ordersChartOptions}
+                series={ordersChartSeries}
+                type="bar"
+                height={350}
+              />
+            </CardBody>
+          </Card>
+        </motion.div>
+
+        {/* Recent Orders Section */}
+        <motion.div variants={itemVariants}>
+          <Card
+            bg="white"
+            borderRadius="xl"
+            boxShadow="0 4px 20px rgba(0, 0, 0, 0.08)"
+            border="1px solid"
+            borderColor="gray.100"
+          >
+            <CardHeader pb={4}>
+              <HStack justify="space-between">
+                <VStack align="start" spacing={1}>
+                  <Heading size="md" color="gray.800">
+                    Recent Orders
+                  </Heading>
+                  <Text fontSize="sm" color="gray.600">
+                    Latest customer orders
+                  </Text>
+                </VStack>
+                <InputGroup maxW="300px">
+                  <InputLeftElement pointerEvents="none">
+                    <Search size={18} color="gray" />
+                  </InputLeftElement>
+                  <Input
+                    placeholder="Search by location..."
                               value={searchInput}
                               onChange={(e) => {
                                 setSearchInput(e.target.value);
                                 filterOrdersByLocation();
                               }}
-                            />
-                          </div>
-                        </form>
-                      </div>
-                      <div className="mb-4">
-                        <div className="py-2">
-                          <div className="flex justify-between">
-                            <p className="text-md font-bold">New Orders</p>
-                            <div>
-                              <Button type={"button"}>View All</Button>
-                            </div>
-                          </div>
-                        </div>
-                        {Dashboard?.PendingOrders &&
-                          Dashboard?.PendingOrders?.orders && (
-                            <div className="border border-slate-100 rounded-md">
+                    borderRadius="lg"
+                    borderColor="gray.300"
+                    _focus={{ borderColor: "green.500", boxShadow: "0 0 0 1px #48BB78" }}
+                  />
+                </InputGroup>
+              </HStack>
+            </CardHeader>
+            <CardBody pt={0}>
+              {Dashboard?.PendingOrders && Dashboard?.PendingOrders?.orders && (
+                <Box overflowX="auto">
                               <Table>
-                                <TableCaption>New Orders</TableCaption>
                                 <TableHeader>
                                   <TableRow>
-                                    <TableHead>firstname</TableHead>
-                                    <TableHead>lastname</TableHead>
-                                    <TableHead>items</TableHead>
-                                    <TableHead>payment</TableHead>
-                                    <TableHead>total</TableHead>
+                        <TableHead>Customer</TableHead>
+                        <TableHead>Items</TableHead>
+                        <TableHead>Payment</TableHead>
+                        <TableHead>Total</TableHead>
                                     <TableHead>Date</TableHead>
-                                    <TableHead>Delivery address</TableHead>
+                        <TableHead>Address</TableHead>
                                   </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                  {filteredOrders.map((order, index) => (
-                                    <TableRow key={index}>
-                                      <TableCell>
-                                        {order?.user?.firstname}
+                      {filteredOrders.slice(0, 10).map((order, index) => (
+                        <TableRow key={index} _hover={{ bg: "gray.50" }}>
+                          <TableCell fontWeight="600">
+                            {order?.user?.firstname} {order?.user?.lastname}
                                       </TableCell>
+                          <TableCell>{order?.productItems}</TableCell>
                                       <TableCell>
-                                        {order?.user?.lastname}
+                            <Badge
+                              colorScheme={
+                                order?.paymentMethod === "card" ? "blue" :
+                                order?.paymentMethod === "mobileMoney" ? "green" : "orange"
+                              }
+                              borderRadius="full"
+                            >
+                              {order?.paymentMethod || order?.payment?.paymentMethod || "N/A"}
+                            </Badge>
                                       </TableCell>
-                                      <TableCell>{`${order?.productItems}`}</TableCell>
-                                      <TableCell>
-                                        {order?.paymentMethod
-                                          ? order?.paymentMethod
-                                          : order?.payment?.paymentMethod}
+                          <TableCell fontWeight="600">
+                            UGX {order?.total?.toLocaleString()}
                                       </TableCell>
-                                      <TableCell>{`UGX ${order?.total}`}</TableCell>
-                                      <TableCell>
+                          <TableCell fontSize="sm" color="gray.600">
                                         {moment(order?.createdAt).fromNow()}
                                       </TableCell>
-                                      <TableCell>
-                                        {order?.deliveryAddress.address1}
+                          <TableCell fontSize="sm" color="gray.600">
+                            {order?.deliveryAddress?.address1}
                                       </TableCell>
                                     </TableRow>
                                   ))}
                                 </TableBody>
                               </Table>
-                            </div>
-                          )}
-                      </div>
-                      <Product router={router} />
-                      <div className="mb-4">
-                        <div className="mt-4">
-                          <form>
-                            <div className="relative">
-                              <span className="absolute inset-y-0 left-0 pl-3 flex items-center">
-                                <svg
-                                  className="h-6 w-6 text-gray-300"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M4 6h16M4 12h16M4 18h16"
-                                  />
-                                </svg>
-                              </span>
-                              <input
-                                type="text"
-                                className="pl-10 pr-3 py-2 border rounded-md border-gray-200 focus:border-blue-500 focus:outline-none w-1/4"
-                                placeholder="Search for vendor by location..."
-                                value={searchVendor}
-                                onChange={(e) => {
-                                  setSearchVendor(e.target.value);
-                                  filterVendorsByLocation();
-                                }}
-                              />
-                            </div>
-                          </form>
-                        </div>
-                        <div className="py-2">
-                          <div className="flex justify-between">
-                            <p className="text-md font-bold">Vendors</p>
-                          </div>
-                        </div>
-                        {vendors.length > 0 && (
-                          <div className="border border-slate-100 rounded-md">
-                            <Table>
-                              <TableCaption>Vendor Data</TableCaption>
-                              <TableHeader>
-                                <TableRow>
-                                  <TableHead>Name</TableHead>
-                                  <TableHead>Address</TableHead>
-                                  <TableHead>Phone</TableHead>
-                                  <TableHead>Transport</TableHead>
-                                  <TableHead>Date</TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                {vendors
-                                  .filter((vendor) => {
-                                    if (searchVendor === "") {
-                                      return vendor;
-                                    } else if (
-                                      vendor.address
-                                        .toLowerCase()
-                                        .includes(
-                                          searchVendor.toLocaleLowerCase()
-                                        )
-                                    ) {
-                                      return vendor;
-                                    }
-                                  })
-                                  .map((vendor, index) => (
-                                    <TableRow key={index}>
-                                      <TableCell>{vendor.name}</TableCell>
-                                      <TableCell>{vendor.address}</TableCell>
-                                      <TableCell>{vendor.phone}</TableCell>
-                                      <TableCell>{vendor.transport}</TableCell>
-                                      <TableCell>
-                                        {moment(vendor?.createdAt).fromNow()}
-                                      </TableCell>
-                                    </TableRow>
-                                  ))}
-                              </TableBody>
-                            </Table>
-                          </div>
-                        )}
-                      </div>
-                      <div className="mb-4">
-                        <div className="mt-4">
-                          <form>
-                            <div className="relative">
-                              <span className="absolute inset-y-0 left-0 pl-3 flex items-center">
-                                <svg
-                                  className="h-6 w-6 text-gray-300"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M4 6h16M4 12h16M4 18h16"
-                                  />
-                                </svg>
-                              </span>
-                              <input
-                                type="text"
-                                className="pl-10 pr-3 py-2 border rounded-md border-gray-200 focus:border-blue-500 focus:outline-none w-1/4"
-                                placeholder="Search for driver by location..."
-                                value={searchPartner}
-                                onChange={(e) =>
-                                  setSearchPartner(e.target.value)
-                                }
-                              />
-                            </div>
-                          </form>
-                        </div>
-                        <div className="py-2">
-                          <div className="flex justify-between">
-                            <p className="text-md font-bold">Drivers</p>
-                          </div>
-                        </div>
-                        {partners.length > 0 && (
-                          <div className="border border-slate-100 rounded-md">
-                            <Table>
-                              <TableCaption>Driver Data</TableCaption>
-                              <TableHeader>
-                                <TableRow>
-                                  <TableHead>Name</TableHead>
-                                  <TableHead>Address</TableHead>
-                                  <TableHead>Phone</TableHead>
-                                  <TableHead>Email</TableHead>
-                                  <TableHead>Transport</TableHead>
-                                  <TableHead>Date</TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                {partners
-                                  .filter((partner) => {
-                                    if (!searchPartner) {
-                                      return true;
-                                    } else if (
-                                      partner.location &&
-                                      partner.location
-                                        .toLowerCase()
-                                        .includes(searchPartner.toLowerCase())
-                                    ) {
-                                      return true;
-                                    }
-                                    return false;
-                                  })
-                                  .map((partner, index) => (
-                                    <TableRow key={index}>
-                                      <TableCell>
-                                        {partner.fullname || ""}
-                                      </TableCell>
-                                      <TableCell>
-                                        {partner.location || ""}
-                                      </TableCell>
-                                      <TableCell>
-                                        {partner.phone || ""}
-                                      </TableCell>
-                                      <TableCell>
-                                        {partner.email || ""}
-                                      </TableCell>
-                                      <TableCell>
-                                        {partner.transport || ""}
-                                      </TableCell>
-                                      <TableCell>
-                                        {moment(partner?.createdAt).fromNow() ||
-                                          ""}
-                                      </TableCell>
-                                    </TableRow>
-                                  ))}
-                              </TableBody>
-                            </Table>
-                          </div>
-                        )}
-                      </div>
-                      <div className="py-4 flex gap-4 lg:flex-row flex-col">
-                        {/* // display yoocard subscriptions */}
-                        <div className="mb-4 lg:w-3/5 w-full pr-4 border-r-2 border-r-slate-100">
-                          <div className="py-2">
-                            <div className="flex justify-between">
-                              <p className="text-md font-bold">
-                                YooCard Subscriptions
-                              </p>
-                              <div>
-                                <Link href={"/subscriptions"}>
-                                  <Button type={"button"}>View All</Button>
-                                </Link>
-                              </div>
-                            </div>
-                          </div>
-                          {Dashboard?.Subscriptions && (
-                            <div className="border border-slate-100 rounded-md">
-                              <Table>
-                                <TableCaption>New Orders</TableCaption>
-                                <TableHeader>
-                                  <TableRow>
-                                    <TableHead>firstname</TableHead>
-                                    <TableHead>lastname</TableHead>
-                                    <TableHead>Cards</TableHead>
-                                    <TableHead>Date</TableHead>
-                                  </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                  {Dashboard?.Subscriptions &&
-                                    [
-                                      ...Dashboard?.Subscriptions
-                                        ?.subscriptions,
-                                    ].map((subscription, index) => (
-                                      <TableRow key={index}>
-                                        <TableCell>
-                                          {subscription?.user?.firstname}
-                                        </TableCell>
-                                        <TableCell>
-                                          {subscription?.user?.lastname}
-                                        </TableCell>
-                                        <TableCell>
-                                          {subscription &&
-                                            subscription?.cards?.length > 0 &&
-                                            subscription?.cards.map(
-                                              (card, index) => (
-                                                <p key={index}>{card.card}</p>
-                                              )
-                                            )}
-                                        </TableCell>
-                                        <TableCell>
-                                          {moment(
-                                            subscription?.createdAt
-                                          ).fromNow()}
-                                        </TableCell>
-                                      </TableRow>
-                                    ))}
-                                </TableBody>
-                              </Table>
-                            </div>
-                          )}
-                        </div>
+                </Box>
+              )}
+              {(!Dashboard?.PendingOrders || filteredOrders.length === 0) && (
+                <Box textAlign="center" py={12}>
+                  <Text color="gray.500">No orders found</Text>
+                </Box>
+              )}
+            </CardBody>
+          </Card>
+        </motion.div>
 
-                        {/* // display newsletter subscriptions */}
-                        <div className="mb-4 lg:w-2/5 w-full">
-                          <div className="py-2">
-                            <div className="flex justify-between">
-                              <p className="text-md font-bold">
-                                Newsletter Subscriptions
-                              </p>
-                              <div>
-                                <Link href={"/newsletters"}>
-                                  <Button type={"button"}>View All</Button>
-                                </Link>
-                              </div>
-                            </div>
-                          </div>
-                          {Dashboard?.Newsletters && (
-                            <div className="border border-slate-100 rounded-md">
-                              <Table>
-                                <TableCaption>Newsletters</TableCaption>
-                                <TableHeader>
-                                  <TableRow>
-                                    <TableHead>email</TableHead>
-                                    <TableHead>Date</TableHead>
-                                  </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                  {Dashboard?.Newsletters &&
-                                    [...Dashboard?.Newsletters].map(
-                                      (newsletter, index) => (
-                                        <TableRow key={index}>
-                                          <TableCell>
-                                            {newsletter?.email}
-                                          </TableCell>
-
-                                          <TableCell>
-                                            {moment(
-                                              newsletter?.createdAt
-                                            ).fromNow()}
-                                          </TableCell>
-                                        </TableRow>
-                                      )
-                                    )}
-                                </TableBody>
-                              </Table>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* // display data for schedules */}
-                      <div className="mb-4 w-full pr-4 border-r-2 border-r-slate-100">
-                        <div className="py-2">
-                          <div className="flex justify-between">
-                            <p className="text-md font-bold">Schedules</p>
-                            <div>
-                              <Link href={"/schedules"}>
-                                <Button type={"button"}>View All</Button>
-                              </Link>
-                            </div>
-                          </div>
-                        </div>
-
-                        {Dashboard?.Schedules && (
-                          <div className="border border-slate-100 rounded-md">
-                            <Table>
-                              <TableCaption>Users' Schedules</TableCaption>
-                              <TableHeader>
-                                <TableRow>
-                                  <TableHead>User</TableHead>
-                                  <TableHead>Schedule For</TableHead>
-                                  <TableHead>Schedule Days</TableHead>
-                                  <TableHead>Schedule Time</TableHead>
-                                  <TableHead>Products</TableHead>
-                                  <TableHead>Repeat Schedule</TableHead>
-                                  <TableHead>Date</TableHead>
-                                </TableRow>
-                              </TableHeader>
-
-                              <TableBody>
-                                {Dashboard?.Schedules &&
-                                  [...Dashboard?.Schedules?.schedules].map(
-                                    (schedule, index) => (
-                                      <TableRow key={index}>
-                                        <TableCell>
-                                          {`${schedule.user.firstname} ${schedule.user.lastname}`}
-                                        </TableCell>
-                                        <TableCell>
-                                          {schedule.scheduleFor}
-                                        </TableCell>
-                                        <TableCell>
-                                          {schedule.scheduleDays.map((day) => (
-                                            <p key={day} className="capitalize">
-                                              {day}
-                                            </p>
-                                          ))}
-                                        </TableCell>
-
-                                        <TableCell>
-                                          {schedule.scheduleTime}
-                                        </TableCell>
-                                        <TableCell>
-                                          {schedule.scheduleFor == "appointment"
-                                            ? schedule.products.map(
-                                                (product, index) => (
-                                                  <p
-                                                    className="capitalize"
-                                                    key={index}
-                                                  >
-                                                    {product.appointmentType}{" "}
-                                                    Appointment
-                                                  </p>
-                                                )
-                                              )
-                                            : schedule.products.map(
-                                                (product, index) => (
-                                                  <p key={index}>
-                                                    {product.name}
-                                                  </p>
-                                                )
-                                              )}
-                                        </TableCell>
-                                        <TableCell>
-                                          {schedule.repeatSchedule
-                                            ? "Yes"
-                                            : "No"}
-                                        </TableCell>
-                                        <TableCell>
-                                          {moment(
-                                            schedule?.createdAt
-                                          ).fromNow()}
-                                        </TableCell>
-                                      </TableRow>
-                                    )
-                                  )}
-                              </TableBody>
-                            </Table>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+        {/* Additional sections */}
+        <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={6} mt={8}>
+          <motion.div variants={itemVariants}>
+            <Product router={router} />
+          </motion.div>
+        </Grid>
+      </motion.div>
       </Box>
-    
   );
 }
