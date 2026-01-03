@@ -137,19 +137,19 @@ const SidebarContent = ({ onClose, ...rest }) => {
       >
         <Flex align="center" gap={3}>
           <Box
-            p={2}
-            borderRadius="lg"
-            bg="green.50"
             display="flex"
             alignItems="center"
             justifyContent="center"
+            flexShrink={0}
           >
             <Image
               src="/assets/icons/logo1.png"
-              height={40}
-              width={40}
+              height={50}
+              width={50}
               className="object-contain"
-              alt="logo"
+              alt="Yookatale Logo"
+              priority
+              unoptimized
             />
           </Box>
           <VStack align="start" spacing={0}>
