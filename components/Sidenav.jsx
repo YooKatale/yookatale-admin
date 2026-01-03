@@ -42,6 +42,7 @@ import { logout } from "@Slices/authSlice";
 import { useToast } from "./ui/use-toast";
 import Signin from '@app/signin/page';
 import { motion } from "framer-motion";
+import Navbar from "./Navbar";
 
 const NavItem = ({ icon: IconComponent, path, children, index, size, ...rest }) => {
   const [isActive, setisActive] = useState(false)
