@@ -20,8 +20,6 @@ import {
   Drawer,
   DrawerContent,
   useDisclosure,
-  BoxProps,
-  FlexProps,
   Menu,
   MenuButton,
   MenuDivider,
@@ -30,51 +28,36 @@ import {
   Stack,
 } from '@chakra-ui/react'
 import {
-  FiHome,
-  FiTrendingUp,
-  FiCompass,
-  FiStar,
-  FiSettings,
   FiMenu,
   FiBell,
   FiChevronDown,
 } from 'react-icons/fi'
-import { IconType } from 'react-icons'
 import { IsAccountValid, IsLoggedIn } from "@middleware/middleware";
 import { useEffect, useState } from "react";
-import { HiMenuAlt2 } from "react-icons/hi";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "./ui/button";
-import { Loader2, LogOut } from "lucide-react";
+import { Loader2, LogOut, Settings } from "lucide-react";
 import { useLogoutMutation } from "@Slices/userApiSlice";
 import { logout } from "@Slices/authSlice";
 import { useToast } from "./ui/use-toast";
 import Signin from '@app/signin/page';
 import { motion } from "framer-motion";
 
-const NavItem = ({ icon, path, children, index, size, ...rest }) => {
-  const [routepath, setRoutepath] = useState("")
+const NavItem = ({ icon: IconComponent, path, children, index, size, ...rest }) => {
   const [isActive, setisActive] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
-  const searchParams = useSearchParams()
-
-  const handleClick = async (e, path2) => {
-    setRoutepath(path2)
-    setisActive(path === pathname ? true : false)
-  }
 
   useEffect(() => {
     if (path === pathname) {
       setisActive(true);
     } else {
       setisActive(false);
-      setRoutepath(pathname);
     }
-  }, [pathname]);
+  }, [pathname, path]);
 
   return (
-    <Link href={path} passHref key={index} onClick={(e) => handleClick(e, path)}>
+    <Link href={path} passHref key={index}>
       <motion.div
         whileHover={{ scale: 1.02, x: 4 }}
         whileTap={{ scale: 0.98 }}
@@ -85,13 +68,12 @@ const NavItem = ({ icon, path, children, index, size, ...rest }) => {
           style={{ textDecoration: 'none' }}
           _focus={{ boxShadow: 'none' }}
           {...rest}
-          onClick={(e) => handleClick(e, path)}
         >
           <Flex
             align="center"
             m="2"
-            p={3}
-            borderRadius="lg"
+            p={4}
+            borderRadius="xl"
             role="group"
             cursor="pointer"
             bg={isActive ? 'green.500' : 'transparent'}
@@ -102,18 +84,23 @@ const NavItem = ({ icon, path, children, index, size, ...rest }) => {
             }}
             transition="all 0.2s"
             boxShadow={isActive ? '0 4px 12px rgba(72, 187, 120, 0.3)' : 'none'}
+            fontWeight={isActive ? '600' : '500'}
           >
-            {icon && (
-              <Icon
-                mr="3"
-                fontSize="20"
-                as={icon}
+            {IconComponent && (
+              <Box
+                mr={4}
+                fontSize="20px"
                 color={isActive ? 'white' : 'gray.600'}
-              />
+                display="flex"
+                alignItems="center"
+              >
+                <IconComponent size={20} />
+              </Box>
             )}
             <Text
               fontSize="sm"
               fontWeight={isActive ? '600' : '500'}
+              letterSpacing="0.01em"
             >
               {children}
             </Text>
@@ -129,38 +116,47 @@ const SidebarContent = ({ onClose, ...rest }) => {
     <Box
       transition="all 0.3s ease"
       bg="white"
-      borderRight="1px"
+      borderRight="1px solid"
       borderRightColor="gray.200"
       w={{ base: 'full', md: 64 }}
       height="100vh"
       position="fixed"
-      boxShadow="2px 0 10px rgba(0, 0, 0, 0.05)"
+      boxShadow="4px 0 20px rgba(0, 0, 0, 0.08)"
       {...rest}
     >
       {/* Logo Section */}
       <Flex
-        h="20"
+        h="80px"
         alignItems="center"
         mx="6"
         justifyContent="space-between"
         borderBottom="1px solid"
         borderColor="gray.200"
-        mb={4}
+        mb={2}
       >
         <Flex align="center" gap={3}>
-          <Image
-            src="/assets/icons/logo1.png"
-            height={50}
-            width={50}
-            className="object-contain"
-            alt="logo"
-          />
+          <Box
+            p={2}
+            borderRadius="lg"
+            bg="green.50"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Image
+              src="/assets/icons/logo1.png"
+              height={40}
+              width={40}
+              className="object-contain"
+              alt="logo"
+            />
+          </Box>
           <VStack align="start" spacing={0}>
-            <Text fontSize="lg" fontWeight="700" color="gray.800">
+            <Text fontSize="lg" fontWeight="700" color="gray.800" letterSpacing="-0.02em">
               Yookatale
             </Text>
-            <Text fontSize="xs" color="gray.500" fontWeight="500">
-              Admin Panel
+            <Text fontSize="xs" color="gray.500" fontWeight="600" letterSpacing="0.05em">
+              ADMIN PANEL
             </Text>
           </VStack>
         </Flex>
@@ -168,10 +164,10 @@ const SidebarContent = ({ onClose, ...rest }) => {
       </Flex>
 
       {/* Navigation Items */}
-      <Box overflowY="auto" flex="1">
+      <Box overflowY="auto" flex="1" py={2}>
         <PerfectScrollbar options={{ suppressScrollX: true }}>
           <Box
-            maxHeight="calc(100vh - 120px)"
+            maxHeight="calc(100vh - 180px)"
             px={3}
             py={2}
           >
@@ -197,9 +193,14 @@ const SidebarContent = ({ onClose, ...rest }) => {
         borderColor="gray.200"
         bg="gray.50"
       >
-        <Text fontSize="xs" color="gray.500" textAlign="center">
-          © 2024 Yookatale Admin
-        </Text>
+        <VStack spacing={2} align="center">
+          <Text fontSize="xs" color="gray.500" textAlign="center" fontWeight="500">
+            © 2024 Yookatale
+          </Text>
+          <Text fontSize="xs" color="gray.400" textAlign="center">
+            Admin Dashboard v2.0
+          </Text>
+        </VStack>
       </Box>
     </Box>
   )
@@ -254,16 +255,19 @@ const SidebarWithHeader = ({ children, ...rest }) => {
       <Box
         w={{ base: 'full' }}
         position="fixed"
-        zIndex="10"
+        top={0}
+        left={0}
+        right={0}
+        zIndex="1000"
         bg="white"
         boxShadow="0 2px 8px rgba(0, 0, 0, 0.1)"
+        height="80px"
       >
         <Flex
-          ml={{ base: 0, md: 64 }}
           px={{ base: 4, md: 6 }}
-          height="20"
+          height="100%"
           alignItems="center"
-          justifyContent={{ base: 'space-between', md: 'flex-end' }}
+          justifyContent="space-between"
           {...rest}
         >
           <IconButton
@@ -275,7 +279,7 @@ const SidebarWithHeader = ({ children, ...rest }) => {
             borderRadius="lg"
           />
 
-          <HStack spacing={{ base: '2', md: '6' }}>
+          <HStack spacing={4}>
             <IconButton
               size="lg"
               variant="ghost"
@@ -329,6 +333,7 @@ const SidebarWithHeader = ({ children, ...rest }) => {
                     href="/settings"
                     _hover={{ bg: "gray.50" }}
                   >
+                    <Settings size={16} style={{ marginRight: "8px" }} />
                     Profile
                   </MenuItem>
                   <MenuDivider />
@@ -338,9 +343,9 @@ const SidebarWithHeader = ({ children, ...rest }) => {
                     color="red.600"
                   >
                     {isLoading && isLoading.operation == "logout" ? (
-                      <Loader2 className="animate-spin mr-2" />
+                      <Loader2 className="animate-spin mr-2" size={16} />
                     ) : (
-                      <LogOut className="mr-2" />
+                      <LogOut className="mr-2" size={16} />
                     )}
                     Logout
                   </MenuItem>
@@ -378,9 +383,10 @@ const SidebarWithHeader = ({ children, ...rest }) => {
           <MobileNav onOpen={onOpen} userInfo={userInfo} />
         </Box>
 
+        {/* Main Content with proper spacing for navbar */}
         <Box
           ml={{ base: 0, md: 64 }}
-          pt={{ base: 20, md: 6 }}
+          pt={{ base: 20, md: 24 }}
           p={{ base: 4, md: 6 }}
           minH="calc(100vh - 80px)"
         >

@@ -19,12 +19,12 @@ import moment from "moment/moment";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Box, Input, InputGroup, InputLeftElement, useColorModeValue, Flex, Text, Heading, Grid, GridItem, Card, CardBody, CardHeader, HStack, VStack, Badge } from "@chakra-ui/react";
+import { Box, Input, InputGroup, InputLeftElement, useColorModeValue, Flex, Text, Heading, Grid, GridItem, Card, CardBody, CardHeader, HStack, VStack, Badge, Spinner, Center } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import Product from "@components/product";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { Search, TrendingUp, Users, ShoppingCart, Package, DollarSign, Activity } from "lucide-react";
+import { Search, TrendingUp, Users, ShoppingCart, Package, DollarSign, Activity, Calendar, Clock } from "lucide-react";
 
 // Dynamically import ApexCharts to avoid SSR issues
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
@@ -37,6 +37,7 @@ export default function Home() {
   const [vendors, setVendors] = useState([]);
   const [partners, setPartners] = useState([]);
   const [searchPartner, setSearchPartner] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const [fetchDashboardData] = useDashboardDataMutation();
   const [vendorGet] = useVendorGetMutation();
@@ -46,6 +47,7 @@ export default function Home() {
 
   const handleDataFetch = async () => {
     try {
+      setLoading(true);
       const res = await fetchDashboardData().unwrap();
       if (res?.status === "Success") {
         setDashboard(res?.data);
@@ -53,6 +55,8 @@ export default function Home() {
       }
     } catch (error) {
       console.error("Error fetching dashboard data: ", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -102,17 +106,45 @@ export default function Home() {
     }
   };
 
-  const filterVendorsByLocation = () => {
-    // Filter logic for vendors
+  // Process real order data for charts from backend
+  const processOrderData = () => {
+    // Use monthly order counts from backend if available
+    if (Dashboard?.ordermonthlycounts && Array.isArray(Dashboard.ordermonthlycounts)) {
+      return Dashboard.ordermonthlycounts.slice(-6).map(item => ({
+        date: item.month || item._id?.month || 'Month',
+        count: item.count || 0
+      }));
+    }
+    
+    // Fallback: process from orders array
+    const orders = Dashboard?.PendingOrders?.orders || [];
+    const last7Days = [];
+    const today = new Date();
+    
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toLocaleDateString('en-US', { weekday: 'short' });
+      const count = orders.filter(order => {
+        const orderDate = new Date(order.createdAt);
+        return orderDate.toDateString() === date.toDateString();
+      }).length;
+      last7Days.push({ date: dateStr, count });
+    }
+    
+    return last7Days;
   };
 
-  // Chart configurations
-  const salesChartOptions = {
+  const orderData = processOrderData();
+
+  // Chart configurations using REAL data
+  const ordersChartOptions = {
     chart: {
       type: 'area',
       height: 350,
       toolbar: { show: false },
       zoom: { enabled: false },
+      fontFamily: 'Inter, sans-serif',
     },
     dataLabels: { enabled: false },
     stroke: {
@@ -130,66 +162,37 @@ export default function Home() {
     },
     colors: ['#48BB78'],
     xaxis: {
-      categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-    },
-    tooltip: {
-      theme: 'light',
-    },
-  };
-
-  const salesChartSeries = [{
-    name: 'Sales',
-    data: [30, 40, 35, 50, 49, 60, 70],
-  }];
-
-  const ordersChartOptions = {
-    chart: {
-      type: 'bar',
-      height: 350,
-      toolbar: { show: false },
-    },
-    plotOptions: {
-      bar: {
-        borderRadius: 4,
-        horizontal: false,
-        columnWidth: '55%',
+      categories: orderData.map(d => d.date),
+      labels: {
+        style: {
+          fontSize: '12px',
+          fontWeight: 500,
+        },
       },
     },
-    dataLabels: { enabled: false },
-    colors: ['#48BB78', '#38A169'],
-    xaxis: {
-      categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    yaxis: {
+      labels: {
+        style: {
+          fontSize: '12px',
+        },
+      },
     },
     tooltip: {
       theme: 'light',
+      style: {
+        fontSize: '12px',
+      },
+    },
+    grid: {
+      borderColor: '#f1f1f1',
+      strokeDashArray: 3,
     },
   };
 
   const ordersChartSeries = [{
     name: 'Orders',
-    data: [44, 55, 57, 56, 61, 58],
+    data: orderData.map(d => d.count),
   }];
-
-  const usersChartOptions = {
-    chart: {
-      type: 'donut',
-      height: 350,
-    },
-    labels: ['Active Users', 'New Users', 'Inactive Users'],
-    colors: ['#48BB78', '#38A169', '#68D391'],
-    legend: {
-      position: 'bottom',
-    },
-    tooltip: {
-      theme: 'light',
-    },
-  };
-
-  const usersChartSeries = [
-    Dashboard?.Users?.count ? Math.floor(Dashboard?.Users?.count * 0.7) : 0,
-    Dashboard?.Users?.count ? Math.floor(Dashboard?.Users?.count * 0.2) : 0,
-    Dashboard?.Users?.count ? Math.floor(Dashboard?.Users?.count * 0.1) : 0,
-  ];
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -210,7 +213,7 @@ export default function Home() {
     },
   };
 
-  const StatCard = ({ icon: Icon, title, value, color, trend }) => (
+  const StatCard = ({ icon: Icon, title, value, color, trend, subtitle }) => (
     <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -4 }}>
       <Card
         bg="white"
@@ -222,19 +225,25 @@ export default function Home() {
           boxShadow: "0 8px 30px rgba(0, 0, 0, 0.12)",
         }}
         transition="all 0.3s"
+        h="100%"
       >
         <CardBody p={6}>
           <HStack justify="space-between" align="start">
             <VStack align="start" spacing={2} flex={1}>
-              <Text fontSize="sm" color="gray.600" fontWeight="500">
+              <Text fontSize="sm" color="gray.600" fontWeight="500" textTransform="uppercase" letterSpacing="0.05em">
                 {title}
               </Text>
-              <Heading size="lg" color="gray.800" fontWeight="700">
-                {value || "___"}
+              <Heading size="xl" color="gray.800" fontWeight="700" fontFamily="Inter, sans-serif">
+                {value || "0"}
               </Heading>
+              {subtitle && (
+                <Text fontSize="xs" color="gray.500" mt={1}>
+                  {subtitle}
+                </Text>
+              )}
               {trend && (
-                <HStack>
-                  <TrendingUp size={16} color={color} />
+                <HStack mt={2}>
+                  <TrendingUp size={14} color={color} />
                   <Text fontSize="xs" color={color} fontWeight="600">
                     {trend}
                   </Text>
@@ -242,12 +251,12 @@ export default function Home() {
               )}
             </VStack>
             <Box
-              p={3}
-              borderRadius="lg"
+              p={4}
+              borderRadius="xl"
               bg={`${color}.50`}
-              color={color}
+              color={`${color}.600`}
             >
-              <Icon size={24} />
+              <Icon size={28} />
             </Box>
           </HStack>
         </CardBody>
@@ -255,8 +264,19 @@ export default function Home() {
     </motion.div>
   );
 
+  if (loading) {
+    return (
+      <Center minH="100vh">
+        <VStack spacing={4}>
+          <Spinner size="xl" color="green.500" thickness="4px" />
+          <Text color="gray.600" fontWeight="500">Loading dashboard...</Text>
+        </VStack>
+      </Center>
+    );
+  }
+
   return (
-    <Box bg="gray.50" minH="100vh" p={6}>
+    <Box bg="gray.50" minH="100vh" p={{ base: 4, md: 6 }}>
       <motion.div
         variants={containerVariants}
         initial="hidden"
@@ -264,72 +284,77 @@ export default function Home() {
       >
         {/* Header */}
         <motion.div variants={itemVariants}>
-          <Flex justify="space-between" align="center" mb={8}>
+          <Flex justify="space-between" align="center" mb={8} flexWrap="wrap" gap={4}>
             <VStack align="start" spacing={1}>
-              <Heading size="xl" color="gray.800" fontWeight="700">
+              <Heading size="xl" color="gray.800" fontWeight="700" fontFamily="Inter, sans-serif">
                 Dashboard Overview
               </Heading>
-              <Text color="gray.600" fontSize="sm">
+              <Text color="gray.600" fontSize="sm" fontWeight="500">
                 Welcome back! Here's what's happening with your business today.
               </Text>
             </VStack>
-            <Badge
-              colorScheme="green"
-              px={4}
-              py={2}
-              borderRadius="full"
-              fontSize="sm"
-              fontWeight="600"
-            >
-              Live
-            </Badge>
+            <HStack spacing={3}>
+              <Badge
+                colorScheme="green"
+                px={4}
+                py={2}
+                borderRadius="full"
+                fontSize="sm"
+                fontWeight="600"
+                display="flex"
+                alignItems="center"
+                gap={2}
+              >
+                <Box w={2} h={2} bg="green.400" borderRadius="full" />
+                Live
+              </Badge>
+              <Text fontSize="xs" color="gray.500" display="flex" alignItems="center" gap={1}>
+                <Clock size={12} />
+                {moment().format('MMM DD, YYYY')}
+              </Text>
+            </HStack>
           </Flex>
         </motion.div>
 
         {/* Stats Cards */}
         <Grid
-          templateColumns={{ base: "1fr", md: "2fr", lg: "repeat(4, 1fr)" }}
+          templateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(4, 1fr)" }}
           gap={6}
           mb={8}
         >
           <StatCard
             icon={Package}
             title="Total Products"
-            value={Dashboard?.Products?.count}
+            value={Dashboard?.Products?.count || 0}
             color="blue"
-            trend="+12% this month"
+            subtitle="Active products"
           />
           <StatCard
             icon={Users}
             title="Total Customers"
-            value={Dashboard?.Users?.count}
+            value={Dashboard?.Users?.count || 0}
             color="green"
-            trend="+8% this month"
+            subtitle="Registered users"
           />
           <StatCard
             icon={ShoppingCart}
             title="Pending Orders"
-            value={Dashboard?.PendingOrders?.count}
+            value={Dashboard?.PendingOrders?.count || 0}
             color="orange"
-            trend="+5 new today"
+            subtitle="Awaiting fulfillment"
           />
           <StatCard
             icon={DollarSign}
             title="Total Revenue"
-            value={`UGX ${Dashboard?.TotalRevenue?.toLocaleString() || "0"}`}
+            value={`UGX ${(Dashboard?.AllTimeOrders?.allorderscashvalue || 0).toLocaleString()}`}
             color="purple"
-            trend="+15% this month"
+            subtitle="All-time revenue"
           />
         </Grid>
 
-        {/* Charts Row */}
-        <Grid
-          templateColumns={{ base: "1fr", lg: "2fr 1fr" }}
-          gap={6}
-          mb={8}
-        >
-          {/* Sales Chart */}
-          <motion.div variants={itemVariants}>
+        {/* Orders Chart - Using Real Data from Backend */}
+        {orderData.length > 0 && orderData.some(d => d.count > 0) && (
+          <motion.div variants={itemVariants} mb={8}>
             <Card
               bg="white"
               borderRadius="xl"
@@ -340,11 +365,11 @@ export default function Home() {
               <CardHeader pb={4}>
                 <HStack justify="space-between">
                   <VStack align="start" spacing={1}>
-                    <Heading size="md" color="gray.800">
-                      Sales Overview
+                    <Heading size="md" color="gray.800" fontFamily="Inter, sans-serif">
+                      Orders Trend
                     </Heading>
                     <Text fontSize="sm" color="gray.600">
-                      Last 7 days performance
+                      {Dashboard?.ordermonthlycounts ? "Monthly order statistics" : "Last 7 days order statistics"}
                     </Text>
                   </VStack>
                   <Activity size={20} color="#48BB78" />
@@ -352,78 +377,15 @@ export default function Home() {
               </CardHeader>
               <CardBody pt={0}>
                 <Chart
-                  options={salesChartOptions}
-                  series={salesChartSeries}
+                  options={ordersChartOptions}
+                  series={ordersChartSeries}
                   type="area"
                   height={350}
                 />
               </CardBody>
             </Card>
           </motion.div>
-
-          {/* Users Chart */}
-          <motion.div variants={itemVariants}>
-            <Card
-              bg="white"
-              borderRadius="xl"
-              boxShadow="0 4px 20px rgba(0, 0, 0, 0.08)"
-              border="1px solid"
-              borderColor="gray.100"
-            >
-              <CardHeader pb={4}>
-                <VStack align="start" spacing={1}>
-                  <Heading size="md" color="gray.800">
-                    User Distribution
-                  </Heading>
-                  <Text fontSize="sm" color="gray.600">
-                    User activity breakdown
-                  </Text>
-                </VStack>
-              </CardHeader>
-              <CardBody pt={0}>
-                <Chart
-                  options={usersChartOptions}
-                  series={usersChartSeries}
-                  type="donut"
-                  height={350}
-                />
-              </CardBody>
-            </Card>
-          </motion.div>
-        </Grid>
-
-        {/* Orders Chart */}
-        <motion.div variants={itemVariants} mb={8}>
-          <Card
-            bg="white"
-            borderRadius="xl"
-            boxShadow="0 4px 20px rgba(0, 0, 0, 0.08)"
-            border="1px solid"
-            borderColor="gray.100"
-          >
-            <CardHeader pb={4}>
-              <HStack justify="space-between">
-                <VStack align="start" spacing={1}>
-                  <Heading size="md" color="gray.800">
-                    Orders Trend
-                  </Heading>
-                  <Text fontSize="sm" color="gray.600">
-                    Monthly orders comparison
-                  </Text>
-                </VStack>
-                <TrendingUp size={20} color="#48BB78" />
-              </HStack>
-            </CardHeader>
-            <CardBody pt={0}>
-              <Chart
-                options={ordersChartOptions}
-                series={ordersChartSeries}
-                type="bar"
-                height={350}
-              />
-            </CardBody>
-          </Card>
-        </motion.div>
+        )}
 
         {/* Recent Orders Section */}
         <motion.div variants={itemVariants}>
@@ -435,9 +397,9 @@ export default function Home() {
             borderColor="gray.100"
           >
             <CardHeader pb={4}>
-              <HStack justify="space-between">
+              <HStack justify="space-between" flexWrap="wrap" gap={4}>
                 <VStack align="start" spacing={1}>
-                  <Heading size="md" color="gray.800">
+                  <Heading size="md" color="gray.800" fontFamily="Inter, sans-serif">
                     Recent Orders
                   </Heading>
                   <Text fontSize="sm" color="gray.600">
@@ -450,11 +412,11 @@ export default function Home() {
                   </InputLeftElement>
                   <Input
                     placeholder="Search by location..."
-                              value={searchInput}
-                              onChange={(e) => {
-                                setSearchInput(e.target.value);
-                                filterOrdersByLocation();
-                              }}
+                    value={searchInput}
+                    onChange={(e) => {
+                      setSearchInput(e.target.value);
+                      filterOrdersByLocation();
+                    }}
                     borderRadius="lg"
                     borderColor="gray.300"
                     _focus={{ borderColor: "green.500", boxShadow: "0 0 0 1px #48BB78" }}
@@ -463,55 +425,57 @@ export default function Home() {
               </HStack>
             </CardHeader>
             <CardBody pt={0}>
-              {Dashboard?.PendingOrders && Dashboard?.PendingOrders?.orders && (
+              {Dashboard?.PendingOrders && Dashboard?.PendingOrders?.orders && filteredOrders.length > 0 ? (
                 <Box overflowX="auto">
-                              <Table>
-                                <TableHeader>
-                                  <TableRow>
-                        <TableHead>Customer</TableHead>
-                        <TableHead>Items</TableHead>
-                        <TableHead>Payment</TableHead>
-                        <TableHead>Total</TableHead>
-                                    <TableHead>Date</TableHead>
-                        <TableHead>Address</TableHead>
-                                  </TableRow>
-                                </TableHeader>
-                                <TableBody>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead fontWeight="600">Customer</TableHead>
+                        <TableHead fontWeight="600">Items</TableHead>
+                        <TableHead fontWeight="600">Payment</TableHead>
+                        <TableHead fontWeight="600">Total</TableHead>
+                        <TableHead fontWeight="600">Date</TableHead>
+                        <TableHead fontWeight="600">Address</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
                       {filteredOrders.slice(0, 10).map((order, index) => (
                         <TableRow key={index} _hover={{ bg: "gray.50" }}>
                           <TableCell fontWeight="600">
                             {order?.user?.firstname} {order?.user?.lastname}
-                                      </TableCell>
+                          </TableCell>
                           <TableCell>{order?.productItems}</TableCell>
-                                      <TableCell>
+                          <TableCell>
                             <Badge
                               colorScheme={
                                 order?.paymentMethod === "card" ? "blue" :
                                 order?.paymentMethod === "mobileMoney" ? "green" : "orange"
                               }
                               borderRadius="full"
+                              px={3}
+                              py={1}
                             >
                               {order?.paymentMethod || order?.payment?.paymentMethod || "N/A"}
                             </Badge>
-                                      </TableCell>
-                          <TableCell fontWeight="600">
+                          </TableCell>
+                          <TableCell fontWeight="600" color="green.600">
                             UGX {order?.total?.toLocaleString()}
-                                      </TableCell>
+                          </TableCell>
                           <TableCell fontSize="sm" color="gray.600">
-                                        {moment(order?.createdAt).fromNow()}
-                                      </TableCell>
+                            {moment(order?.createdAt).fromNow()}
+                          </TableCell>
                           <TableCell fontSize="sm" color="gray.600">
                             {order?.deliveryAddress?.address1}
-                                      </TableCell>
-                                    </TableRow>
-                                  ))}
-                                </TableBody>
-                              </Table>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 </Box>
-              )}
-              {(!Dashboard?.PendingOrders || filteredOrders.length === 0) && (
+              ) : (
                 <Box textAlign="center" py={12}>
-                  <Text color="gray.500">No orders found</Text>
+                  <ShoppingCart size={48} color="#CBD5E0" style={{ margin: "0 auto 16px" }} />
+                  <Text color="gray.500" fontWeight="500">No orders found</Text>
                 </Box>
               )}
             </CardBody>
@@ -538,9 +502,9 @@ export default function Home() {
                 borderColor="gray.100"
               >
                 <CardHeader pb={4}>
-                  <HStack justify="space-between">
+                  <HStack justify="space-between" flexWrap="wrap" gap={4}>
                     <VStack align="start" spacing={1}>
-                      <Heading size="md" color="gray.800">
+                      <Heading size="md" color="gray.800" fontFamily="Inter, sans-serif">
                         Vendors
                       </Heading>
                       <Text fontSize="sm" color="gray.600">
@@ -567,10 +531,10 @@ export default function Home() {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Name</TableHead>
-                          <TableHead>Address</TableHead>
-                          <TableHead>Phone</TableHead>
-                          <TableHead>Date</TableHead>
+                          <TableHead fontWeight="600">Name</TableHead>
+                          <TableHead fontWeight="600">Address</TableHead>
+                          <TableHead fontWeight="600">Phone</TableHead>
+                          <TableHead fontWeight="600">Date</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -609,9 +573,9 @@ export default function Home() {
                 borderColor="gray.100"
               >
                 <CardHeader pb={4}>
-                  <HStack justify="space-between">
+                  <HStack justify="space-between" flexWrap="wrap" gap={4}>
                     <VStack align="start" spacing={1}>
-                      <Heading size="md" color="gray.800">
+                      <Heading size="md" color="gray.800" fontFamily="Inter, sans-serif">
                         Delivery Partners
                       </Heading>
                       <Text fontSize="sm" color="gray.600">
@@ -638,10 +602,10 @@ export default function Home() {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Name</TableHead>
-                          <TableHead>Location</TableHead>
-                          <TableHead>Phone</TableHead>
-                          <TableHead>Date</TableHead>
+                          <TableHead fontWeight="600">Name</TableHead>
+                          <TableHead fontWeight="600">Location</TableHead>
+                          <TableHead fontWeight="600">Phone</TableHead>
+                          <TableHead fontWeight="600">Date</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -670,6 +634,6 @@ export default function Home() {
           )}
         </Grid>
       </motion.div>
-      </Box>
+    </Box>
   );
 }
