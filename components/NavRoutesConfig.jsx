@@ -11,7 +11,8 @@ import {
   ClipboardCheck, 
   BaggageClaim,
   Store,
-  FolderTree
+  FolderTree,
+  Banknote
 } from "lucide-react";
 import { HiCreditCard, HiMenuAlt2, HiOutlineDocumentAdd } from "react-icons/hi";
 export const SideNavRoutes=[
@@ -74,6 +75,11 @@ export const SideNavRoutes=[
       name: "Accounts",
       icon: UsersIcon ,
       path: "/accounts"
+    },
+    {
+      name: "Cashout & Payments",
+      icon: Banknote,
+      path: "/cashout"
     },
     {
       name: "Settings",
@@ -156,6 +162,11 @@ export const SideNavRoutesx=[
         name: "Accounts",
         icon: <UsersIcon size={25} />,
         path: "/accounts"
+      },
+      {
+        name: "Cashout & Payments",
+        icon: <Banknote size={25} />,
+        path: "/cashout"
       },
       {
         name: "Settings",
