@@ -69,24 +69,59 @@ const EMAIL_TEMPLATES = [
   },
 ];
 
-// Frontend API URL - tries multiple ports
+// Get Frontend API URL - works in both development and production
+// The frontend email API is at: https://www.yookatale.app/api/mail (production)
+// or http://localhost:3000/api/mail / http://localhost:3001/api/mail (development)
 const getFrontendApiUrl = () => {
-  if (typeof window !== 'undefined') {
-    // Try to use same origin but port 3000, fallback to 3001
-    const origin = window.location.origin;
-    const baseUrl = origin.includes('localhost') ? 'http://localhost' : origin.split(':').slice(0, 2).join(':');
-    return `${baseUrl}:3000`; // Default to port 3000
+  if (typeof window === 'undefined') {
+    return null; // Server-side, will use development ports
   }
-  return "http://localhost:3000";
+
+  const origin = window.location.origin;
+  const isLocalhost = origin.includes('localhost') || origin.includes('127.0.0.1');
+  
+  if (isLocalhost) {
+    // Development: return null to try multiple ports
+    return null;
+  } else {
+    // Production: use the frontend URL
+    // You can set NEXT_PUBLIC_FRONTEND_URL in your .env file, or it defaults to yookatale.app
+    // Note: In client components, only NEXT_PUBLIC_* env vars are available
+    const frontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://www.yookatale.app';
+    return frontendUrl;
+  }
 };
 
-const FRONTEND_API_URL = getFrontendApiUrl();
+// Get API endpoints to try - handles both dev and production
+const getApiEndpoints = () => {
+  const baseUrl = getFrontendApiUrl();
+  
+  if (baseUrl) {
+    // Production: single endpoint
+    return [`${baseUrl}/api/mail`];
+  }
+  
+  // Development: try multiple ports
+  if (typeof window !== 'undefined') {
+    const protocol = window.location.protocol;
+    const hostname = window.location.hostname;
+    return [
+      `${protocol}//${hostname}:3000/api/mail`,
+      `${protocol}//${hostname}:3001/api/mail`
+    ];
+  }
+  
+  return [
+    'http://localhost:3000/api/mail',
+    'http://localhost:3001/api/mail'
+  ];
+};
 
 export default function EmailSender() {
   const [emails, setEmails] = useState("");
   const [sending, setSending] = useState(false);
   const [sendingTemplate, setSendingTemplate] = useState(null);
-  const [results, setResults] = useState({ success: 0, failed: 0, errors: [] });
+  const [results, setResults] = useState({ success: 0, failed: 0, errors: [], currentIndex: 0, total: 0 });
   const toast = useToast();
 
   const parseEmails = (emailString) => {
@@ -101,6 +136,58 @@ export default function EmailSender() {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return email && emailRegex.test(email);
       });
+  };
+
+  // Retry function with exponential backoff
+  const sendEmailWithRetry = async (email, templateId, maxRetries = 3) => {
+    const endpointsToTry = getApiEndpoints();
+    let lastError = null;
+    
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      for (const apiUrl of endpointsToTry) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+          
+          const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: email,
+              type: templateId,
+            }),
+            signal: controller.signal,
+          });
+          
+          clearTimeout(timeoutId);
+          
+          if (response.ok) {
+            const data = await response.json().catch(() => ({}));
+            return { success: true, data };
+          } else {
+            const errorData = await response.json().catch(() => ({}));
+            lastError = new Error(errorData?.error || errorData?.details || `HTTP ${response.status}`);
+          }
+        } catch (err) {
+          if (err.name === 'AbortError') {
+            lastError = new Error('Request timeout (30s)');
+          } else if (err.message) {
+            lastError = err;
+          } else {
+            lastError = new Error('Connection failed');
+          }
+          // Continue to next endpoint or retry
+        }
+      }
+      
+      // If all endpoints failed, wait before retrying (exponential backoff)
+      if (attempt < maxRetries - 1) {
+        const delay = Math.min(1000 * Math.pow(2, attempt), 10000); // Max 10 seconds
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+    
+    return { success: false, error: lastError?.message || "Failed to send email" };
   };
 
   const sendEmails = async (templateId) => {
@@ -119,72 +206,91 @@ export default function EmailSender() {
 
     setSending(true);
     setSendingTemplate(templateId);
-    setResults({ success: 0, failed: 0, errors: [] });
+    setResults({ success: 0, failed: 0, errors: [], currentIndex: 0, total: emailList.length });
 
     const template = EMAIL_TEMPLATES.find(t => t.id === templateId);
     let successCount = 0;
     let failCount = 0;
     const errorList = [];
+    const BATCH_SIZE = 40; // Send 40 emails, then pause
+    const BATCH_PAUSE_MS = 90000; // 90 seconds pause between batches
 
     try {
       // Send emails one by one with delay to avoid rate limiting
       for (let i = 0; i < emailList.length; i++) {
         const email = emailList[i];
         
-        try {
-          // Try port 3000 first, then 3001 if it fails
-          let response = null;
-          let lastError = null;
-          
-          for (const port of [3000, 3001]) {
-            try {
-              const apiUrl = typeof window !== 'undefined' 
-                ? `${window.location.protocol}//${window.location.hostname}:${port}/api/mail`
-                : `http://localhost:${port}/api/mail`;
-              
-              response = await fetch(apiUrl, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  email: email,
-                  type: templateId,
-                }),
-                signal: AbortSignal.timeout(30000), // 30 second timeout
-              });
-
-              if (response.ok) {
-                break; // Success, exit loop
-              } else {
-                lastError = new Error(`HTTP ${response.status}`);
-              }
-            } catch (err) {
-              lastError = err;
-              continue; // Try next port
-            }
-          }
-
-          if (response && response.ok) {
-            successCount++;
-          } else {
-            const errorData = await response?.json().catch(() => ({}));
-            failCount++;
-            errorList.push({ 
-              email, 
-              error: errorData?.error || lastError?.message || `HTTP ${response?.status || 'Connection failed'}` 
-            });
-          }
-        } catch (error) {
+        // Update current index
+        setResults({ 
+          success: successCount, 
+          failed: failCount, 
+          errors: errorList,
+          currentIndex: i + 1,
+          total: emailList.length
+        });
+        
+        // Send email with retry logic
+        const result = await sendEmailWithRetry(email, templateId);
+        
+        if (result.success) {
+          successCount++;
+        } else {
           failCount++;
-          errorList.push({ email, error: error.message || "Connection failed" });
+          errorList.push({ 
+            email, 
+            error: result.error || "Failed to send email"
+          });
         }
 
-        // Small delay between emails (except for the last one)
+        // Small delay between individual emails (500ms)
         if (i < emailList.length - 1) {
           await new Promise(resolve => setTimeout(resolve, 500));
         }
 
+        // Pause after every batch (except for the last batch)
+        if ((i + 1) % BATCH_SIZE === 0 && i < emailList.length - 1) {
+          const batchNumber = Math.floor((i + 1) / BATCH_SIZE);
+          const remainingBatches = Math.ceil((emailList.length - (i + 1)) / BATCH_SIZE);
+          
+          toast({
+            title: `Batch ${batchNumber} Complete`,
+            description: `Pausing for 90 seconds... ${remainingBatches} batch(es) remaining`,
+            status: "info",
+            duration: 2000,
+            isClosable: true,
+          });
+          
+          // Update UI to show we're pausing
+          setResults({ 
+            success: successCount, 
+            failed: failCount, 
+            errors: errorList,
+            currentIndex: i + 1,
+            total: emailList.length,
+            pausing: true 
+          });
+          
+          // Pause for 90 seconds
+          await new Promise(resolve => setTimeout(resolve, BATCH_PAUSE_MS));
+          
+          setResults({ 
+            success: successCount, 
+            failed: failCount, 
+            errors: errorList,
+            currentIndex: i + 1,
+            total: emailList.length,
+            pausing: false 
+          });
+        }
+
         // Update results in real-time
-        setResults({ success: successCount, failed: failCount, errors: errorList });
+        setResults({ 
+          success: successCount, 
+          failed: failCount, 
+          errors: errorList,
+          currentIndex: i + 1,
+          total: emailList.length
+        });
       }
 
       // Show completion toast
@@ -327,10 +433,29 @@ export default function EmailSender() {
         </Card>
 
         {/* Results Section */}
-        {(results.success > 0 || results.failed > 0) && !sending && (
+        {(results.success > 0 || results.failed > 0 || sending) && (
           <Card shadow="lg">
             <CardHeader>
               <Heading size="md" color="gray.800">Send Results</Heading>
+              {sending && (
+                <VStack align="start" spacing={2} mt={2}>
+                  <Text fontSize="sm" color="gray.500">
+                    {results.pausing 
+                      ? "⏸️ Pausing between batches to avoid rate limits..." 
+                      : `📧 Sending... ${results.currentIndex || 0} of ${results.total || parseEmails(emails).length} emails processed`}
+                  </Text>
+                  {results.total > 0 && (
+                    <Box w="100%" bg="gray.200" borderRadius="md" h="8px" overflow="hidden">
+                      <Box 
+                        bg="blue.500" 
+                        h="100%" 
+                        w={`${((results.currentIndex || 0) / results.total) * 100}%`}
+                        transition="width 0.3s ease"
+                      />
+                    </Box>
+                  )}
+                </VStack>
+              )}
             </CardHeader>
             <CardBody>
               <VStack spacing={4} align="stretch">
