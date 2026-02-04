@@ -8,11 +8,13 @@ import {
   Settings2,
   Users2Icon,
   UsersIcon,
-  ClipboardCheck, 
+  ClipboardCheck,
   BaggageClaim,
   Store,
   FolderTree,
-  Banknote
+  Banknote,
+  Star,
+  Mail,
 } from "lucide-react";
 import { HiCreditCard, HiMenuAlt2, HiOutlineDocumentAdd } from "react-icons/hi";
 export const SideNavRoutes=[
@@ -45,6 +47,11 @@ export const SideNavRoutes=[
       name: "Subscriptions",
       icon: HiCreditCard,
       path: "/subscriptions"
+    },
+    {
+      name: "Ratings & Feedback",
+      icon: Star,
+      path: "/ratings"
     },
     {
       name: "Advertisement",
@@ -80,6 +87,11 @@ export const SideNavRoutes=[
       name: "Cashout & Payments",
       icon: Banknote,
       path: "/cashout"
+    },
+    {
+      name: "Email Sender",
+      icon: Mail,
+      path: "/email-sender"
     },
     {
       name: "Settings",
