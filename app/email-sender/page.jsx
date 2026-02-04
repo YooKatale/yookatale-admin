@@ -69,7 +69,18 @@ const EMAIL_TEMPLATES = [
   },
 ];
 
-const FRONTEND_API_URL = process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:3000";
+// Frontend API URL - tries multiple ports
+const getFrontendApiUrl = () => {
+  if (typeof window !== 'undefined') {
+    // Try to use same origin but port 3000, fallback to 3001
+    const origin = window.location.origin;
+    const baseUrl = origin.includes('localhost') ? 'http://localhost' : origin.split(':').slice(0, 2).join(':');
+    return `${baseUrl}:3000`; // Default to port 3000
+  }
+  return "http://localhost:3000";
+};
+
+const FRONTEND_API_URL = getFrontendApiUrl();
 
 export default function EmailSender() {
   const [emails, setEmails] = useState("");
@@ -121,25 +132,50 @@ export default function EmailSender() {
         const email = emailList[i];
         
         try {
-          const response = await fetch(`${FRONTEND_API_URL}/api/mail`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email: email,
-              type: templateId,
-            }),
-          });
+          // Try port 3000 first, then 3001 if it fails
+          let response = null;
+          let lastError = null;
+          
+          for (const port of [3000, 3001]) {
+            try {
+              const apiUrl = typeof window !== 'undefined' 
+                ? `${window.location.protocol}//${window.location.hostname}:${port}/api/mail`
+                : `http://localhost:${port}/api/mail`;
+              
+              response = await fetch(apiUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  email: email,
+                  type: templateId,
+                }),
+                signal: AbortSignal.timeout(30000), // 30 second timeout
+              });
 
-          if (response.ok) {
+              if (response.ok) {
+                break; // Success, exit loop
+              } else {
+                lastError = new Error(`HTTP ${response.status}`);
+              }
+            } catch (err) {
+              lastError = err;
+              continue; // Try next port
+            }
+          }
+
+          if (response && response.ok) {
             successCount++;
           } else {
-            const errorData = await response.json().catch(() => ({}));
+            const errorData = await response?.json().catch(() => ({}));
             failCount++;
-            errorList.push({ email, error: errorData.error || `HTTP ${response.status}` });
+            errorList.push({ 
+              email, 
+              error: errorData?.error || lastError?.message || `HTTP ${response?.status || 'Connection failed'}` 
+            });
           }
         } catch (error) {
           failCount++;
-          errorList.push({ email, error: error.message });
+          errorList.push({ email, error: error.message || "Connection failed" });
         }
 
         // Small delay between emails (except for the last one)
