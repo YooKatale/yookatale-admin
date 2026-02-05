@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { 
   Box, 
   Button, 
@@ -16,7 +16,17 @@ import {
   CardHeader,
   Badge,
   Spinner,
-  Divider
+  Divider,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
+  SimpleGrid,
+  Stat,
+  StatLabel,
+  StatNumber,
+  StatHelpText
 } from "@chakra-ui/react";
 import { 
   Mail, 
@@ -30,7 +40,21 @@ import {
   XCircle,
   Loader2,
   Upload,
-  FileText
+  FileText,
+  Pause,
+  Play,
+  Trash2,
+  Copy,
+  AlertCircle,
+  Clock,
+  BarChart3,
+  RefreshCw,
+  CheckCircle,
+  X,
+  TrendingUp,
+  Database,
+  Calendar,
+  Activity
 } from "lucide-react";
 
 const EMAIL_TEMPLATES = [
@@ -122,10 +146,22 @@ const getApiEndpoints = () => {
 export default function EmailSender() {
   const [emails, setEmails] = useState("");
   const [sending, setSending] = useState(false);
+  const [paused, setPaused] = useState(false);
   const [sendingTemplate, setSendingTemplate] = useState(null);
   const [results, setResults] = useState({ success: 0, failed: 0, errors: [], currentIndex: 0, total: 0 });
   const [uploadedFileName, setUploadedFileName] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [emailStats, setEmailStats] = useState({ total: 0, valid: 0, invalid: 0, duplicates: 0, domains: {} });
+  const [invalidEmails, setInvalidEmails] = useState([]);
+  const [showInvalidEmails, setShowInvalidEmails] = useState(false);
+  const [allTimeStats, setAllTimeStats] = useState({
+    totalSent: 0,
+    uniqueEmails: 0,
+    byTemplate: {},
+    lastUpdated: null
+  });
+  const [activeTab, setActiveTab] = useState(0);
+  const pauseRef = useRef(false);
   const toast = useToast();
 
   const parseEmails = (emailString) => {
@@ -140,6 +176,271 @@ export default function EmailSender() {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return email && emailRegex.test(email);
       });
+  };
+
+  // Get invalid emails from the input
+  const getInvalidEmails = (emailString) => {
+    if (!emailString || !emailString.trim()) return [];
+    
+    return emailString
+      .split(/[,\n;]/)
+      .map(email => email.trim())
+      .filter(email => {
+        if (!email) return false;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return !emailRegex.test(email);
+      });
+  };
+
+  // Calculate email statistics
+  const calculateEmailStats = (emailString) => {
+    const allEmails = emailString.split(/[,\n;]/).map(e => e.trim()).filter(Boolean);
+    const validEmails = parseEmails(emailString);
+    const invalidEmails = getInvalidEmails(emailString);
+    
+    // Count duplicates
+    const emailSet = new Set();
+    const duplicates = new Set();
+    validEmails.forEach(email => {
+      const lowerEmail = email.toLowerCase();
+      if (emailSet.has(lowerEmail)) {
+        duplicates.add(lowerEmail);
+      } else {
+        emailSet.add(lowerEmail);
+      }
+    });
+
+    // Count domains
+    const domains = {};
+    validEmails.forEach(email => {
+      const domain = email.split('@')[1]?.toLowerCase();
+      if (domain) {
+        domains[domain] = (domains[domain] || 0) + 1;
+      }
+    });
+
+    return {
+      total: allEmails.length,
+      valid: validEmails.length,
+      invalid: invalidEmails.length,
+      duplicates: duplicates.size,
+      domains: domains
+    };
+  };
+
+  // Load statistics from localStorage on mount
+  useEffect(() => {
+    const storedStats = localStorage.getItem('emailSenderStats');
+    const storedUniqueEmails = localStorage.getItem('uniqueEmailsSent');
+    
+    if (storedStats) {
+      try {
+        const parsed = JSON.parse(storedStats);
+        // Ensure uniqueEmails count matches the actual stored unique emails
+        if (storedUniqueEmails) {
+          const uniqueEmailsArray = JSON.parse(storedUniqueEmails);
+          parsed.uniqueEmails = uniqueEmailsArray.length;
+        }
+        setAllTimeStats(parsed);
+      } catch (e) {
+        console.error('Error loading stats:', e);
+      }
+    } else if (storedUniqueEmails) {
+      // If we have unique emails but no stats, initialize stats
+      const uniqueEmailsArray = JSON.parse(storedUniqueEmails);
+      const initialStats = {
+        totalSent: uniqueEmailsArray.length,
+        uniqueEmails: uniqueEmailsArray.length,
+        byTemplate: {},
+        lastUpdated: null
+      };
+      setAllTimeStats(initialStats);
+      localStorage.setItem('emailSenderStats', JSON.stringify(initialStats));
+    }
+  }, []);
+
+  // Update stats when emails change
+  useEffect(() => {
+    const stats = calculateEmailStats(emails);
+    setEmailStats(stats);
+    setInvalidEmails(getInvalidEmails(emails));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [emails]);
+
+  // Save statistics to localStorage
+  const saveStats = (newStats) => {
+    localStorage.setItem('emailSenderStats', JSON.stringify(newStats));
+    setAllTimeStats(newStats);
+  };
+
+  // Update statistics when emails are successfully sent
+  const updateAllTimeStats = (sentEmails, templateId) => {
+    // Load current stats from localStorage to ensure we have the latest
+    const storedStats = localStorage.getItem('emailSenderStats');
+    const currentStats = storedStats ? JSON.parse(storedStats) : {
+      totalSent: 0,
+      uniqueEmails: 0,
+      byTemplate: {},
+      lastUpdated: null
+    };
+    
+    // Load existing unique emails
+    const storedUniqueEmails = localStorage.getItem('uniqueEmailsSent');
+    const uniqueEmailsSet = new Set(storedUniqueEmails ? JSON.parse(storedUniqueEmails) : []);
+    
+    // Add new emails to unique set
+    sentEmails.forEach(email => {
+      uniqueEmailsSet.add(email.toLowerCase());
+    });
+
+    // Update counts
+    const newStats = {
+      totalSent: (currentStats.totalSent || 0) + sentEmails.length,
+      uniqueEmails: uniqueEmailsSet.size,
+      byTemplate: { ...(currentStats.byTemplate || {}) },
+      lastUpdated: new Date().toISOString()
+    };
+    
+    // Update template-specific count
+    newStats.byTemplate[templateId] = (newStats.byTemplate[templateId] || 0) + sentEmails.length;
+
+    // Save unique emails list
+    localStorage.setItem('uniqueEmailsSent', JSON.stringify([...uniqueEmailsSet]));
+
+    // Save updated stats
+    saveStats(newStats);
+  };
+
+  // Auto-deduplicate emails
+  const deduplicateEmails = () => {
+    const emailList = parseEmails(emails);
+    const uniqueEmails = [...new Set(emailList.map(e => e.toLowerCase()))];
+    const originalCount = emailList.length;
+    const duplicateCount = originalCount - uniqueEmails.length;
+    
+    if (duplicateCount > 0) {
+      setEmails(uniqueEmails.join('\n'));
+      toast({
+        title: "Duplicates removed",
+        description: `Removed ${duplicateCount} duplicate email(s)`,
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } else {
+      toast({
+        title: "No duplicates",
+        description: "All emails are already unique",
+        status: "info",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  };
+
+  // Export failed emails to CSV
+  const exportFailedEmails = () => {
+    if (results.errors.length === 0) {
+      toast({
+        title: "No failed emails",
+        description: "There are no failed emails to export",
+        status: "info",
+        duration: 2000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    const csvContent = "Email,Error\n" + 
+      results.errors.map(e => `"${e.email}","${e.error}"`).join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `failed-emails-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+
+    toast({
+      title: "Export successful",
+      description: `Exported ${results.errors.length} failed email(s) to CSV`,
+      status: "success",
+      duration: 3000,
+      isClosable: true,
+    });
+  };
+
+  // Copy all emails to clipboard
+  const copyEmailsToClipboard = () => {
+    const emailList = parseEmails(emails);
+    if (emailList.length === 0) {
+      toast({
+        title: "No emails",
+        description: "No valid emails to copy",
+        status: "warning",
+        duration: 2000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    navigator.clipboard.writeText(emailList.join('\n')).then(() => {
+      toast({
+        title: "Copied!",
+        description: `Copied ${emailList.length} email(s) to clipboard`,
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+    });
+  };
+
+  // Remove invalid emails from the list
+  const removeInvalidEmails = () => {
+    const validEmails = parseEmails(emails);
+    if (validEmails.length === parseEmails(emails).length) {
+      toast({
+        title: "No invalid emails",
+        description: "All emails are valid",
+        status: "info",
+        duration: 2000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    setEmails(validEmails.join('\n'));
+    toast({
+      title: "Invalid emails removed",
+      description: `Removed ${invalidEmails.length} invalid email(s)`,
+      status: "success",
+      duration: 3000,
+      isClosable: true,
+    });
+  };
+
+  // Clear all statistics
+  const clearAllStats = () => {
+    if (window.confirm('Are you sure you want to clear all statistics? This cannot be undone.')) {
+      localStorage.removeItem('emailSenderStats');
+      localStorage.removeItem('uniqueEmailsSent');
+      setAllTimeStats({
+        totalSent: 0,
+        uniqueEmails: 0,
+        byTemplate: {},
+        lastUpdated: null
+      });
+      toast({
+        title: "Statistics cleared",
+        description: "All email statistics have been reset",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
   };
 
   // Parse CSV file and extract emails
@@ -308,7 +609,17 @@ export default function EmailSender() {
       return;
     }
 
+    // Warn if sending to many emails
+    if (emailList.length > 100) {
+      const confirmed = window.confirm(
+        `You are about to send ${emailList.length} emails. This will take approximately ${Math.ceil(emailList.length / 40) * 1.5} minutes. Continue?`
+      );
+      if (!confirmed) return;
+    }
+
     setSending(true);
+    setPaused(false);
+    pauseRef.current = false;
     setSendingTemplate(templateId);
     setResults({ success: 0, failed: 0, errors: [], currentIndex: 0, total: emailList.length });
 
@@ -397,6 +708,18 @@ export default function EmailSender() {
         });
       }
 
+      // Update all-time statistics for successfully sent emails
+      // Track only successfully sent emails (exclude failed ones)
+      if (successCount > 0) {
+        const failedEmailSet = new Set(errorList.map(e => e.email.toLowerCase()));
+        const successfulEmails = emailList.filter(email => !failedEmailSet.has(email.toLowerCase()));
+        
+        // Only update stats with emails that were actually sent successfully
+        if (successfulEmails.length > 0) {
+          updateAllTimeStats(successfulEmails, templateId);
+        }
+      }
+
       // Show completion toast
       toast({
         title: "Emails Sent!",
@@ -431,6 +754,32 @@ export default function EmailSender() {
           </HStack>
           <Text color="gray.600">Send email templates to multiple recipients at once</Text>
         </div>
+
+        {/* Tabs */}
+        <Tabs index={activeTab} onChange={setActiveTab} mb={6} colorScheme="green">
+          <TabList>
+            <Tab>
+              <HStack spacing={2}>
+                <Send size={16} />
+                <Text>Send Emails</Text>
+              </HStack>
+            </Tab>
+            <Tab>
+              <HStack spacing={2}>
+                <BarChart3 size={16} />
+                <Text>Statistics</Text>
+                {allTimeStats.totalSent > 0 && (
+                  <Badge colorScheme="green" borderRadius="full" fontSize="xs">
+                    {allTimeStats.totalSent}
+                  </Badge>
+                )}
+              </HStack>
+            </Tab>
+          </TabList>
+
+          <TabPanels>
+            {/* Send Emails Tab */}
+            <TabPanel px={0}>
 
         {/* Email Input Section */}
         <Card mb={6} shadow="lg">
@@ -512,17 +861,156 @@ export default function EmailSender() {
                 resize="vertical"
                 isDisabled={sending}
               />
-              <HStack justify="space-between">
-                <Text fontSize="sm" color="gray.600">
-                  {parseEmails(emails).length > 0 
-                    ? `${parseEmails(emails).length} valid email(s) detected`
-                    : "No valid emails detected"}
-                </Text>
-                <HStack spacing={2}>
+              {/* Email Statistics */}
+              {emailStats.total > 0 && (
+                <Box p={3} bg="blue.50" borderRadius="md" borderLeft="3px solid" borderColor="blue.400">
+                  <HStack spacing={4} flexWrap="wrap">
+                    <HStack>
+                      <CheckCircle size={16} className="text-green-500" />
+                      <Text fontSize="xs" fontWeight="semibold" color="green.700">
+                        {emailStats.valid} Valid
+                      </Text>
+                    </HStack>
+                    {emailStats.invalid > 0 && (
+                      <HStack>
+                        <AlertCircle size={16} className="text-orange-500" />
+                        <Text fontSize="xs" fontWeight="semibold" color="orange.700">
+                          {emailStats.invalid} Invalid
+                        </Text>
+                      </HStack>
+                    )}
+                    {emailStats.duplicates > 0 && (
+                      <HStack>
+                        <RefreshCw size={16} className="text-yellow-500" />
+                        <Text fontSize="xs" fontWeight="semibold" color="yellow.700">
+                          {emailStats.duplicates} Duplicates
+                        </Text>
+                      </HStack>
+                    )}
+                    {Object.keys(emailStats.domains).length > 0 && (
+                      <HStack>
+                        <BarChart3 size={16} className="text-purple-500" />
+                        <Text fontSize="xs" fontWeight="semibold" color="purple.700">
+                          {Object.keys(emailStats.domains).length} Domains
+                        </Text>
+                      </HStack>
+                    )}
+                  </HStack>
+                </Box>
+              )}
+
+              {/* Invalid Emails Warning */}
+              {invalidEmails.length > 0 && (
+                <Box p={3} bg="orange.50" borderRadius="md" borderLeft="3px solid" borderColor="orange.400">
+                  <HStack justify="space-between" mb={2}>
+                    <HStack>
+                      <AlertCircle size={16} className="text-orange-500" />
+                      <Text fontSize="sm" fontWeight="semibold" color="orange.700">
+                        {invalidEmails.length} Invalid Email(s) Found
+                      </Text>
+                    </HStack>
+                    <HStack spacing={2}>
+                      <Button
+                        size="xs"
+                        variant="outline"
+                        colorScheme="orange"
+                        onClick={removeInvalidEmails}
+                        leftIcon={<X size={12} />}
+                      >
+                        Remove
+                      </Button>
+                      <Button
+                        size="xs"
+                        variant="ghost"
+                        onClick={() => setShowInvalidEmails(!showInvalidEmails)}
+                      >
+                        {showInvalidEmails ? "Hide" : "Show"}
+                      </Button>
+                    </HStack>
+                  </HStack>
+                  {showInvalidEmails && (
+                    <VStack align="stretch" spacing={1} maxH="100px" overflowY="auto">
+                      {invalidEmails.map((email, idx) => (
+                        <Text key={idx} fontSize="xs" color="orange.600">
+                          • {email}
+                        </Text>
+                      ))}
+                    </VStack>
+                  )}
+                </Box>
+              )}
+
+              {/* Domain Distribution (Top 5) */}
+              {Object.keys(emailStats.domains).length > 0 && emailStats.valid > 0 && (
+                <Box p={3} bg="purple.50" borderRadius="md" borderLeft="3px solid" borderColor="purple.400">
+                  <HStack mb={2}>
+                    <BarChart3 size={16} className="text-purple-500" />
+                    <Text fontSize="sm" fontWeight="semibold" color="purple.700">
+                      Top Email Domains:
+                    </Text>
+                  </HStack>
+                  <HStack spacing={3} flexWrap="wrap">
+                    {Object.entries(emailStats.domains)
+                      .sort((a, b) => b[1] - a[1])
+                      .slice(0, 5)
+                      .map(([domain, count]) => (
+                        <Badge key={domain} colorScheme="purple" fontSize="xs">
+                          {domain}: {count}
+                        </Badge>
+                      ))}
+                    {Object.keys(emailStats.domains).length > 5 && (
+                      <Text fontSize="xs" color="purple.600">
+                        +{Object.keys(emailStats.domains).length - 5} more
+                      </Text>
+                    )}
+                  </HStack>
+                </Box>
+              )}
+
+              <HStack justify="space-between" flexWrap="wrap" spacing={2}>
+                <HStack spacing={2} flexWrap="wrap">
+                  <Text fontSize="sm" color="gray.600">
+                    {emailStats.valid > 0 
+                      ? `${emailStats.valid} valid email(s) ready to send`
+                      : "No valid emails detected"}
+                  </Text>
+                  {emailStats.valid > 0 && (
+                    <>
+                      <Text fontSize="xs" color="gray.500">•</Text>
+                      <Text fontSize="xs" color="gray.500">
+                        Est. time: ~{Math.ceil(emailStats.valid / 40) * 1.5} min
+                      </Text>
+                    </>
+                  )}
+                </HStack>
+                <HStack spacing={2} flexWrap="wrap">
                   {uploadedFileName && (
                     <Badge colorScheme="green" fontSize="xs">
                       CSV Loaded
                     </Badge>
+                  )}
+                  {emailStats.duplicates > 0 && (
+                    <Button
+                      size="xs"
+                      variant="outline"
+                      colorScheme="yellow"
+                      onClick={deduplicateEmails}
+                      isDisabled={sending}
+                      leftIcon={<RefreshCw size={12} />}
+                    >
+                      Remove Duplicates
+                    </Button>
+                  )}
+                  {emailStats.valid > 0 && (
+                    <Button
+                      size="xs"
+                      variant="ghost"
+                      onClick={copyEmailsToClipboard}
+                      isDisabled={sending}
+                      leftIcon={<Copy size={12} />}
+                    >
+                      Copy
+                    </Button>
                   )}
                   <Button
                     size="sm"
@@ -530,10 +1018,12 @@ export default function EmailSender() {
                     onClick={() => {
                       setEmails("");
                       setUploadedFileName(null);
+                      setShowInvalidEmails(false);
                       const fileInput = document.getElementById('csv-upload-input');
                       if (fileInput) fileInput.value = '';
                     }}
                     isDisabled={!emails || sending}
+                    leftIcon={<Trash2 size={14} />}
                   >
                     Clear All
                   </Button>
@@ -592,16 +1082,50 @@ export default function EmailSender() {
                           </Text>
                         </VStack>
                       </HStack>
-                      <Button
-                        colorScheme={template.color}
-                        onClick={() => sendEmails(template.id)}
-                        isDisabled={!emails || sending || parseEmails(emails).length === 0}
-                        isLoading={isSending}
-                        loadingText="Sending..."
-                        leftIcon={isSending ? <Loader2 size={16} /> : <Send size={16} />}
-                      >
-                        Send
-                      </Button>
+                      <HStack spacing={2}>
+                        {isSending && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            colorScheme={template.color}
+                            onClick={() => {
+                              const newPausedState = !pauseRef.current;
+                              setPaused(newPausedState);
+                              pauseRef.current = newPausedState;
+                              if (newPausedState) {
+                                toast({
+                                  title: "Paused",
+                                  description: "Email sending has been paused. Click Resume to continue.",
+                                  status: "warning",
+                                  duration: 3000,
+                                  isClosable: true,
+                                });
+                              } else {
+                                toast({
+                                  title: "Resuming...",
+                                  description: "Email sending has been resumed",
+                                  status: "info",
+                                  duration: 2000,
+                                  isClosable: true,
+                                });
+                              }
+                            }}
+                            leftIcon={paused ? <Play size={14} /> : <Pause size={14} />}
+                          >
+                            {paused ? "Resume" : "Pause"}
+                          </Button>
+                        )}
+                        <Button
+                          colorScheme={template.color}
+                          onClick={() => sendEmails(template.id)}
+                          isDisabled={!emails || sending || parseEmails(emails).length === 0}
+                          isLoading={isSending}
+                          loadingText="Sending..."
+                          leftIcon={isSending ? <Loader2 size={16} /> : <Send size={16} />}
+                        >
+                          {isSending ? "Sending..." : "Send"}
+                        </Button>
+                      </HStack>
                     </HStack>
                   </Box>
                 );
@@ -617,19 +1141,34 @@ export default function EmailSender() {
               <Heading size="md" color="gray.800">Send Results</Heading>
               {sending && (
                 <VStack align="start" spacing={2} mt={2}>
-                  <Text fontSize="sm" color="gray.500">
-                    {results.pausing 
-                      ? "⏸️ Pausing between batches to avoid rate limits..." 
-                      : `📧 Sending... ${results.currentIndex || 0} of ${results.total || parseEmails(emails).length} emails processed`}
-                  </Text>
+                  <HStack spacing={4} flexWrap="wrap">
+                    <Text fontSize="sm" color="gray.500">
+                      {results.pausing 
+                        ? "⏸️ Pausing between batches to avoid rate limits..." 
+                        : `📧 Sending... ${results.currentIndex || 0} of ${results.total || parseEmails(emails).length} emails processed`}
+                    </Text>
+                    {results.currentIndex > 0 && results.total > 0 && !results.pausing && (
+                      <HStack spacing={1}>
+                        <Clock size={14} className="text-gray-500" />
+                        <Text fontSize="xs" color="gray.500">
+                          Est. remaining: ~{Math.ceil(((results.total - results.currentIndex) / 40) * 1.5)} min
+                        </Text>
+                      </HStack>
+                    )}
+                  </HStack>
                   {results.total > 0 && (
-                    <Box w="100%" bg="gray.200" borderRadius="md" h="8px" overflow="hidden">
-                      <Box 
-                        bg="blue.500" 
-                        h="100%" 
-                        w={`${((results.currentIndex || 0) / results.total) * 100}%`}
-                        transition="width 0.3s ease"
-                      />
+                    <Box w="100%">
+                      <Box w="100%" bg="gray.200" borderRadius="md" h="8px" overflow="hidden" mb={1}>
+                        <Box 
+                          bg="blue.500" 
+                          h="100%" 
+                          w={`${((results.currentIndex || 0) / results.total) * 100}%`}
+                          transition="width 0.3s ease"
+                        />
+                      </Box>
+                      <Text fontSize="xs" color="gray.500" textAlign="right">
+                        {Math.round(((results.currentIndex || 0) / results.total) * 100)}% complete
+                      </Text>
                     </Box>
                   )}
                 </VStack>
@@ -658,9 +1197,20 @@ export default function EmailSender() {
                   <>
                     <Divider />
                     <Box>
-                      <Text fontSize="sm" fontWeight="semibold" mb={2} color="gray.700">
-                        Failed Emails:
-                      </Text>
+                      <HStack justify="space-between" mb={2}>
+                        <Text fontSize="sm" fontWeight="semibold" color="gray.700">
+                          Failed Emails ({results.errors.length}):
+                        </Text>
+                        <Button
+                          size="xs"
+                          variant="outline"
+                          colorScheme="red"
+                          onClick={exportFailedEmails}
+                          leftIcon={<Download size={12} />}
+                        >
+                          Export CSV
+                        </Button>
+                      </HStack>
                       <VStack align="stretch" spacing={2} maxH="200px" overflowY="auto">
                         {results.errors.map((error, index) => (
                           <Box
@@ -680,10 +1230,226 @@ export default function EmailSender() {
                     </Box>
                   </>
                 )}
+
+                {/* Success Rate */}
+                {results.total > 0 && (
+                  <>
+                    <Divider />
+                    <Box>
+                      <HStack justify="space-between" mb={2}>
+                        <Text fontSize="sm" fontWeight="semibold" color="gray.700">
+                          Success Rate:
+                        </Text>
+                        <Badge 
+                          colorScheme={results.success / results.total > 0.8 ? "green" : results.success / results.total > 0.5 ? "yellow" : "red"}
+                          fontSize="sm"
+                        >
+                          {Math.round((results.success / results.total) * 100)}%
+                        </Badge>
+                      </HStack>
+                      <Box w="100%" bg="gray.200" borderRadius="md" h="6px" overflow="hidden">
+                        <Box 
+                          bg="green.500" 
+                          h="100%" 
+                          w={`${(results.success / results.total) * 100}%`}
+                          transition="width 0.3s ease"
+                        />
+                      </Box>
+                    </Box>
+                  </>
+                )}
               </VStack>
             </CardBody>
           </Card>
         )}
+            </TabPanel>
+
+            {/* Statistics Tab */}
+            <TabPanel px={0}>
+              <Card shadow="lg" mb={6}>
+                <CardHeader>
+                  <HStack justify="space-between">
+                    <Box>
+                      <Heading size="md" color="gray.800">Email Statistics</Heading>
+                      <Text fontSize="sm" color="gray.500" mt={2}>
+                        Track all emails sent through this system
+                      </Text>
+                    </Box>
+                    {allTimeStats.totalSent > 0 && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        colorScheme="red"
+                        onClick={clearAllStats}
+                        leftIcon={<Trash2 size={14} />}
+                      >
+                        Clear Stats
+                      </Button>
+                    )}
+                  </HStack>
+                </CardHeader>
+                <CardBody>
+                  {allTimeStats.totalSent === 0 ? (
+                    <VStack spacing={4} py={8}>
+                      <Database size={48} className="text-gray-400" />
+                      <Text fontSize="lg" color="gray.500" fontWeight="semibold">
+                        No statistics yet
+                      </Text>
+                      <Text fontSize="sm" color="gray.400" textAlign="center">
+                        Start sending emails to see statistics here
+                      </Text>
+                    </VStack>
+                  ) : (
+                    <VStack spacing={6} align="stretch">
+                      {/* Main Statistics */}
+                      <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
+                        <Stat p={4} bg="blue.50" borderRadius="lg" borderLeft="4px solid" borderColor="blue.400">
+                          <StatLabel>
+                            <HStack spacing={2}>
+                              <Mail size={16} className="text-blue-500" />
+                              <Text>Total Emails Sent</Text>
+                            </HStack>
+                          </StatLabel>
+                          <StatNumber color="blue.600" fontSize="3xl">
+                            {allTimeStats.totalSent.toLocaleString()}
+                          </StatNumber>
+                          <StatHelpText>
+                            <HStack spacing={1}>
+                              <TrendingUp size={12} />
+                              <Text>All time</Text>
+                            </HStack>
+                          </StatHelpText>
+                        </Stat>
+
+                        <Stat p={4} bg="green.50" borderRadius="lg" borderLeft="4px solid" borderColor="green.400">
+                          <StatLabel>
+                            <HStack spacing={2}>
+                              <Users size={16} className="text-green-500" />
+                              <Text>Unique Recipients</Text>
+                            </HStack>
+                          </StatLabel>
+                          <StatNumber color="green.600" fontSize="3xl">
+                            {allTimeStats.uniqueEmails.toLocaleString()}
+                          </StatNumber>
+                          <StatHelpText>
+                            <HStack spacing={1}>
+                              <CheckCircle size={12} />
+                              <Text>No duplicates</Text>
+                            </HStack>
+                          </StatHelpText>
+                        </Stat>
+
+                        <Stat p={4} bg="purple.50" borderRadius="lg" borderLeft="4px solid" borderColor="purple.400">
+                          <StatLabel>
+                            <HStack spacing={2}>
+                              <Activity size={16} className="text-purple-500" />
+                              <Text>Duplicate Sends</Text>
+                            </HStack>
+                          </StatLabel>
+                          <StatNumber color="purple.600" fontSize="3xl">
+                            {(allTimeStats.totalSent - allTimeStats.uniqueEmails).toLocaleString()}
+                          </StatNumber>
+                          <StatHelpText>
+                            <Text fontSize="xs">
+                              {allTimeStats.uniqueEmails > 0 
+                                ? `${Math.round(((allTimeStats.totalSent - allTimeStats.uniqueEmails) / allTimeStats.totalSent) * 100)}% of total`
+                                : '0%'}
+                            </Text>
+                          </StatHelpText>
+                        </Stat>
+                      </SimpleGrid>
+
+                      {/* Statistics by Template */}
+                      {Object.keys(allTimeStats.byTemplate || {}).length > 0 && (
+                        <>
+                          <Divider />
+                          <Box>
+                            <Heading size="sm" color="gray.800" mb={4}>
+                              Emails Sent by Template
+                            </Heading>
+                            <VStack spacing={3} align="stretch">
+                              {EMAIL_TEMPLATES.map((template) => {
+                                const count = allTimeStats.byTemplate[template.id] || 0;
+                                const percentage = allTimeStats.totalSent > 0 
+                                  ? (count / allTimeStats.totalSent) * 100 
+                                  : 0;
+                                const Icon = template.icon;
+                                
+                                if (count === 0) return null;
+
+                                return (
+                                  <Box
+                                    key={template.id}
+                                    p={4}
+                                    bg={`${template.color}.50`}
+                                    borderRadius="lg"
+                                    borderLeft="4px solid"
+                                    borderColor={`${template.color}.400`}
+                                  >
+                                    <HStack justify="space-between" mb={2}>
+                                      <HStack spacing={3}>
+                                        <Box
+                                          p={2}
+                                          bg={`${template.color}.100`}
+                                          borderRadius="md"
+                                          color={`${template.color}.600`}
+                                        >
+                                          <Icon size={20} />
+                                        </Box>
+                                        <VStack align="start" spacing={0}>
+                                          <Text fontWeight="semibold" color="gray.800">
+                                            {template.name}
+                                          </Text>
+                                          <Text fontSize="xs" color="gray.500">
+                                            {percentage.toFixed(1)}% of total sends
+                                          </Text>
+                                        </VStack>
+                                      </HStack>
+                                      <Badge
+                                        colorScheme={template.color}
+                                        fontSize="lg"
+                                        px={3}
+                                        py={1}
+                                        borderRadius="md"
+                                      >
+                                        {count.toLocaleString()}
+                                      </Badge>
+                                    </HStack>
+                                    <Box w="100%" bg="gray.200" borderRadius="md" h="6px" overflow="hidden" mt={2}>
+                                      <Box
+                                        bg={`${template.color}.500`}
+                                        h="100%"
+                                        w={`${percentage}%`}
+                                        transition="width 0.3s ease"
+                                      />
+                                    </Box>
+                                  </Box>
+                                );
+                              })}
+                            </VStack>
+                          </Box>
+                        </>
+                      )}
+
+                      {/* Last Updated */}
+                      {allTimeStats.lastUpdated && (
+                        <>
+                          <Divider />
+                          <HStack spacing={2} color="gray.500" fontSize="sm">
+                            <Calendar size={14} />
+                            <Text>
+                              Last updated: {new Date(allTimeStats.lastUpdated).toLocaleString()}
+                            </Text>
+                          </HStack>
+                        </>
+                      )}
+                    </VStack>
+                  )}
+                </CardBody>
+              </Card>
+            </TabPanel>
+          </TabPanels>
+        </Tabs>
       </div>
     </div>
   );
