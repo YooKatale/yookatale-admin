@@ -28,25 +28,30 @@ import {
   Spinner,
   Center,
 } from "@chakra-ui/react";
-import { useGetAppRatingsMutation, useGetPlatformFeedbackMutation } from "@/Slices/ratingsApiSlice";
+import { useGetAppRatingsMutation, useGetPlatformFeedbackMutation, useGetProductRatingsMutation } from "@/Slices/ratingsApiSlice";
 
 export default function RatingsPage() {
   const [appRatings, setAppRatings] = useState([]);
   const [platformFeedback, setPlatformFeedback] = useState([]);
+  const [productRatings, setProductRatings] = useState([]);
   const [appStats, setAppStats] = useState(null);
   const [platformStats, setPlatformStats] = useState(null);
+  const [productStats, setProductStats] = useState(null);
   const [isLoadingApp, setIsLoadingApp] = useState(false);
   const [isLoadingPlatform, setIsLoadingPlatform] = useState(false);
+  const [isLoadingProduct, setIsLoadingProduct] = useState(false);
   const [platformFilter, setPlatformFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
 
   const [getAppRatings] = useGetAppRatingsMutation();
   const [getPlatformFeedback] = useGetPlatformFeedbackMutation();
+  const [getProductRatings] = useGetProductRatingsMutation();
   const toast = useToast();
 
   useEffect(() => {
     loadAppRatings();
     loadPlatformFeedback();
+    loadProductRatings();
   }, []);
 
   const loadAppRatings = async () => {
@@ -61,11 +66,12 @@ export default function RatingsPage() {
         setAppStats(res.stats || null);
       }
     } catch (error) {
+      console.error("Error loading app ratings:", error);
       toast({
         title: "Error",
-        description: "Failed to load app ratings",
+        description: error?.data?.message || error?.message || "Failed to load app ratings",
         status: "error",
-        duration: 3000,
+        duration: 5000,
       });
     } finally {
       setIsLoadingApp(false);
@@ -85,14 +91,36 @@ export default function RatingsPage() {
         setPlatformStats(res.stats || null);
       }
     } catch (error) {
+      console.error("Error loading platform feedback:", error);
       toast({
         title: "Error",
-        description: "Failed to load platform feedback",
+        description: error?.data?.message || error?.message || "Failed to load platform feedback",
         status: "error",
-        duration: 3000,
+        duration: 5000,
       });
     } finally {
       setIsLoadingPlatform(false);
+    }
+  };
+
+  const loadProductRatings = async () => {
+    setIsLoadingProduct(true);
+    try {
+      const res = await getProductRatings().unwrap();
+      if (res.status === "Success") {
+        setProductRatings(res.data || []);
+        setProductStats(res.stats || null);
+      }
+    } catch (error) {
+      console.error("Error loading product ratings:", error);
+      toast({
+        title: "Error",
+        description: error?.data?.message || error?.message || "Failed to load product ratings",
+        status: "error",
+        duration: 5000,
+      });
+    } finally {
+      setIsLoadingProduct(false);
     }
   };
 
@@ -119,6 +147,7 @@ export default function RatingsPage() {
         <TabList>
           <Tab>App Ratings</Tab>
           <Tab>Platform Feedback</Tab>
+          <Tab>Product Ratings & Comments</Tab>
         </TabList>
 
         <TabPanels>
@@ -323,8 +352,84 @@ export default function RatingsPage() {
                               <Badge>{feedback.category || "general"}</Badge>
                             </Td>
                             <Td>
-                              <Text fontSize="sm" maxW="300px" isTruncated>
+                              <Text fontSize="sm" maxW="400px" whiteSpace="pre-wrap" wordBreak="break-word">
                                 {feedback.feedback || "No feedback provided"}
+                              </Text>
+                            </Td>
+                          </Tr>
+                        ))
+                      )}
+                    </Tbody>
+                  </Table>
+                </Box>
+              )}
+            </VStack>
+          </TabPanel>
+
+          {/* Product Ratings & Comments Tab */}
+          <TabPanel>
+            <VStack align="stretch" spacing={4}>
+              {/* Stats */}
+              {productStats && (
+                <HStack spacing={4} flexWrap="wrap">
+                  <Stat>
+                    <StatLabel>Total Ratings</StatLabel>
+                    <StatNumber>{productStats.total}</StatNumber>
+                  </Stat>
+                  <Stat>
+                    <StatLabel>Average Rating</StatLabel>
+                    <StatNumber>{productStats.average?.toFixed(1) || "0.0"}</StatNumber>
+                    <StatHelpText>/ 5.0</StatHelpText>
+                  </Stat>
+                </HStack>
+              )}
+
+              {/* Product Ratings Table */}
+              {isLoadingProduct ? (
+                <Center p={8}>
+                  <Spinner size="xl" />
+                </Center>
+              ) : (
+                <Box overflowX="auto">
+                  <Table variant="simple">
+                    <Thead>
+                      <Tr>
+                        <Th>Date</Th>
+                        <Th>User</Th>
+                        <Th>Product</Th>
+                        <Th>Rating</Th>
+                        <Th>Comment</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {productRatings.length === 0 ? (
+                        <Tr>
+                          <Td colSpan={5} textAlign="center">
+                            <Text color="gray.500">No product ratings found</Text>
+                          </Td>
+                        </Tr>
+                      ) : (
+                        productRatings.map((rating) => (
+                          <Tr key={rating._id}>
+                            <Td>
+                              {new Date(rating.createdAt).toLocaleDateString()}
+                            </Td>
+                            <Td>
+                              {rating.userName || rating.userEmail || "Anonymous"}
+                            </Td>
+                            <Td>
+                              <Text fontSize="sm" fontWeight="medium">
+                                {rating.productId?.name || "Unknown Product"}
+                              </Text>
+                            </Td>
+                            <Td>
+                              <Badge colorScheme={getRatingColor(rating.rating)}>
+                                {rating.rating} / 5
+                              </Badge>
+                            </Td>
+                            <Td>
+                              <Text fontSize="sm" maxW="400px" whiteSpace="pre-wrap" wordBreak="break-word">
+                                {rating.comment || "No comment"}
                               </Text>
                             </Td>
                           </Tr>

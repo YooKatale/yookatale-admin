@@ -14,7 +14,7 @@ export const ratingsApiSlice = apiSlice.injectEndpoints({
         
         const queryString = queryParams.toString();
         return {
-          url: `${BACKEND_URL}/ratings/app${queryString ? `?${queryString}` : ''}`,
+          url: `${BACKEND_URL}/api/ratings/app${queryString ? `?${queryString}` : ''}`,
           method: "GET",
         };
       },
@@ -29,7 +29,15 @@ export const ratingsApiSlice = apiSlice.injectEndpoints({
         
         const queryString = queryParams.toString();
         return {
-          url: `${BACKEND_URL}/ratings/platform${queryString ? `?${queryString}` : ''}`,
+          url: `${BACKEND_URL}/api/ratings/platform${queryString ? `?${queryString}` : ''}`,
+          method: "GET",
+        };
+      },
+    }),
+    getProductRatings: builder.mutation({
+      query: () => {
+        return {
+          url: `${BACKEND_URL}/api/ratings/products`,
           method: "GET",
         };
       },
@@ -40,4 +48,5 @@ export const ratingsApiSlice = apiSlice.injectEndpoints({
 export const {
   useGetAppRatingsMutation,
   useGetPlatformFeedbackMutation,
+  useGetProductRatingsMutation,
 } = ratingsApiSlice;
