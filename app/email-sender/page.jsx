@@ -28,7 +28,9 @@ import {
   ShoppingCart,
   CheckCircle2,
   XCircle,
-  Loader2
+  Loader2,
+  Upload,
+  FileText
 } from "lucide-react";
 
 const EMAIL_TEMPLATES = [
@@ -122,6 +124,8 @@ export default function EmailSender() {
   const [sending, setSending] = useState(false);
   const [sendingTemplate, setSendingTemplate] = useState(null);
   const [results, setResults] = useState({ success: 0, failed: 0, errors: [], currentIndex: 0, total: 0 });
+  const [uploadedFileName, setUploadedFileName] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
   const toast = useToast();
 
   const parseEmails = (emailString) => {
@@ -136,6 +140,106 @@ export default function EmailSender() {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return email && emailRegex.test(email);
       });
+  };
+
+  // Parse CSV file and extract emails
+  const parseCSV = (csvText) => {
+    const lines = csvText.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+    if (lines.length === 0) return [];
+
+    // Check if first line is a header (common headers: Email, email, Email Address, etc.)
+    const firstLine = lines[0].toLowerCase();
+    const isHeader = firstLine.includes('email') || firstLine.includes('mail');
+    const startIndex = isHeader ? 1 : 0;
+
+    const extractedEmails = [];
+    
+    for (let i = startIndex; i < lines.length; i++) {
+      const line = lines[i];
+      // Handle CSV with quotes and commas
+      const values = line.split(',').map(val => val.trim().replace(/^["']|["']$/g, ''));
+      
+      // Try to find email in each column
+      values.forEach(value => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (emailRegex.test(value)) {
+          extractedEmails.push(value.toLowerCase());
+        }
+      });
+    }
+
+    return extractedEmails;
+  };
+
+  // Handle CSV file upload
+  const handleFileUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload a CSV file (.csv)",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadedFileName(file.name);
+
+    try {
+      const fileText = await file.text();
+      const csvEmails = parseCSV(fileText);
+      
+      if (csvEmails.length === 0) {
+        toast({
+          title: "No emails found",
+          description: "The CSV file doesn't contain any valid email addresses",
+          status: "warning",
+          duration: 3000,
+          isClosable: true,
+        });
+        setIsUploading(false);
+        return;
+      }
+
+      // Get existing emails
+      const existingEmails = parseEmails(emails);
+      const existingSet = new Set(existingEmails.map(e => e.toLowerCase()));
+      
+      // Add new emails from CSV (avoid duplicates)
+      const newEmails = csvEmails.filter(e => !existingSet.has(e));
+      const allEmails = [...existingEmails, ...newEmails];
+
+      // Update textarea with all emails
+      setEmails(allEmails.join('\n'));
+
+      toast({
+        title: "CSV uploaded successfully",
+        description: `Loaded ${csvEmails.length} email(s) from CSV. ${newEmails.length} new, ${csvEmails.length - newEmails.length} duplicate(s) skipped.`,
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+
+    } catch (error) {
+      console.error("Error parsing CSV:", error);
+      toast({
+        title: "Error reading file",
+        description: error.message || "Failed to read CSV file",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsUploading(false);
+      // Reset file input
+      event.target.value = '';
+    }
   };
 
   // Retry function with exponential backoff
@@ -333,11 +437,72 @@ export default function EmailSender() {
           <CardHeader>
             <Heading size="md" color="gray.800">Email Recipients</Heading>
             <Text fontSize="sm" color="gray.500" mt={2}>
-              Paste email addresses separated by commas, semicolons, or new lines
+              Paste email addresses separated by commas, semicolons, or new lines. Or upload a CSV file.
             </Text>
           </CardHeader>
           <CardBody>
             <VStack spacing={4} align="stretch">
+              {/* CSV Upload Section */}
+              <Box
+                p={4}
+                borderWidth="2px"
+                borderStyle="dashed"
+                borderColor="gray.300"
+                borderRadius="lg"
+                bg="gray.50"
+                _hover={{ borderColor: "blue.400", bg: "blue.50" }}
+                transition="all 0.2s"
+              >
+                <input
+                  type="file"
+                  accept=".csv"
+                  onChange={handleFileUpload}
+                  disabled={isUploading || sending}
+                  style={{ display: 'none' }}
+                  id="csv-upload-input"
+                />
+                <label htmlFor="csv-upload-input">
+                  <VStack spacing={2} cursor="pointer">
+                    {isUploading ? (
+                      <>
+                        <Spinner size="lg" color="blue.500" />
+                        <Text fontSize="sm" color="gray.600">Reading CSV file...</Text>
+                      </>
+                    ) : (
+                      <>
+                        <Upload size={32} className="text-blue-500" />
+                        <Text fontSize="sm" fontWeight="semibold" color="gray.700">
+                          {uploadedFileName ? `Uploaded: ${uploadedFileName}` : "Click to upload CSV file"}
+                        </Text>
+                        <Text fontSize="xs" color="gray.500">
+                          Supports CSV files with email column (with or without header)
+                        </Text>
+                      </>
+                    )}
+                  </VStack>
+                </label>
+                {uploadedFileName && !isUploading && (
+                  <HStack mt={2} justify="center">
+                    <FileText size={16} className="text-green-500" />
+                    <Text fontSize="xs" color="green.600">
+                      {uploadedFileName}
+                    </Text>
+                    <Button
+                      size="xs"
+                      variant="ghost"
+                      onClick={() => {
+                        setUploadedFileName(null);
+                        document.getElementById('csv-upload-input').value = '';
+                      }}
+                    >
+                      Clear
+                    </Button>
+                  </HStack>
+                )}
+              </Box>
+
+              <Divider />
+
               <Textarea
                 value={emails}
                 onChange={(e) => setEmails(e.target.value)}
@@ -345,6 +510,7 @@ export default function EmailSender() {
                 minH="200px"
                 fontSize="sm"
                 resize="vertical"
+                isDisabled={sending}
               />
               <HStack justify="space-between">
                 <Text fontSize="sm" color="gray.600">
@@ -352,14 +518,26 @@ export default function EmailSender() {
                     ? `${parseEmails(emails).length} valid email(s) detected`
                     : "No valid emails detected"}
                 </Text>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setEmails("")}
-                  isDisabled={!emails || sending}
-                >
-                  Clear
-                </Button>
+                <HStack spacing={2}>
+                  {uploadedFileName && (
+                    <Badge colorScheme="green" fontSize="xs">
+                      CSV Loaded
+                    </Badge>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      setEmails("");
+                      setUploadedFileName(null);
+                      const fileInput = document.getElementById('csv-upload-input');
+                      if (fileInput) fileInput.value = '';
+                    }}
+                    isDisabled={!emails || sending}
+                  >
+                    Clear All
+                  </Button>
+                </HStack>
               </HStack>
             </VStack>
           </CardBody>
