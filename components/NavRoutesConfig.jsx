@@ -44,6 +44,16 @@ export const SideNavRoutes=[
       path: "/partners"
     },
     {
+      name: "Seller Stores",
+      icon: Store,
+      path: "/seller-stores"
+    },
+    {
+      name: "Seller Listings",
+      icon: ClipboardCheck,
+      path: "/seller-listings"
+    },
+    {
       name: "Subscriptions",
       icon: HiCreditCard,
       path: "/subscriptions"
