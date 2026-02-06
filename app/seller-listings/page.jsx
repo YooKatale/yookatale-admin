@@ -3,136 +3,187 @@
 import React, { useState } from "react";
 import {
   useFetchListingsQueueQuery,
-  useApproveListingMutation,
-  useRejectListingMutation,
 } from "@Slices/sellerListingsApiSlice";
-import { Box } from "@chakra-ui/react";
+import {
+  Box,
+  Heading,
+  Button,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Badge,
+  Spinner,
+  Text,
+  Alert,
+  AlertIcon,
+  useDisclosure,
+  Input,
+  HStack,
+  InputGroup,
+  InputLeftElement,
+} from "@chakra-ui/react";
+import ListingApprovalModal from "@components/modals/ListingApprovalModal";
+import { SearchIcon, ViewIcon } from "@chakra-ui/icons";
 
 export default function SellerListingsPage() {
   const [status, setStatus] = useState("pending");
+  const [selectedListing, setSelectedListing] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const { data: listings, isLoading, isError, error, refetch } = useFetchListingsQueueQuery(status);
-  const [approveListing] = useApproveListingMutation();
-  const [rejectListing] = useRejectListingMutation();
-  const [rejectReason, setRejectReason] = useState({});
-  const [loadingId, setLoadingId] = useState(null);
 
-  const handleApprove = async (listingId) => {
-    setLoadingId(listingId);
-    try {
-      await approveListing(listingId).unwrap();
-      refetch();
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoadingId(null);
-    }
+  const handleViewDetails = (listing) => {
+    setSelectedListing(listing);
+    onOpen();
   };
 
-  const handleReject = async (listingId) => {
-    const reason = rejectReason[listingId] || "";
-    setLoadingId(listingId);
-    try {
-      await rejectListing({ listingId, reason }).unwrap();
-      setRejectReason((p) => ({ ...p, [listingId]: "" }));
-      refetch();
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoadingId(null);
+  const handleModalSuccess = () => {
+    refetch();
+  };
+
+  const filteredListings = listings?.filter((listing) => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      listing.title?.toLowerCase().includes(query) ||
+      listing.sellerId?.email?.toLowerCase().includes(query) ||
+      listing.categoryId?.name?.toLowerCase().includes(query) ||
+      [listing.sellerId?.firstname, listing.sellerId?.lastname]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+        .includes(query)
+    );
+  }) || [];
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "approved":
+        return "green";
+      case "rejected":
+        return "red";
+      case "pending":
+        return "yellow";
+      default:
+        return "gray";
     }
   };
 
   return (
-    <Box marginTop={20}>
-      <h1 className="text-2xl font-bold mb-4 text-center">Seller Listings Queue</h1>
-      <div className="mb-4 flex gap-2 justify-center">
-        <button
-          type="button"
-          onClick={() => setStatus("pending")}
-          className={`px-4 py-2 rounded ${status === "pending" ? "bg-green-600 text-white" : "bg-gray-200"}`}
-        >
-          Pending
-        </button>
-        <button
-          type="button"
-          onClick={() => setStatus("approved")}
-          className={`px-4 py-2 rounded ${status === "approved" ? "bg-green-600 text-white" : "bg-gray-200"}`}
-        >
-          Approved
-        </button>
-        <button
-          type="button"
-          onClick={() => setStatus("rejected")}
-          className={`px-4 py-2 rounded ${status === "rejected" ? "bg-green-600 text-white" : "bg-gray-200"}`}
-        >
-          Rejected
-        </button>
-      </div>
+    <Box marginTop={20} px={4} maxW="7xl" mx="auto">
+      <Heading size="lg" mb={6} textAlign="center">
+        Seller Listings Queue
+      </Heading>
+
+      {/* Search and Filters */}
+      <HStack mb={6} spacing={4} flexWrap="wrap">
+        <InputGroup maxW="400px">
+          <InputLeftElement pointerEvents="none">
+            <SearchIcon color="gray.300" />
+          </InputLeftElement>
+          <Input
+            placeholder="Search listings by title, seller, or category..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </InputGroup>
+        <Tabs index={status === "pending" ? 0 : status === "approved" ? 1 : 2} onChange={(index) => {
+          const statuses = ["pending", "approved", "rejected"];
+          setStatus(statuses[index]);
+        }}>
+          <TabList>
+            <Tab>Pending</Tab>
+            <Tab>Approved</Tab>
+            <Tab>Rejected</Tab>
+          </TabList>
+        </Tabs>
+      </HStack>
+
       {isLoading ? (
-        <p className="text-center">Loading...</p>
+        <Box textAlign="center" py={8}>
+          <Spinner size="xl" />
+          <Text mt={4} color="gray.500">
+            Loading listings...
+          </Text>
+        </Box>
       ) : isError ? (
-        <p className="text-center text-red-600">Error: {error?.message}</p>
-      ) : listings?.length > 0 ? (
-        <div className="overflow-x-auto">
-          <table className="divide-y divide-gray-200 w-full max-w-4xl mx-auto">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Seller</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                {status === "pending" && (
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {listings.map((listing) => (
-                <tr key={listing._id} className="bg-white hover:bg-gray-50 border-b">
-                  <td className="px-4 py-3">{listing.title}</td>
-                  <td className="px-4 py-3">
-                    {listing.sellerId
-                      ? [listing.sellerId.firstname, listing.sellerId.lastname].filter(Boolean).join(" ") || listing.sellerId.email
-                      : "—"}
-                  </td>
-                  <td className="px-4 py-3">{listing.categoryId?.name ?? "—"}</td>
-                  <td className="px-4 py-3">UGX {(listing.price ?? 0).toLocaleString()}</td>
-                  <td className="px-4 py-3">{listing.status}</td>
-                  {status === "pending" && (
-                    <td className="px-4 py-3">
-                      <input
-                        type="text"
-                        placeholder="Rejection reason (optional)"
-                        value={rejectReason[listing._id] ?? ""}
-                        onChange={(e) => setRejectReason((p) => ({ ...p, [listing._id]: e.target.value }))}
-                        className="border rounded px-2 py-1 text-sm mr-2 w-40"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handleApprove(listing._id)}
-                        disabled={loadingId === listing._id}
-                        className="bg-green-600 text-white px-3 py-1 rounded text-sm mr-1 disabled:opacity-50"
-                      >
-                        Approve
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleReject(listing._id)}
-                        disabled={loadingId === listing._id}
-                        className="bg-red-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
-                      >
-                        Reject
-                      </button>
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Alert status="error">
+          <AlertIcon />
+          {error?.message || "Failed to load listings"}
+        </Alert>
+      ) : filteredListings.length === 0 ? (
+        <Box textAlign="center" py={12}>
+          <Text fontSize="lg" color="gray.500">
+            {searchQuery ? "No listings match your search." : `No ${status} listings found.`}
+          </Text>
+        </Box>
       ) : (
-        <p className="text-center text-gray-500">No listings found.</p>
+        <Box overflowX="auto">
+          <Table variant="simple" size="md">
+            <Thead>
+              <Tr>
+                <Th>Title</Th>
+                <Th>Seller</Th>
+                <Th>Category</Th>
+                <Th>Price</Th>
+                <Th>Status</Th>
+                <Th>Actions</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {filteredListings.map((listing) => (
+                <Tr key={listing._id} _hover={{ bg: "gray.50" }}>
+                  <Td fontWeight="medium">{listing.title}</Td>
+                  <Td>
+                    {listing.sellerId
+                      ? [listing.sellerId.firstname, listing.sellerId.lastname]
+                          .filter(Boolean)
+                          .join(" ") || listing.sellerId.email
+                      : "—"}
+                  </Td>
+                  <Td>{listing.categoryId?.name ?? "—"}</Td>
+                  <Td>UGX {(listing.price ?? 0).toLocaleString()}</Td>
+                  <Td>
+                    <Badge colorScheme={getStatusColor(listing.status)}>
+                      {listing.status?.toUpperCase()}
+                    </Badge>
+                  </Td>
+                  <Td>
+                    <Button
+                      size="sm"
+                      leftIcon={<ViewIcon />}
+                      onClick={() => handleViewDetails(listing)}
+                      colorScheme="blue"
+                      variant="outline"
+                    >
+                      View Details
+                    </Button>
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </Box>
+      )}
+
+      {selectedListing && (
+        <ListingApprovalModal
+          isOpen={isOpen}
+          onClose={() => {
+            onClose();
+            setSelectedListing(null);
+          }}
+          listing={selectedListing}
+          onSuccess={handleModalSuccess}
+        />
       )}
     </Box>
   );
