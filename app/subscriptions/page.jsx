@@ -64,7 +64,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@components/ui/alert-dialog";
-import { Loader2, Plus, Pencil, Trash2, Calendar, UtensilsCrossed } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Calendar, UtensilsCrossed, ChevronUp, ChevronDown } from "lucide-react";
 import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
 
@@ -149,24 +149,25 @@ export default function SubscriptionsPage() {
 
   const openAddPlan = () => {
     setEditingPlan(null);
-    setPlanForm({ type: "standard", price: "", name: "", details: "", previousPrice: "" });
+    setPlanForm({ type: "standard", price: "", name: "", details: [], previousPrice: "" });
     onPlanOpen();
   };
 
   const openEditPlan = (p) => {
     setEditingPlan(p);
+    const detailsArray = Array.isArray(p?.details) ? p.details : (p?.details ? String(p.details).split("\n").filter(Boolean) : []);
     setPlanForm({
       type: p?.type || "",
       price: p?.price ?? "",
       name: p?.name || "",
-      details: Array.isArray(p?.details) ? p.details.join("\n") : "",
+      details: detailsArray,
       previousPrice: p?.previousPrice ?? "",
     });
     onEditOpen();
   };
 
   const handleSavePlan = async () => {
-    const details = planForm.details ? planForm.details.split("\n").filter(Boolean) : [];
+    const details = Array.isArray(planForm.details) ? planForm.details.filter(Boolean) : (planForm.details ? String(planForm.details).split("\n").filter(Boolean) : []);
     const payload = {
       type: planForm.type,
       price: Number(planForm.price),
@@ -407,33 +408,37 @@ export default function SubscriptionsPage() {
       </Tabs>
 
       {/* Add plan modal */}
-      <Modal isOpen={isPlanOpen} onClose={onPlanClose} size="md">
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Add subscription plan</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
+      <Modal isOpen={isPlanOpen} onClose={onPlanClose} size="xl" isCentered scrollBehavior="inside">
+        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
+        <ModalContent maxH="90vh" borderRadius="xl" boxShadow="2xl">
+          <ModalHeader fontSize="xl" fontWeight="bold" color="gray.800" borderBottomWidth="1px" py={5}>
+            Add subscription plan
+          </ModalHeader>
+          <ModalCloseButton top={4} right={4} size="lg" />
+          <ModalBody py={6} overflowY="auto">
             <PlanForm form={planForm} setForm={setPlanForm} />
           </ModalBody>
-          <ModalFooter>
-            <Button variant="ghost" mr={2} onClick={onPlanClose}>Cancel</Button>
-            <Button colorScheme="green" onClick={handleSavePlan}>Save</Button>
+          <ModalFooter borderTopWidth="1px" py={4} gap={3}>
+            <Button variant="outline" onClick={onPlanClose}>Cancel</Button>
+            <Button colorScheme="green" size="md" onClick={handleSavePlan}>Save Plan</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
 
       {/* Edit plan modal */}
-      <Modal isOpen={isEditOpen} onClose={onEditClose} size="md">
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Edit plan</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
+      <Modal isOpen={isEditOpen} onClose={onEditClose} size="xl" isCentered scrollBehavior="inside">
+        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
+        <ModalContent maxH="90vh" borderRadius="xl" boxShadow="2xl">
+          <ModalHeader fontSize="xl" fontWeight="bold" color="gray.800" borderBottomWidth="1px" py={5}>
+            Edit plan
+          </ModalHeader>
+          <ModalCloseButton top={4} right={4} size="lg" />
+          <ModalBody py={6} overflowY="auto">
             <PlanForm form={planForm} setForm={setPlanForm} />
           </ModalBody>
-          <ModalFooter>
-            <Button variant="ghost" mr={2} onClick={onEditClose}>Cancel</Button>
-            <Button colorScheme="green" onClick={handleSavePlan}>Update</Button>
+          <ModalFooter borderTopWidth="1px" py={4} gap={3}>
+            <Button variant="outline" onClick={onEditClose}>Cancel</Button>
+            <Button colorScheme="green" size="md" onClick={handleSavePlan}>Update Plan</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
@@ -442,55 +447,183 @@ export default function SubscriptionsPage() {
 }
 
 function PlanForm({ form, setForm }) {
+  const benefits = Array.isArray(form.details) ? form.details : (form.details ? String(form.details).split("\n").filter(Boolean) : []);
+
+  const setBenefits = (arr) => {
+    setForm((f) => ({ ...f, details: arr }));
+  };
+
+  const addBenefit = () => {
+    setBenefits([...benefits, ""]);
+  };
+
+  const updateBenefit = (index, value) => {
+    const next = [...benefits];
+    next[index] = value;
+    setBenefits(next);
+  };
+
+  const removeBenefit = (index) => {
+    setBenefits(benefits.filter((_, i) => i !== index));
+  };
+
+  const moveUp = (index) => {
+    if (index <= 0) return;
+    const next = [...benefits];
+    [next[index - 1], next[index]] = [next[index], next[index - 1]];
+    setBenefits(next);
+  };
+
+  const moveDown = (index) => {
+    if (index >= benefits.length - 1) return;
+    const next = [...benefits];
+    [next[index], next[index + 1]] = [next[index + 1], next[index]];
+    setBenefits(next);
+  };
+
   return (
-    <VStack spacing={4} align="stretch">
-      <FormControl>
-        <FormLabel>Type</FormLabel>
-        <Select
-          value={form.type}
-          onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}
-        >
-          <option value="standard">Standard</option>
-          <option value="premium">Premium</option>
-          <option value="family">Family</option>
-          <option value="business">Business</option>
-        </Select>
-      </FormControl>
-      <FormControl>
-        <FormLabel>Name</FormLabel>
-        <Input
-          value={form.name}
-          onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-          placeholder="e.g. Monthly Standard"
-        />
-      </FormControl>
-      <FormControl>
-        <FormLabel>Price (UGX)</FormLabel>
-        <Input
-          type="number"
-          value={form.price}
-          onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
-          placeholder="e.g. 50000"
-        />
-      </FormControl>
-      <FormControl>
-        <FormLabel>Previous price (UGX, optional)</FormLabel>
-        <Input
-          type="number"
-          value={form.previousPrice}
-          onChange={(e) => setForm((f) => ({ ...f, previousPrice: e.target.value }))}
-          placeholder="e.g. 65000"
-        />
-      </FormControl>
-      <FormControl>
-        <FormLabel>Details (one per line)</FormLabel>
-        <Textarea
-          value={form.details}
-          onChange={(e) => setForm((f) => ({ ...f, details: e.target.value }))}
-          placeholder="Feature one&#10;Feature two"
-          rows={4}
-        />
-      </FormControl>
+    <VStack spacing={6} align="stretch">
+      <SimpleGrid columns={{ base: 1, md: 2 }} spacing={5}>
+        <FormControl isRequired>
+          <FormLabel fontWeight="600" color="gray.700">Plan Type</FormLabel>
+          <Select
+            value={form.type}
+            onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}
+            size="md"
+            borderRadius="lg"
+            borderColor="gray.300"
+            _focus={{ borderColor: "green.500", boxShadow: "0 0 0 1px var(--chakra-colors-green-500)" }}
+          >
+            <option value="standard">Standard</option>
+            <option value="premium">Premium</option>
+            <option value="family">Family</option>
+            <option value="business">Business</option>
+          </Select>
+        </FormControl>
+        <FormControl isRequired>
+          <FormLabel fontWeight="600" color="gray.700">Display Name</FormLabel>
+          <Input
+            value={form.name}
+            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+            placeholder="e.g. Premium"
+            size="md"
+            borderRadius="lg"
+            borderColor="gray.300"
+          />
+        </FormControl>
+      </SimpleGrid>
+
+      <SimpleGrid columns={{ base: 1, md: 2 }} spacing={5}>
+        <FormControl isRequired>
+          <FormLabel fontWeight="600" color="gray.700">Price (UGX)</FormLabel>
+          <Input
+            type="number"
+            min={0}
+            value={form.price}
+            onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
+            placeholder="e.g. 30000"
+            size="md"
+            borderRadius="lg"
+            borderColor="gray.300"
+          />
+        </FormControl>
+        <FormControl>
+          <FormLabel fontWeight="600" color="gray.700">Previous Price (UGX, optional)</FormLabel>
+          <Input
+            type="number"
+            min={0}
+            value={form.previousPrice}
+            onChange={(e) => setForm((f) => ({ ...f, previousPrice: e.target.value }))}
+            placeholder="e.g. 40000"
+            size="md"
+            borderRadius="lg"
+            borderColor="gray.300"
+          />
+          <Text fontSize="xs" color="gray.500" mt={1}>Shown as strike-through on the subscription page</Text>
+        </FormControl>
+      </SimpleGrid>
+
+      <Box>
+        <Flex justify="space-between" align="center" mb={3}>
+          <FormLabel fontWeight="600" color="gray.700" mb={0}>Plan Benefits</FormLabel>
+          <Button
+            leftIcon={<Plus size={16} />}
+            size="sm"
+            colorScheme="green"
+            variant="outline"
+            onClick={addBenefit}
+          >
+            Add Benefit
+          </Button>
+        </Flex>
+        <Text fontSize="sm" color="gray.500" mb={3}>
+          Reorder benefits using the arrows. Top items appear first on the subscription page.
+        </Text>
+        <VStack spacing={2} align="stretch">
+          {benefits.map((benefit, index) => (
+            <Flex
+              key={index}
+              gap={2}
+              align="center"
+              p={3}
+              bg="gray.50"
+              borderRadius="lg"
+              borderWidth="1px"
+              borderColor="gray.200"
+              _hover={{ borderColor: "gray.300" }}
+            >
+              <HStack spacing={1} flexShrink={0}>
+                <IconButton
+                  aria-label="Move up"
+                  icon={<ChevronUp size={16} />}
+                  size="xs"
+                  variant="ghost"
+                  onClick={() => moveUp(index)}
+                  isDisabled={index === 0}
+                />
+                <IconButton
+                  aria-label="Move down"
+                  icon={<ChevronDown size={16} />}
+                  size="xs"
+                  variant="ghost"
+                  onClick={() => moveDown(index)}
+                  isDisabled={index === benefits.length - 1}
+                />
+              </HStack>
+              <Input
+                flex={1}
+                value={benefit}
+                onChange={(e) => updateBenefit(index, e.target.value)}
+                placeholder={`Benefit ${index + 1}`}
+                size="sm"
+                borderRadius="md"
+                borderColor="gray.300"
+              />
+              <IconButton
+                aria-label="Remove"
+                icon={<Trash2 size={14} />}
+                size="sm"
+                variant="ghost"
+                colorScheme="red"
+                onClick={() => removeBenefit(index)}
+              />
+            </Flex>
+          ))}
+          {benefits.length === 0 && (
+            <Box
+              p={6}
+              textAlign="center"
+              borderWidth="2px"
+              borderStyle="dashed"
+              borderColor="gray.200"
+              borderRadius="lg"
+              bg="gray.50"
+            >
+              <Text color="gray.500" fontSize="sm">No benefits yet. Click &quot;Add Benefit&quot; to add plan features.</Text>
+            </Box>
+          )}
+        </VStack>
+      </Box>
     </VStack>
   );
 }
