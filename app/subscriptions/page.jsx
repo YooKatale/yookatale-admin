@@ -166,6 +166,8 @@ export default function SubscriptionsPage() {
     onEditOpen();
   };
 
+  const [saving, setSaving] = useState(false);
+
   const handleSavePlan = async () => {
     const details = Array.isArray(planForm.details) ? planForm.details.filter(Boolean) : (planForm.details ? String(planForm.details).split("\n").filter(Boolean) : []);
     const payload = {
@@ -175,29 +177,72 @@ export default function SubscriptionsPage() {
       details,
       previousPrice: planForm.previousPrice ? Number(planForm.previousPrice) : null,
     };
+    setSaving(true);
     try {
       if (editingPlan) {
         await updatePackage({ id: editingPlan._id, ...payload }).unwrap();
-        toast({ title: "Updated", description: "Plan updated successfully" });
         onEditClose();
+        loadPackages();
+        toast({
+          title: "Plan updated",
+          description: "Your changes are now live on the subscription page. Users will see the updated plan details.",
+          status: "success",
+          duration: 6000,
+          isClosable: true,
+          position: "top-right",
+          containerStyle: { maxWidth: "420px" },
+        });
       } else {
         await createPackage(payload).unwrap();
-        toast({ title: "Created", description: "Plan created successfully" });
         onPlanClose();
+        loadPackages();
+        toast({
+          title: "Plan created",
+          description: "The new plan has been added and is now visible on the subscription page.",
+          status: "success",
+          duration: 6000,
+          isClosable: true,
+          position: "top-right",
+          containerStyle: { maxWidth: "420px" },
+        });
       }
-      loadPackages();
     } catch (e) {
-      toast({ variant: "destructive", title: "Error", description: e?.data?.message || "Failed to save" });
+      const msg = e?.data?.message || e?.message || "Failed to save. Please check your connection and try again.";
+      toast({
+        title: "Update failed",
+        description: msg,
+        status: "error",
+        duration: 8000,
+        isClosable: true,
+        position: "top-right",
+        containerStyle: { maxWidth: "420px" },
+      });
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleDeletePlan = async (id) => {
     try {
       await deletePackage(id).unwrap();
-      toast({ title: "Deleted", description: "Plan removed" });
       loadPackages();
+      toast({
+        title: "Plan deleted",
+        description: "The plan has been removed from the subscription page.",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+        position: "top-right",
+      });
     } catch (e) {
-      toast({ variant: "destructive", title: "Error", description: e?.data?.message });
+      toast({
+        title: "Delete failed",
+        description: e?.data?.message || "Failed to delete the plan.",
+        status: "error",
+        duration: 6000,
+        isClosable: true,
+        position: "top-right",
+      });
     }
   };
 
@@ -437,8 +482,8 @@ export default function SubscriptionsPage() {
             <PlanForm form={planForm} setForm={setPlanForm} />
           </ModalBody>
           <ModalFooter borderTopWidth="1px" py={4} gap={3}>
-            <Button variant="outline" onClick={onEditClose}>Cancel</Button>
-            <Button colorScheme="green" size="md" onClick={handleSavePlan}>Update Plan</Button>
+            <Button variant="outline" onClick={onEditClose} isDisabled={saving}>Cancel</Button>
+            <Button colorScheme="green" size="md" onClick={handleSavePlan} isLoading={saving} loadingText="Updating...">Update Plan</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
