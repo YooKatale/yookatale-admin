@@ -9,6 +9,8 @@ import {
   useSubscriptionPackageDeleteMutation,
   useMealCalendarOverridesFetchMutation,
   useMealCalendarOverrideUpsertMutation,
+  useMealSlotsFetchMutation,
+  useMealSlotUpsertMutation,
 } from "@Slices/yoocacrdApiSlice";
 import {
   Box,
@@ -65,6 +67,7 @@ import {
   AlertDialogTrigger,
 } from "@components/ui/alert-dialog";
 import { Loader2, Plus, Pencil, Trash2, Calendar, UtensilsCrossed, ChevronUp, ChevronDown } from "lucide-react";
+import { BACKEND_URL } from "@constants/constant";
 import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
 
@@ -78,9 +81,11 @@ export default function SubscriptionsPage() {
   const [subscriptionsData, setSubscriptionsData] = useState([]);
   const [packages, setPackages] = useState([]);
   const [overrides, setOverrides] = useState([]);
+  const [slots, setSlots] = useState([]);
   const [isLoading, setLoading] = useState(false);
   const [loadingPackages, setLoadingPackages] = useState(false);
   const [loadingOverrides, setLoadingOverrides] = useState(false);
+  const [loadingSlots, setLoadingSlots] = useState(false);
 
   const [fetchSubscriptions] = useSubscriptionsFetchMutation();
   const [approveSubscription] = useSubscriptionsApproveMutation();
@@ -90,6 +95,8 @@ export default function SubscriptionsPage() {
   const [deletePackage] = useSubscriptionPackageDeleteMutation();
   const [fetchOverrides] = useMealCalendarOverridesFetchMutation();
   const [upsertOverride] = useMealCalendarOverrideUpsertMutation();
+  const [fetchSlots] = useMealSlotsFetchMutation();
+  const [upsertSlot] = useMealSlotUpsertMutation();
 
   const { toast } = useToast();
   const { isOpen: isPlanOpen, onOpen: onPlanOpen, onClose: onPlanClose } = useDisclosure();
@@ -129,6 +136,18 @@ export default function SubscriptionsPage() {
       setLoadingOverrides(false);
     }
   }, [fetchOverrides, toast]);
+
+  const loadSlots = useCallback(async () => {
+    setLoadingSlots(true);
+    try {
+      const res = await fetchSlots().unwrap();
+      if (res?.status === "Success") setSlots(res?.data || []);
+    } catch (e) {
+      toast({ variant: "destructive", title: "Error", description: e?.data?.message || "Failed to load slots" });
+    } finally {
+      setLoadingSlots(false);
+    }
+  }, [fetchSlots, toast]);
 
   useEffect(() => {
     loadSubscriptions();
@@ -258,7 +277,7 @@ export default function SubscriptionsPage() {
           <Tab fontWeight="600" onClick={loadPackages}>
             <HStack><UtensilsCrossed size={18} />Meal Plans</HStack>
           </Tab>
-          <Tab fontWeight="600" onClick={loadOverrides}>
+          <Tab fontWeight="600" onClick={() => { loadOverrides(); loadSlots(); }}>
             <HStack><Calendar size={18} />Meal Calendars</HStack>
           </Tab>
         </TabList>
@@ -428,21 +447,24 @@ export default function SubscriptionsPage() {
             </Card>
           </TabPanel>
 
-          {/* Meal Calendars — image overrides */}
+          {/* Meal Calendars — full meal slot CRUD */}
           <TabPanel px={0}>
             <Card>
               <CardBody>
-                <Text fontWeight="600" mb={2}>Meal calendar images</Text>
+                <Text fontWeight="600" mb={2}>Meal calendar — add, edit meals, prices & images</Text>
                 <Text fontSize="sm" color="gray.600" mb={4}>
-                  Set image URLs for each meal slot. These override defaults on the subscription page.
+                  Edit meal name, description, quantity, weekly/monthly prices, and upload images per slot. Syncs for low & middle income.
                 </Text>
-                {loadingOverrides ? (
+                {loadingSlots ? (
                   <Center py={8}><Spinner size="lg" /></Center>
                 ) : (
-                  <MealCalendarGrid
+                  <MealSlotGrid
+                    slots={slots}
                     overrides={overrides}
+                    upsertSlot={upsertSlot}
                     upsertOverride={upsertOverride}
                     toast={toast}
+                    loadSlots={loadSlots}
                     loadOverrides={loadOverrides}
                   />
                 )}
@@ -673,10 +695,20 @@ function PlanForm({ form, setForm }) {
   );
 }
 
-function MealCalendarGrid({ overrides, upsertOverride, toast, loadOverrides }) {
+function MealSlotGrid({ slots, overrides, upsertSlot, upsertOverride, toast, loadSlots, loadOverrides }) {
   const [incomeLevel, setIncomeLevel] = useState("middle");
   const [prepType, setPrepType] = useState("ready-to-eat");
-  const [saving, setSaving] = useState(null);
+  const [editingSlot, setEditingSlot] = useState(null);
+  const { isOpen: isSlotModalOpen, onOpen: onSlotModalOpen, onClose: onSlotModalClose } = useDisclosure();
+
+  const getSlot = (day, mealType) =>
+    slots.find(
+      (s) =>
+        s.incomeLevel === incomeLevel &&
+        s.prepType === prepType &&
+        s.day === day &&
+        s.mealType === mealType
+    );
 
   const getOverride = (day, mealType) =>
     overrides.find(
@@ -687,129 +719,261 @@ function MealCalendarGrid({ overrides, upsertOverride, toast, loadOverrides }) {
         o.mealType === mealType
     );
 
-  const handleSave = async (day, mealType, imageUrl) => {
-    const slotKey = `${incomeLevel}-${prepType}-${day}-${mealType}`;
-    setSaving(slotKey);
+  const openEditor = (day, mealType) => {
+    const slot = getSlot(day, mealType);
+    const override = getOverride(day, mealType);
+    setEditingSlot({
+      day,
+      mealType,
+      incomeLevel,
+      prepType,
+      mealName: slot?.mealName || "",
+      description: slot?.description || "",
+      quantity: slot?.quantity || "",
+      priceWeekly: slot?.priceWeekly ?? 0,
+      priceMonthly: slot?.priceMonthly ?? 0,
+      imageUrl: slot?.imageUrl || override?.imageUrl || "",
+    });
+    onSlotModalOpen();
+  };
+
+  const handleSaveSlot = async (form) => {
     try {
-      await upsertOverride({ incomeLevel, prepType, day, mealType, imageUrl }).unwrap();
-      toast({ title: "Saved", description: "Image updated" });
-      loadOverrides();
+      await upsertSlot({
+        incomeLevel: form.incomeLevel,
+        prepType: form.prepType,
+        day: form.day,
+        mealType: form.mealType,
+        mealName: form.mealName,
+        description: form.description,
+        quantity: form.quantity,
+        priceWeekly: Number(form.priceWeekly) || 0,
+        priceMonthly: Number(form.priceMonthly) || 0,
+        imageUrl: form.imageUrl || "",
+      }).unwrap();
+      toast({ title: "Saved", description: "Meal slot updated" });
+      loadSlots();
+      if (form.imageUrl) {
+        await upsertOverride({
+          incomeLevel: form.incomeLevel,
+          prepType: form.prepType,
+          day: form.day,
+          mealType: form.mealType,
+          imageUrl: form.imageUrl,
+        }).unwrap();
+        loadOverrides();
+      }
+      onSlotModalClose();
     } catch (e) {
       toast({ variant: "destructive", title: "Error", description: e?.data?.message });
-    } finally {
-      setSaving(null);
     }
   };
 
   return (
-    <VStack align="stretch" spacing={4}>
-      <HStack flexWrap="wrap" gap={2}>
-        <Select
-          w="140px"
-          value={incomeLevel}
-          onChange={(e) => setIncomeLevel(e.target.value)}
-          size="sm"
-        >
-          <option value="middle">Middle income</option>
-          <option value="low">Low income</option>
-        </Select>
-        <Select
-          w="160px"
-          value={prepType}
-          onChange={(e) => setPrepType(e.target.value)}
-          size="sm"
-        >
-          <option value="ready-to-eat">Ready to eat</option>
-          <option value="ready-to-cook">Ready to cook</option>
-        </Select>
-      </HStack>
-      <Box overflowX="auto">
-        <Table size="sm">
-          <Thead>
-            <Tr>
-              <Th>Day</Th>
-              <Th>Breakfast</Th>
-              <Th>Lunch</Th>
-              <Th>Supper</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {DAYS.map((day) => (
-              <Tr key={day}>
-                <Td fontWeight="600" textTransform="capitalize">{day}</Td>
-                {MEAL_TYPES.map((mealType) => {
-                  const o = getOverride(day, mealType);
-                  const slotKey = `${incomeLevel}-${prepType}-${day}-${mealType}`;
-                  return (
-                    <Td key={mealType}>
-                      <MealImageEditor
-                        override={o}
-                        day={day}
-                        mealType={mealType}
-                        onSave={handleSave}
-                        saving={saving}
-                        slotKey={slotKey}
-                      />
-                    </Td>
-                  );
-                })}
+    <>
+      <VStack align="stretch" spacing={4}>
+        <HStack flexWrap="wrap" gap={2}>
+          <Select
+            w="140px"
+            value={incomeLevel}
+            onChange={(e) => setIncomeLevel(e.target.value)}
+            size="sm"
+          >
+            <option value="middle">Middle income</option>
+            <option value="low">Low income</option>
+          </Select>
+          <Select
+            w="160px"
+            value={prepType}
+            onChange={(e) => setPrepType(e.target.value)}
+            size="sm"
+          >
+            <option value="ready-to-eat">Ready to eat</option>
+            <option value="ready-to-cook">Ready to cook</option>
+          </Select>
+        </HStack>
+        <Box overflowX="auto" minW="0" sx={{ WebkitOverflowScrolling: "touch" }}>
+          <Table size="sm" minW="600px">
+            <Thead>
+              <Tr>
+                <Th>Day</Th>
+                <Th>Breakfast</Th>
+                <Th>Lunch</Th>
+                <Th>Supper</Th>
               </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </Box>
+            </Thead>
+            <Tbody>
+              {DAYS.map((day) => (
+                <Tr key={day}>
+                  <Td fontWeight="600" textTransform="capitalize">{day}</Td>
+                  {MEAL_TYPES.map((mealType) => {
+                    const slot = getSlot(day, mealType);
+                    const override = getOverride(day, mealType);
+                    const imgUrl = slot?.imageUrl || override?.imageUrl;
+                    return (
+                      <Td key={mealType}>
+                        <MealSlotCell
+                          slot={slot}
+                          imgUrl={imgUrl}
+                          day={day}
+                          mealType={mealType}
+                          onEdit={() => openEditor(day, mealType)}
+                        />
+                      </Td>
+                    );
+                  })}
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </Box>
+      </VStack>
+
+      <MealSlotEditorModal
+        isOpen={isSlotModalOpen}
+        onClose={() => { onSlotModalClose(); setEditingSlot(null); }}
+        slot={editingSlot}
+        onSave={handleSaveSlot}
+      />
+    </>
+  );
+}
+
+function MealSlotCell({ slot, imgUrl, day, mealType, onEdit }) {
+  return (
+    <VStack align="stretch" spacing={1}>
+      {imgUrl && (
+        <Box pos="relative" w="full" h="16" borderRadius="md" overflow="hidden" bg="gray.100">
+          <Box as="img" src={imgUrl} alt="" w="full" h="full" objectFit="cover" onError={(e) => { e.target.style.display = "none"; }} />
+        </Box>
+      )}
+      {slot?.mealName && <Text fontSize="xs" fontWeight="600" noOfLines={2}>{slot.mealName}</Text>}
+      <Button size="xs" variant="outline" colorScheme="green" onClick={onEdit} leftIcon={<Pencil size={12} />}>
+        Edit
+      </Button>
     </VStack>
   );
 }
 
-function MealImageEditor({ override, day, mealType, onSave, saving, slotKey }) {
-  const [url, setUrl] = useState(override?.imageUrl || "");
-  const [editing, setEditing] = useState(false);
-  const isSaving = saving === slotKey;
+function MealSlotEditorModal({ isOpen, onClose, slot, onSave }) {
+  const [form, setForm] = useState({});
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    setUrl(override?.imageUrl || "");
-  }, [override?.imageUrl]);
+    if (slot) setForm({ ...slot });
+  }, [slot]);
 
-  const save = () => {
-    if (!url.trim()) return;
-    onSave(day, mealType, url.trim());
-    setEditing(false);
+  const handleSubmit = (e) => {
+    e?.preventDefault?.();
+    onSave(form);
   };
 
+  const handleImageUpload = async (e) => {
+    const file = e?.target?.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("image", file);
+      const res = await fetch(`${BACKEND_URL}/api/meal-calendar/upload`, { method: "POST", body: fd });
+      const data = await res.json();
+      if (data?.status === "Success" && data?.data?.imageUrl) {
+        setForm((f) => ({ ...f, imageUrl: data.data.imageUrl }));
+      } else {
+        throw new Error(data?.message || "Upload failed");
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  if (!slot) return null;
+
   return (
-    <VStack align="stretch" spacing={1}>
-      {override?.imageUrl && !editing ? (
-        <Box pos="relative" w="full" h="16" borderRadius="md" overflow="hidden" bg="gray.100">
-          <Box
-            as="img"
-            src={override.imageUrl}
-            alt=""
-            w="full"
-            h="full"
-            objectFit="cover"
-            onError={(e) => { e.target.style.display = "none"; }}
-          />
-        </Box>
-      ) : null}
-      {editing ? (
-        <>
-          <Input
-            size="xs"
-            placeholder="Image URL"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-          />
-          <HStack>
-            <Button size="xs" colorScheme="green" onClick={save} isLoading={isSaving}>Save</Button>
-            <Button size="xs" variant="ghost" onClick={() => { setEditing(false); setUrl(override?.imageUrl || ""); }}>Cancel</Button>
-          </HStack>
-        </>
-      ) : (
-        <Button size="xs" variant="outline" onClick={() => setEditing(true)}>
-          {override?.imageUrl ? "Change image" : "Post image"}
-        </Button>
-      )}
-    </VStack>
+    <Modal isOpen={isOpen} onClose={onClose} size={{ base: "full", md: "lg" }} isCentered scrollBehavior="inside">
+      <ModalOverlay />
+      <ModalContent maxH="90vh" borderRadius="xl">
+        <ModalHeader>Edit meal — {slot.day} {slot.mealType}</ModalHeader>
+        <ModalCloseButton />
+        <form onSubmit={handleSubmit}>
+          <ModalBody py={4}>
+            <VStack spacing={4} align="stretch">
+              <FormControl>
+                <FormLabel>Meal name</FormLabel>
+                <Input
+                  value={form.mealName || ""}
+                  onChange={(e) => setForm((f) => ({ ...f, mealName: e.target.value }))}
+                  placeholder="e.g. Rice with Bean Stew"
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel>Description</FormLabel>
+                <Textarea
+                  value={form.description || ""}
+                  onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                  placeholder="e.g. 200g rice, 100g bean stew..."
+                  rows={2}
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel>Quantity</FormLabel>
+                <Input
+                  value={form.quantity || ""}
+                  onChange={(e) => setForm((f) => ({ ...f, quantity: e.target.value }))}
+                  placeholder="e.g. ~550g"
+                />
+              </FormControl>
+              <SimpleGrid columns={2} spacing={4}>
+                <FormControl>
+                  <FormLabel>Price weekly (UGX)</FormLabel>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={form.priceWeekly ?? ""}
+                    onChange={(e) => setForm((f) => ({ ...f, priceWeekly: e.target.value }))}
+                    placeholder="e.g. 87500"
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Price monthly (UGX)</FormLabel>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={form.priceMonthly ?? ""}
+                    onChange={(e) => setForm((f) => ({ ...f, priceMonthly: e.target.value }))}
+                    placeholder="e.g. 350000"
+                  />
+                </FormControl>
+              </SimpleGrid>
+              <FormControl>
+                <FormLabel>Image (URL or upload)</FormLabel>
+                <HStack spacing={2}>
+                  <Input
+                    value={form.imageUrl || ""}
+                    onChange={(e) => setForm((f) => ({ ...f, imageUrl: e.target.value }))}
+                    placeholder="https://... or upload below"
+                  />
+                  <Button as="label" size="sm" colorScheme="green" cursor="pointer" isLoading={uploading}>
+                    Upload
+                    <input type="file" accept="image/*" hidden onChange={handleImageUpload} />
+                  </Button>
+                </HStack>
+                {form.imageUrl && (
+                  <Box mt={2} w="full" h="24" borderRadius="md" overflow="hidden" bg="gray.100">
+                    <Box as="img" src={form.imageUrl} alt="" w="full" h="full" objectFit="cover" onError={(e) => { e.target.style.display = "none"; }} />
+                  </Box>
+                )}
+              </FormControl>
+            </VStack>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="outline" onClick={onClose}>Cancel</Button>
+            <Button colorScheme="green" type="submit">Save</Button>
+          </ModalFooter>
+        </form>
+      </ModalContent>
+    </Modal>
   );
 }

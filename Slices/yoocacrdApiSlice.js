@@ -70,6 +70,19 @@ export const yoocardApiSlice = apiSlice.injectEndpoints({
         body,
       }),
     }),
+    mealSlotsFetch: builder.mutation({
+      query: (params) => {
+        const q = params ? `?${new URLSearchParams(params).toString()}` : "";
+        return { url: `${BACKEND_URL}/api/meal-calendar/slots${q}`, method: "GET" };
+      },
+    }),
+    mealSlotUpsert: builder.mutation({
+      query: (body) => ({
+        url: `${BACKEND_URL}/api/meal-calendar/slots`,
+        method: "PUT",
+        body,
+      }),
+    }),
   }),
 });
 
@@ -84,4 +97,6 @@ export const {
   useSubscriptionPackageDeleteMutation,
   useMealCalendarOverridesFetchMutation,
   useMealCalendarOverrideUpsertMutation,
+  useMealSlotsFetchMutation,
+  useMealSlotUpsertMutation,
 } = yoocardApiSlice;
