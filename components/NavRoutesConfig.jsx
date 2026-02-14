@@ -99,6 +99,11 @@ export const SideNavRoutes=[
       path: "/cashout"
     },
     {
+      name: "Customer Support",
+      icon: MessagesSquare,
+      path: "/support"
+    },
+    {
       name: "Email Sender",
       icon: Mail,
       path: "/email-sender"
