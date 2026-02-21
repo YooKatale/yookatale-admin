@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import Providers from "./provider";
 import { Toaster } from "@components/ui/toaster";
 import { ChakraProvider } from '@chakra-ui/react'
+import chakraTheme from '@lib/chakraTheme'
 import SidebarWithHeader from "@components/Sidenav";
 import Navbar from "@components/Navbar";
 import { Suspense } from "react";
@@ -18,7 +19,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className} style={{ fontFamily: 'Inter, sans-serif' }}>
-        <ChakraProvider>
+        <ChakraProvider theme={chakraTheme}>
         <Providers>
           <Suspense>
           <SidebarWithHeader>
