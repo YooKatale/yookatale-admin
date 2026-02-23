@@ -21,6 +21,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Box, Input, InputGroup, InputLeftElement, useColorModeValue, Flex, Text, Heading, Grid, GridItem, Card, CardBody, CardHeader, HStack, VStack, Badge, Spinner, Center } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
+import { useSelector } from "react-redux";
 import Product from "@components/product";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
@@ -44,6 +45,9 @@ export default function Home() {
   const [partnerGet] = usePartnerGetMutation();
 
   const router = useRouter();
+  const { userInfo } = useSelector((state) => state.auth);
+  const accountType = userInfo?.accountType ?? userInfo?.account ?? "";
+  const isEditor = accountType === "editor";
 
   const handleDataFetch = async () => {
     try {
@@ -316,9 +320,13 @@ export default function Home() {
           </Flex>
         </motion.div>
 
-        {/* Stats Cards */}
+        {/* Stats Cards - Editors only see Total Products; admin sees all */}
         <Grid
-          templateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(4, 1fr)" }}
+          templateColumns={{
+            base: "1fr",
+            md: isEditor ? "1fr" : "repeat(2, 1fr)",
+            lg: isEditor ? "1fr" : "repeat(4, 1fr)",
+          }}
           gap={6}
           mb={8}
         >
@@ -329,31 +337,35 @@ export default function Home() {
             color="blue"
             subtitle="Active products"
           />
-          <StatCard
-            icon={Users}
-            title="Total Customers"
-            value={Dashboard?.Users?.count || 0}
-            color="green"
-            subtitle="Registered users"
-          />
-          <StatCard
-            icon={ShoppingCart}
-            title="Pending Orders"
-            value={Dashboard?.PendingOrders?.count || 0}
-            color="orange"
-            subtitle="Awaiting fulfillment"
-          />
-          <StatCard
-            icon={DollarSign}
-            title="Total Revenue"
-            value={`UGX ${(Dashboard?.AllTimeOrders?.allorderscashvalue || 0).toLocaleString()}`}
-            color="purple"
-            subtitle="All-time revenue"
-          />
+          {!isEditor && (
+            <>
+              <StatCard
+                icon={Users}
+                title="Total Customers"
+                value={Dashboard?.Users?.count || 0}
+                color="green"
+                subtitle="Registered users"
+              />
+              <StatCard
+                icon={ShoppingCart}
+                title="Pending Orders"
+                value={Dashboard?.PendingOrders?.count || 0}
+                color="orange"
+                subtitle="Awaiting fulfillment"
+              />
+              <StatCard
+                icon={DollarSign}
+                title="Total Revenue"
+                value={`UGX ${(Dashboard?.AllTimeOrders?.allorderscashvalue || 0).toLocaleString()}`}
+                color="purple"
+                subtitle="All-time revenue"
+              />
+            </>
+          )}
         </Grid>
 
-        {/* Orders Chart - Using Real Data from Backend */}
-        {orderData.length > 0 && orderData.some(d => d.count > 0) && (
+        {/* Orders Trend - Admin only; hidden for editors */}
+        {!isEditor && orderData.length > 0 && orderData.some(d => d.count > 0) && (
           <motion.div variants={itemVariants} mb={8}>
             <Card
               bg="white"
@@ -387,7 +399,8 @@ export default function Home() {
           </motion.div>
         )}
 
-        {/* Recent Orders Section */}
+        {/* Recent Orders - Admin only; hidden for editors */}
+        {!isEditor && (
         <motion.div variants={itemVariants}>
           <Card
             bg="white"
@@ -481,6 +494,7 @@ export default function Home() {
             </CardBody>
           </Card>
         </motion.div>
+        )}
 
         {/* Additional sections - Products, Vendors, Partners */}
         <Grid templateColumns={{ base: "1fr", lg: "1fr" }} gap={6} mt={8}>
@@ -489,10 +503,10 @@ export default function Home() {
           </motion.div>
         </Grid>
 
-        {/* Vendors and Partners Section */}
-        <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={6} mt={8}>
-          {/* Vendors */}
-          {vendors.length > 0 && (
+        {/* Vendors and Partners Section - Vendors hidden for editors */}
+        <Grid templateColumns={{ base: "1fr", lg: isEditor ? "1fr" : "1fr 1fr" }} gap={6} mt={8}>
+          {/* Vendors - Admin only */}
+          {!isEditor && vendors.length > 0 && (
             <motion.div variants={itemVariants}>
               <Card
                 bg="white"

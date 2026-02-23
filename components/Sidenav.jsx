@@ -1,9 +1,9 @@
 "use client";
 import React from 'react'
-import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import Image from "next/image";
 import Link from "next/link";
-import { SideNavRoutes } from "./NavRoutesConfig";
+import { SideNavRoutes, isPathAllowedForEditor } from "./NavRoutesConfig";
 import PerfectScrollbar from 'react-perfect-scrollbar'
 import 'react-perfect-scrollbar/dist/css/styles.css'
 import {
@@ -113,6 +113,13 @@ const NavItem = ({ icon: IconComponent, path, children, index, size, ...rest }) 
 }
 
 const SidebarContent = ({ onClose, ...rest }) => {
+  const { userInfo } = useSelector((state) => state.auth);
+  const accountType = userInfo?.accountType ?? userInfo?.account ?? "";
+  const isEditor = accountType === "editor";
+  const navRoutes = isEditor
+    ? SideNavRoutes.filter((r) => r.editorCanAccess)
+    : SideNavRoutes;
+
   return (
     <Box
       transition="all 0.3s ease"
@@ -172,13 +179,13 @@ const SidebarContent = ({ onClose, ...rest }) => {
             px={3}
             py={2}
           >
-            {SideNavRoutes.map((link, index) => (
+            {navRoutes.map((link, index) => (
               <NavItem
                 key={link.name}
                 icon={link.icon}
                 path={link.path}
                 index={index}
-                size={SideNavRoutes.length}
+                size={navRoutes.length}
               >
                 {link.name}
               </NavItem>
@@ -208,19 +215,30 @@ const SidebarContent = ({ onClose, ...rest }) => {
 }
 
 const SidebarWithHeader = ({ children, ...rest }) => {
-  const router = useRouter()
-  const { isOpen, onOpen, onClose } = useDisclosure()
-  const [isAuthenticated, setisAuthenticated] = useState(false)
-  const { userInfo, loading } = useSelector((state) => state.auth);
+  const router = useRouter();
+  const pathname = usePathname();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isAuthenticated, setisAuthenticated] = useState(false);
+  const { userInfo } = useSelector((state) => state.auth);
+  const accountType = userInfo?.accountType ?? userInfo?.account ?? "";
+  const isEditor = accountType === "editor";
 
   useEffect(() => {
     if (userInfo?._id !== undefined) {
-      setisAuthenticated(true)
+      setisAuthenticated(true);
     } else {
-      router.push("/signin")
+      router.push("/signin");
     }
     IsAccountValid();
-  }, []);
+  }, [userInfo, router]);
+
+  // Restrict editors to allowed paths only
+  useEffect(() => {
+    if (!isAuthenticated || !userInfo) return;
+    if (isEditor && !isPathAllowedForEditor(pathname)) {
+      router.replace("/");
+    }
+  }, [isAuthenticated, userInfo, isEditor, pathname, router]);
 
   const MobileNav = ({ onOpen, userInfo, ...rest }) => {
     const [isLoading, setLoading] = useState({ operation: "", status: false });
