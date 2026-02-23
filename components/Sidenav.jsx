@@ -218,15 +218,13 @@ const SidebarWithHeader = ({ children, ...rest }) => {
   const router = useRouter();
   const pathname = usePathname();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [isAuthenticated, setisAuthenticated] = useState(false);
   const { userInfo } = useSelector((state) => state.auth);
+  const isAuthenticated = !!(userInfo?._id);
   const accountType = userInfo?.accountType ?? userInfo?.account ?? "";
   const isEditor = accountType === "editor";
 
   useEffect(() => {
-    if (userInfo?._id !== undefined) {
-      setisAuthenticated(true);
-    } else {
+    if (!userInfo?._id) {
       router.push("/signin");
     }
     IsAccountValid();
@@ -254,7 +252,6 @@ const SidebarWithHeader = ({ children, ...rest }) => {
         const res = await logoutApiCall().unwrap();
         setLoading({ ...isLoading, operation: "", status: false });
         dispatch(logout());
-        setisAuthenticated(false)
         router.push("/signin");
       } catch (err) {
         console.log({ err });

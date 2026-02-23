@@ -13,8 +13,7 @@ import {
   SelectValue,
 } from "@components/ui/select";
 import { useToast } from "@components/ui/use-toast";
-import { Loader2, Plus, X } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Loader2, X } from "lucide-react";
 import React, { useState } from "react";
 
 const benefitPacks = [
@@ -56,203 +55,140 @@ const AddAdvertisementPackage = ({ closeModal }) => {
  
   const submitHandler = async (e) => {
     e.preventDefault();
-    advertPlan.type = e.target.type.value;
-    advertPlan.period = e.target.period.value
-    setLoading((prevState) => (prevState ? false : true));
+    setLoading(true);
     try {
       const res = await createPlan({
         ...advertPlan,
         benefits: selectedBenefits,
       }).unwrap();
-      setLoading((prevState) => (prevState ? false : true));
-      if (res?.status == "Success") {
-        toast({
-          title: "Success",
-          description: `Plan created.`,
-        });
-        // clear form input data
-        setAdvertPlan({
-          type: "",
-          period: "",
-          adverts: 0,
-          price: 0,
-        });
-        // router.push("/cards");
+      setLoading(false);
+      if (res?.status === "Success") {
+        toast({ title: "Success", description: "Plan created." });
+        setAdvertPlan({ type: "", period: "", adverts: 0, price: 0 });
+        setSelectedBenefits([]);
+        closeModal(false);
       }
     } catch (err) {
-      // set loading to be false
-      setLoading((prevState) => (prevState ? false : true));
-
+      setLoading(false);
       toast({
         variant: "destructive",
-        title: "Error occured",
-        description: err.data?.message
-          ? err.data?.message
-          : err.data || err.error,
+        title: "Error",
+        description: err.data?.message || err.data || err.error,
       });
     }
   };
 
   return (
-    <>
-      <div className="p-8 flex bg-none justify-center items-center fixed z-30 top-0 left-0 right-0 bottom-0">
-        <div className="m-auto w-4/5 h-full p-4 bg-white overflow-y-auto overflow-x-hidden rounded-md shadow-md relative">
-          <div
-            className="absolute top-4 right-8 cursor-pointer"
-            onClick={() => closeModal(false)}
-          >
-            <X size={30} />
-          </div>
-          <div className="pt-8 pb-4">
-            <p className="text-center text-3xl font-thin">Add A New Package</p>
-          </div>
-          <div className="py-2">
-            <div className="flex">
-              <div className="m-auto py-2 w-4/5">
-                <form onSubmit={submitHandler}>
-                  <div className="grid grid-cols-2">
-                    <div className="p-2">
-                      <Label htmlFor="type" className="text-lg mb-1">
-                        Plan Type
-                      </Label>
-                      <Select
-                        name="type"
-                        onChange={(e) => {
-                          setAdvertPlan({
-                            ...advertPlan,
-                            [e.target.name]: e.target.value,
-                          });
-                        }}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue
-                            placeholder="Select plan type"
-                            value={advertPlan.type}
-                          />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            <SelectLabel>Plan Type</SelectLabel>
-                            <SelectItem value="Basic">Basic</SelectItem>
-                            <SelectItem value="Vip">VIP</SelectItem>
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="p-2">
-                      <Label htmlFor="period" className="text-lg mb-1">
-                        Period
-                      </Label>
-                      <Select
-                        name="period"
-                        onChange={(e) => {
-                          setAdvertPlan({
-                            ...advertPlan,
-                            [e.target.name]: e.target.value,
-                          });
-                        }}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue
-                            placeholder="Select period"
-                            value={advertPlan.period}
-                          />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            <SelectLabel>Plan Type</SelectLabel>
-                            <SelectItem value="weekly">Weekly</SelectItem>
-                            <SelectItem value="monthly">Monthly</SelectItem>
-                            <SelectItem value="3 months">3 Months</SelectItem>
-                            <SelectItem value="6 months">6 Months</SelectItem>
-                            <SelectItem value="1 year"> 1 year</SelectItem>
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="p-2">
-                      <Label htmlFor="price" className="text-lg mb-1">
-                        Plan Price
-                      </Label>
-                      <Input
-                        type="number"
-                        id="price"
-                        placeholder="price is required"
-                        name="price"
-                        value={advertPlan.price}
-                        onChange={(e) => {
-                          setAdvertPlan({
-                            ...advertPlan,
-                            [e.target.name]: e.target.value,
-                          });
-                        }}
-                      />
-                    </div>
-                    <div className="p-2">
-                      <Label htmlFor="adverts" className="text-lg mb-1">
-                        Number of Adverts
-                      </Label>
-                      <Input
-                        type="number"
-                        id="adverts"
-                        placeholder=""
-                        name="adverts"
-                        value={advertPlan.previousPrice}
-                        onChange={(e) => {
-                          setAdvertPlan({
-                            ...advertPlan,
-                            [e.target.name]: e.target.value,
-                          });
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <div className="p-2">
-                    <div className="flex justify-between pb-2">
-                      <Label htmlFor="details" className="text-lg">
-                        Advert Plan Benefits
-                      </Label>
-                    </div>
-                    <div className="grid grid-cols-4">
-                      {benefitPacks.map((pack, index) => (
-                        <div className="flex items-center mb-4" key={index}>
-                          <input
-                            id="checkbox-3"
-                            type="checkbox"
-                            defaultChecked={pack.isChecked}
-                            className="w-4 h-4 rounded"
-                            onChange={() => handleCheckBox(pack.value)}
-                          />
-                          <label className="ms-2 text-sm md:text-lg font-medium">
-                            {pack.value}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                    {/* <Textarea
-                      name={"details"}
-                      id={"details"}
-                      value={advertPlan.details}
-                      onChange={(e) => {
-                        setAdvertPlan({
-                          ...advertPlan,
-                          [e.target.name]: e.target.value,
-                        });
-                      }}
-                    ></Textarea> */}
-                  </div>
-                  <div className="py-2">
-                    <Button type="submit">
-                      {isLoading ? <Loader2 /> : ""}Add Package
-                    </Button>
-                  </div>
-                </form>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4 py-8">
+      <div className="relative m-auto w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl">
+        <div
+          className="absolute right-6 top-6 cursor-pointer text-slate-500 hover:text-slate-800"
+          onClick={() => closeModal(false)}
+        >
+          <X size={26} />
+        </div>
+        <div className="px-8 pt-8 pb-4 border-b border-slate-100">
+          <p className="text-center text-2xl font-semibold tracking-tight text-slate-900">
+            Add a new package
+          </p>
+        </div>
+        <div className="px-8 pb-8 pt-4">
+          <form onSubmit={submitHandler} className="space-y-6">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-slate-700">Plan type</Label>
+                <Select
+                  value={advertPlan.type}
+                  onValueChange={(value) => setAdvertPlan({ ...advertPlan, type: value })}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select plan type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Plan type</SelectLabel>
+                      <SelectItem value="Basic">Basic</SelectItem>
+                      <SelectItem value="Vip">VIP</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-slate-700">Period</Label>
+                <Select
+                  value={advertPlan.period}
+                  onValueChange={(value) => setAdvertPlan({ ...advertPlan, period: value })}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select period" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Period</SelectLabel>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="3 months">3 Months</SelectItem>
+                      <SelectItem value="6 months">6 Months</SelectItem>
+                      <SelectItem value="1 year">1 year</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="price" className="text-sm font-medium text-slate-700">Plan price</Label>
+                <Input
+                  type="number"
+                  id="price"
+                  placeholder="Price"
+                  name="price"
+                  value={advertPlan.price || ""}
+                  onChange={(e) => setAdvertPlan({ ...advertPlan, price: Number(e.target.value) || 0 })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="adverts" className="text-sm font-medium text-slate-700">Number of adverts</Label>
+                <Input
+                  type="number"
+                  id="adverts"
+                  placeholder="Number of adverts"
+                  name="adverts"
+                  value={advertPlan.adverts || ""}
+                  onChange={(e) => setAdvertPlan({ ...advertPlan, adverts: Number(e.target.value) || 0 })}
+                />
               </div>
             </div>
-          </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-slate-700">Advert plan benefits</Label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {benefitPacks.map((pack, index) => (
+                  <div className="flex items-center gap-2" key={index}>
+                    <input
+                      type="checkbox"
+                      id={`benefit-${index}`}
+                      checked={selectedBenefits.some((b) => b.value === pack.value)}
+                      onChange={() => handleCheckBox(pack.value)}
+                      className="w-4 h-4 rounded border-gray-300"
+                    />
+                    <label htmlFor={`benefit-${index}`} className="text-sm font-medium text-slate-700">
+                      {pack.value}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <Button type="button" variant="outline" onClick={() => closeModal(false)} disabled={isLoading}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Add package
+              </Button>
+            </div>
+          </form>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

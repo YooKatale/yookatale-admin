@@ -16,11 +16,26 @@ export const categoryApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+    categoryUpdate: builder.mutation({
+      query: ({ id, ...data }) => ({
+        url: `${BACKEND_URL}/api/categories/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+    }),
+    categoryDelete: builder.mutation({
+      query: (id) => ({
+        url: `${BACKEND_URL}/api/categories/${id}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 
 export const {
   useCategoriesGetMutation,
   useCategoryCreateMutation,
+  useCategoryUpdateMutation,
+  useCategoryDeleteMutation,
 } = categoryApiSlice;
 

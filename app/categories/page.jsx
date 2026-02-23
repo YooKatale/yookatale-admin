@@ -1,17 +1,31 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Box, Button, Flex, Grid, GridItem, Heading, Text, Input, Stack, useToast } from "@chakra-ui/react";
-import { PlusIcon, Trash2 } from "lucide-react";
-import { useCategoriesGetMutation, useCategoryCreateMutation } from "@Slices/categoryApiSlice";
+import { Box, Button, Flex, Grid, GridItem, Heading, Text, Input, Stack, useToast, useDisclosure } from "@chakra-ui/react";
+import { PlusIcon, Pencil, Trash2, X, Loader2 } from "lucide-react";
+import { useCategoriesGetMutation, useCategoryCreateMutation, useCategoryUpdateMutation, useCategoryDeleteMutation } from "@Slices/categoryApiSlice";
+import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
+} from "@chakra-ui/react";
 
 const Categories = () => {
   const [categories, setCategories] = useState([]);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [editName, setEditName] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure();
 
   const [fetchCategories] = useCategoriesGetMutation();
   const [createCategory] = useCategoryCreateMutation();
+  const [updateCategory] = useCategoryUpdateMutation();
+  const [deleteCategory] = useCategoryDeleteMutation();
   const toast = useToast();
 
   const handleFetchCategories = async () => {
@@ -121,6 +135,62 @@ const Categories = () => {
     handleFetchCategories();
   };
 
+  const handleEdit = (category) => {
+    setEditingCategory(category);
+    setEditName(category.name);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingCategory || !editName.trim()) return;
+    setIsLoading(true);
+    try {
+      const res = await updateCategory({ id: editingCategory._id, name: editName.trim() }).unwrap();
+      if (res?.success) {
+        toast({ title: "Success", description: "Category updated", status: "success", duration: 3000 });
+        setEditingCategory(null);
+        setEditName("");
+        handleFetchCategories();
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error?.data?.message || "Failed to update category",
+        status: "error",
+        duration: 3000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteClick = (category) => {
+    setDeleteTarget(category);
+    onDeleteOpen();
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
+    setIsLoading(true);
+    try {
+      const res = await deleteCategory(deleteTarget._id).unwrap();
+      if (res?.success) {
+        toast({ title: "Success", description: "Category deleted", status: "success", duration: 3000 });
+        setDeleteTarget(null);
+        onDeleteClose();
+        handleFetchCategories();
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error?.data?.message || "Failed to delete category",
+        status: "error",
+        duration: 3000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Flex minH={'100vh'} style={{ marginTop: '4em' }}>
       <Stack mx={'auto'} width={'100%'} py={4} px={1}>
@@ -191,14 +261,39 @@ const Categories = () => {
                     border="1px"
                     borderColor="gray.200"
                     borderRadius="md"
-                    _hover={{ borderColor: 'blue.400', shadow: 'sm' }}
+                    _hover={{ borderColor: "blue.400", shadow: "sm" }}
                   >
-                    <Flex justify="space-between" align="center">
-                      <Text fontSize="sm" fontWeight="medium">
-                        {category.name}
-                      </Text>
-                      {/* Add delete functionality later if needed */}
-                    </Flex>
+                    {editingCategory?._id === category._id ? (
+                      <Flex gap={2} align="center" wrap="wrap">
+                        <Input
+                          size="sm"
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          flex="1"
+                          minW="120px"
+                        />
+                        <Button size="sm" colorScheme="blue" onClick={handleSaveEdit} isLoading={isLoading} leftIcon={<Loader2 size={14} />}>
+                          Save
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => { setEditingCategory(null); setEditName(""); }}>
+                          <X size={14} />
+                        </Button>
+                      </Flex>
+                    ) : (
+                      <Flex justify="space-between" align="center" gap={2}>
+                        <Text fontSize="sm" fontWeight="medium" noOfLines={1}>
+                          {category.name}
+                        </Text>
+                        <Flex gap={1}>
+                          <Button size="xs" variant="ghost" aria-label="Edit" onClick={() => handleEdit(category)}>
+                            <Pencil size={14} />
+                          </Button>
+                          <Button size="xs" variant="ghost" colorScheme="red" aria-label="Delete" onClick={() => handleDeleteClick(category)}>
+                            <Trash2 size={14} />
+                          </Button>
+                        </Flex>
+                      </Flex>
+                    )}
                   </Box>
                 </GridItem>
               ))}
@@ -212,6 +307,23 @@ const Categories = () => {
           )}
         </Box>
       </Stack>
+
+      <AlertDialog isOpen={isDeleteOpen} onClose={onDeleteClose} leastDestructiveRef={undefined}>
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader>Delete category</AlertDialogHeader>
+            <AlertDialogBody>
+              Are you sure you want to delete &quot;{deleteTarget?.name}&quot;? This cannot be undone.
+            </AlertDialogBody>
+            <AlertDialogFooter>
+              <Button onClick={onDeleteClose}>Cancel</Button>
+              <Button colorScheme="red" onClick={handleConfirmDelete} isLoading={isLoading} ml={3}>
+                Delete
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
     </Flex>
   );
 };
