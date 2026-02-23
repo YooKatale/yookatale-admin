@@ -1,4 +1,3 @@
-import { useadvertPlanCreatePostMutation } from "@Slices/yoocacrdApiSlice";
 import { useCreateAdvertisementPackageMutation } from "@Slices/advertisementApiSlice";
 import { Button } from "@components/ui/button";
 import { Input } from "@components/ui/input";
@@ -34,9 +33,6 @@ const AddAdvertisementPackage = ({ closeModal }) => {
   });
 
   const [createPlan] = useCreateAdvertisementPackageMutation();
-
-  const router = useRouter();
-
   const { toast } = useToast();
   const handleCheckBox = (value) => {
     const updatedBenefits = [...selectedBenefits];
