@@ -1,31 +1,24 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSelector } from "react-redux";
+import { Loader2, X } from "lucide-react";
+
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
-import { Loader2, X } from "lucide-react";
-import { useSelector } from "react-redux";
-import { useProductCreateMutation } from "@Slices/productApiSlice";
 import { useToast } from "@components/ui/use-toast";
-import { useRouter } from "next/navigation";
 import {
-  //Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@components/ui/select";
-import { useEffect, useState } from "react";
-import { useRegisterMutation, useUpdateAdminUserAccountMutation } from "@Slices/userApiSlice";
+  useRegisterMutation,
+  useUpdateAdminUserAccountMutation,
+} from "@Slices/userApiSlice";
 import { Select } from "@chakra-ui/react";
 
 const AddAccount = ({ closeModal, accountData, editmode, reloadAccounts }) => {
   const [isLoading, setLoading] = useState(false);
   const [User, setUser] = useState({
-    _id:"",
+    _id: "",
     firstname: "",
     lastname: "",
     email: "",
@@ -35,15 +28,15 @@ const AddAccount = ({ closeModal, accountData, editmode, reloadAccounts }) => {
   });
 
   const router = useRouter();
+  const { toast } = useToast();
+  const { userInfo } = useSelector((state) => state.auth);
 
   const [registerUser] = useRegisterMutation();
-const [updateUser]=useUpdateAdminUserAccountMutation()
-  const { toast } = useToast();
+  const [updateUser] = useUpdateAdminUserAccountMutation();
 
-  const { userInfo } = useSelector((state) => state.auth);
-  const closeModalAndUpdate=()=>{
+  const resetForm = () => {
     setUser({
-      _id:"",
+      _id: "",
       firstname: "",
       lastname: "",
       email: "",
@@ -51,200 +44,212 @@ const [updateUser]=useUpdateAdminUserAccountMutation()
       gender: "",
       accountType: "",
     });
-     closeModal(false)
-  }
-  
+  };
+
+  const closeModalAndReset = () => {
+    resetForm();
+    closeModal(false);
+  };
+
   const submitHandler = async (e) => {
     e.preventDefault();
-
-    // User.gender = e.target.gender.value;
-    // User.accountType = e.target.accountType.value;
 
     setLoading(true);
 
     try {
-    
-      
-      const res = await (editmode ? updateUser(User).unwrap() : registerUser(User).unwrap());
-      
-      
+      const payload = { ...User };
+      const res = await (editmode
+        ? updateUser(payload).unwrap()
+        : registerUser(payload).unwrap());
 
-      if (res?.status == "Success"){
-        setLoading(false);
-        
-        // Show appropriate message based on email status
-        const message = res?.message || 
-          `Account ${editmode?"Edited":"Created"} Successfully. ${editmode?"":`Credentials emailed to ${res?.data}`}`;
-        
+      if (res?.status === "Success") {
+        const message =
+          res?.message ||
+          `Account ${editmode ? "edited" : "created"} successfully.${
+            editmode ? "" : ` Credentials emailed to ${res?.data}.`
+          }`;
+
         toast({
           title: "Success",
           description: message,
           variant: res?.message?.includes("email failed") ? "warning" : "default",
         });
-        
-        // Log for debugging
+
         console.log("Account operation response:", res);
-        
-        // clear form input data
-        closeModalAndUpdate()
-        reloadAccounts()
+
+        resetForm();
+        reloadAccounts?.();
+        closeModal(false);
         router.push("/accounts");
       }
     } catch (err) {
-      // set loading to be false
-      setLoading(false);
-
       toast({
         variant: "destructive",
-        title: "Error occured",
-        description: err.data?.message
-          ? err.data?.message
-          : err.data || err.error,
+        title: "Error",
+        description:
+          err?.data?.message ||
+          err?.data ||
+          err?.error ||
+          "Something went wrong while saving the account.",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
-  useEffect(()=>{
-if(editmode){
-  setUser({ ...User, _id:accountData._id,firstname:accountData.firstname, 
-    lastname:accountData.lastname,accountType:accountData.accountType, 
-    email:accountData.email, gender:accountData.gender, phone:accountData.phone })
- // setUser({...User, accountData})
-}
-  },[accountData])
+  useEffect(() => {
+    if (editmode && accountData) {
+      setUser((prev) => ({
+        ...prev,
+        _id: accountData._id,
+        firstname: accountData.firstname || "",
+        lastname: accountData.lastname || "",
+        email: accountData.email || "",
+        phone: accountData.phone || "",
+        gender: accountData.gender || "",
+        accountType: accountData.accountType || "",
+      }));
+    }
+  }, [editmode, accountData]);
 
-const handleSelect=(name,e)=>{
-  const fieldname = name==="accounType"?User.accountType:User.gender
-  if(name==="accounType"){
-  setUser({...User.accountType,  e })
-  }else{
-    setUser({ ...User.gender,  e })
-  }
-}
   return (
     <>
-      <div className="p-8 flex bg-none justify-center items-center fixed z-30 top-0 left-0 right-0 bottom-0">
-        <div className="m-auto w-4/5 h-full p-4 bg-white overflow-y-auto overflow-x-hidden rounded-md shadow-md relative">
+      <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/30 px-4 py-8">
+        <div className="relative m-auto w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl">
           <div
-            className="absolute top-4 right-8 cursor-pointer"
-            onClick={closeModalAndUpdate}
+            className="absolute right-6 top-6 cursor-pointer text-slate-500 hover:text-slate-800"
+            onClick={closeModalAndReset}
           >
-            <X size={30} />
+            <X size={26} />
           </div>
-          <div className="pt-8 pb-4">
-            <p className="text-center text-3xl font-thin">{editmode? "Edit User": "Add New User" }</p>
+          <div className="px-8 pt-8 pb-4 border-b border-slate-100">
+            <p className="text-center text-2xl font-semibold tracking-tight text-slate-900">
+              {editmode ? "Edit User" : "Add New User"}
+            </p>
           </div>
-          <div className="py-2">
-            <div className="flex">
-              <div className="m-auto py-2 w-4/5">
-                <form onSubmit={submitHandler} encType="multipart/form-data">
-                  <div className="grid grid-cols-2">
-                    <div className="p-2">
-                      <Label htmlFor="firstname" className="text-lg mb-1">
-                        Firstname
-                      </Label>
-                      <Input
-                        type="text"
-                        id="firstname"
-                        placeholder="Firstname is required"
-                        name="firstname"
-                        value={User.firstname}
-                        onChange={(e) =>
-                          setUser({ ...User, [e.target.name]: e.target.value })
-                        }
-                      />
-                    </div>
-                    <div className="p-2">
-                      <Label htmlFor="lastname" className="text-lg mb-1">
-                        Lastname
-                      </Label>
-                      <Input
-                        type="text"
-                        id="lastname"
-                        placeholder="Lastname is required"
-                        name="lastname"
-                        value={User.lastname}
-                        onChange={(e) =>
-                          setUser({ ...User, [e.target.name]: e.target.value })
-                        }
-                      />
-                    </div>
-                    <div className="p-2">
-                      <Label htmlFor="email" className="text-lg mb-1">
-                        Email
-                      </Label>
-                      <Input
-                        type="text"
-                        id="email"
-                        placeholder="Email is required"
-                        name="email"
-                        value={User.email}
-                        onChange={(e) =>
-                          setUser({ ...User, [e.target.name]: e.target.value })
-                        }
-                      />
-                    </div>
-                    <div className="p-2">
-                      <Label htmlFor="phone" className="text-lg mb-1">
-                        Phone
-                      </Label>
-                      <Input
-                        type="text"
-                        id="phone"
-                        placeholder="eg. 07-------"
-                        name="phone"
-                        value={User.phone}
-                        onChange={(e) =>
-                          setUser({ ...User, [e.target.name]: e.target.value })
-                        }
-                      />
-                    </div>
-                    
-                    <div className="p-2">
-                    <Label htmlFor="gender" className="text-lg mb-1">Gender</Label>
-                    <Select
-                     
-                      name="gender"
-                      value={User.gender}
-                      onChange={(e) =>
-                        setUser({ ...User, [e.target.name]: e.target.value })
-                      }
-                    >
-                       <option disabled></option>
-                      <option value='male'>Male</option>
-                      <option value='female'>Female</option>
-                    </Select>
-                    </div>
-
-                    <div className="p-2">
-                    <Label htmlFor="gender" className="text-lg mb-1">Account Type</Label>
-                    <Select
-                      name="accountType"
-                      value={User.accountType}
-                      onChange={(e) =>
-                        setUser({ ...User, [e.target.name]: e.target.value })
-                      }
-                    >
-                      <option disabled></option>
-                      <option value='admin'>Admin</option>
-                      <option value='iam'>IAM</option>
-                      <option value='editor'>Editor</option>
-                    </Select>
-                    </div>
-                   
-                  </div>
-
-                  
-                  
-                  <div className="py-2">
-                    <Button type="submit">
-                      {isLoading ? <Loader2 /> : ""}
-                      {editmode?"Update User":"Add User"}
-                    </Button>
-                  </div>
-                </form>
+          <div className="px-8 pb-8 pt-4">
+            <form onSubmit={submitHandler} className="space-y-6">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="firstname" className="text-sm font-medium text-slate-700">
+                    Firstname
+                  </Label>
+                  <Input
+                    type="text"
+                    id="firstname"
+                    placeholder="Firstname is required"
+                    name="firstname"
+                    value={User.firstname}
+                    onChange={(e) =>
+                      setUser({ ...User, [e.target.name]: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastname" className="text-sm font-medium text-slate-700">
+                    Lastname
+                  </Label>
+                  <Input
+                    type="text"
+                    id="lastname"
+                    placeholder="Lastname is required"
+                    name="lastname"
+                    value={User.lastname}
+                    onChange={(e) =>
+                      setUser({ ...User, [e.target.name]: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-sm font-medium text-slate-700">
+                    Email
+                  </Label>
+                  <Input
+                    type="email"
+                    id="email"
+                    placeholder="Email is required"
+                    name="email"
+                    value={User.email}
+                    onChange={(e) =>
+                      setUser({ ...User, [e.target.name]: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="text-sm font-medium text-slate-700">
+                    Phone
+                  </Label>
+                  <Input
+                    type="tel"
+                    id="phone"
+                    placeholder="eg. 07-------"
+                    name="phone"
+                    value={User.phone}
+                    onChange={(e) =>
+                      setUser({ ...User, [e.target.name]: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="gender" className="text-sm font-medium text-slate-700">
+                    Gender
+                  </Label>
+                  <Select
+                    name="gender"
+                    value={User.gender}
+                    onChange={(e) =>
+                      setUser({ ...User, gender: e.target.value })
+                    }
+                    placeholder="Select gender"
+                  >
+                    <option value="" disabled>
+                      Select gender
+                    </option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="accountType" className="text-sm font-medium text-slate-700">
+                    Account Type
+                  </Label>
+                  <Select
+                    name="accountType"
+                    value={User.accountType}
+                    onChange={(e) =>
+                      setUser({ ...User, accountType: e.target.value })
+                    }
+                    placeholder="Select account type"
+                  >
+                    <option value="" disabled>
+                      Select account type
+                    </option>
+                    <option value="admin">Admin</option>
+                    <option value="iam">IAM</option>
+                    <option value="editor">Editor</option>
+                  </Select>
+                </div>
               </div>
-            </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={closeModalAndReset}
+                  disabled={isLoading}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {editmode ? "Update User" : "Add User"}
+                </Button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
