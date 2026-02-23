@@ -1,3 +1,7 @@
+import { Toaster } from "@components/ui/toaster";
+import { ChakraProvider } from '@chakra-ui/react'
+import chakraTheme from '../lib/chakraTheme'
+import { Provider } from "react-redux";
 import "./globals.css";
 import { Inter } from "next/font/google";
 import Providers from "./provider";
@@ -8,12 +12,15 @@ const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
 
 export const metadata = {
   title: "Admin",
+        <ChakraProvider theme={chakraTheme}>
   description: "Admin panel",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+        <Toaster />
+        </ChakraProvider>
       <body className={inter.className} style={{ fontFamily: 'Inter, sans-serif' }}>
         <Providers>
           <Suspense>

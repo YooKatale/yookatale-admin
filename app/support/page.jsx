@@ -21,6 +21,7 @@ import {
   MessageCircle,
   User,
   Send,
+  ChevronRight,
   Trash2,
   AlertCircle,
   Headphones,
@@ -180,6 +181,7 @@ export default function SupportPage() {
       setDeletingId(null);
     }
   };
+  const withAgent = conversations.filter((c) => c.status === "with_agent");
 
   const selected = conversations.find((c) => c._id === selectedId);
   const needsAttention = conversations.filter((c) => c.status === "open");

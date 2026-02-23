@@ -1,3 +1,5 @@
+import { useadvertPlanCreatePostMutation } from "@Slices/yoocacrdApiSlice";
+import { useadvertPlanCreatePostMutation } from "@Slices/yoocacrdApiSlice";
 import { useCreateAdvertisementPackageMutation } from "@Slices/advertisementApiSlice";
 import { Button } from "@components/ui/button";
 import { Input } from "@components/ui/input";
@@ -29,7 +31,13 @@ const AddAdvertisementPackage = ({ closeModal }) => {
     type: "",
     adverts: 0,
     period: "",
+
+  const router = useRouter();
+
     price: 0,
+
+  const router = useRouter();
+
   });
 
   const [createPlan] = useCreateAdvertisementPackageMutation();
