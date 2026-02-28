@@ -3,6 +3,7 @@
 import {
   CreditCardIcon,
   LucideSalad,
+  LayoutDashboard,
   MessagesSquare,
   PenBoxIcon,
   Settings2,
@@ -15,14 +16,16 @@ import {
   Banknote,
   Star,
   Mail,
+  Globe,
 } from "lucide-react";
 import { HiCreditCard, HiMenuAlt2, HiOutlineDocumentAdd } from "react-icons/hi";
-
 // Paths editors are allowed to access (settings, email sender, support, news blog, subscription, partners, categories, products)
 export const EDITOR_ALLOWED_PATHS = [
   "/",
   "/products",
   "/categories",
+  "/country-cuisines",
+  "/homepage-config",
   "/partners",
   "/subscriptions",
   "/newsblogs",
@@ -37,6 +40,8 @@ export const SideNavRoutes = [
   { name: "Dashboard", icon: HiMenuAlt2, path: "/", editorCanAccess: true },
   { name: "Products", icon: LucideSalad, path: "/products", editorCanAccess: true },
   { name: "Categories", icon: FolderTree, path: "/categories", editorCanAccess: true },
+  { name: "Country Cuisines", icon: Globe, path: "/country-cuisines", editorCanAccess: true },
+  { name: "Homepage / Hero", icon: LayoutDashboard, path: "/homepage-config", editorCanAccess: true },
   { name: "Vendors", icon: Users2Icon, path: "/vendors", editorCanAccess: false },
   { name: "Delivery Partners", icon: UsersIcon, path: "/partners", editorCanAccess: true },
   { name: "Seller Stores", icon: Store, path: "/seller-stores", editorCanAccess: false },
