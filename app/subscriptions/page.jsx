@@ -73,7 +73,7 @@ import React, { useCallback, useEffect, useState } from "react";
 
 const DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 const MEAL_TYPES = ["breakfast", "lunch", "supper"];
-const INCOME_LEVELS = ["middle", "low"];
+const INCOME_LEVELS = ["middle", "low", "high"];
 const PREP_TYPES = ["ready-to-eat", "ready-to-cook"];
 
 export default function SubscriptionsPage() {
@@ -827,6 +827,7 @@ function MealSlotGrid({ slots, overrides, upsertSlot, upsertOverride, toast, loa
           >
             <option value="middle">Middle income</option>
             <option value="low">Low income</option>
+            <option value="high">High budget</option>
           </Select>
           <Select
             w="160px"
