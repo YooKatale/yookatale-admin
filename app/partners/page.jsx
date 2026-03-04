@@ -8,9 +8,10 @@ import {
   useRejectPartnerMutation,
   useVerifyPartnerMutation,
 } from "@Slices/partnersPageApiSlice";
-import { Box } from "@chakra-ui/react";
+import { Box, useToast } from "@chakra-ui/react";
 
 const PartnerPage = () => {
+  const toast = useToast();
   const { data: partners, isLoading, isError, error } = useFetchPartnersQuery();
 
   const [verifyPartner] = useVerifyPartnerMutation();
@@ -20,9 +21,22 @@ const PartnerPage = () => {
     e.preventDefault();
     try {
       await verifyPartner(partnerId).unwrap();
-      console.log("Partner verified successfully");
-    } catch (error) {
-      console.error("Failed to verify partner:", error);
+      toast({
+        title: "Partner approved",
+        description: "Login credentials have been sent to their email.",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+    } catch (err) {
+      console.error("Failed to verify partner:", err);
+      toast({
+        title: "Error",
+        description: err?.data?.message || err?.error || "Failed to approve partner",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
     }
   };
 
@@ -30,9 +44,21 @@ const PartnerPage = () => {
     e.preventDefault();
     try {
       await rejectPartner(partnerId).unwrap();
-      console.log("Partner rejected successfully");
-    } catch (error) {
-      console.error("Failed to reject partner:", error);
+      toast({
+        title: "Partner rejected",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (err) {
+      console.error("Failed to reject partner:", err);
+      toast({
+        title: "Error",
+        description: err?.data?.message || err?.error || "Failed to reject partner",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
     }
   };
 
@@ -69,13 +95,13 @@ const PartnerPage = () => {
                         Location
                       </th>
                       <th className="px-6 py-3 text-left text-xs sm:text-sm font-medium text-gray-600 uppercase tracking-wider border-b border-r">
-                        Business Name
+                        Business Name <span className="text-gray-400 font-normal">(optional)</span>
                       </th>
                       <th className="px-6 py-3 text-left text-xs sm:text-sm font-medium text-gray-600 uppercase tracking-wider border-b border-r">
-                        Business Address
+                        Business Address <span className="text-gray-400 font-normal">(optional)</span>
                       </th>
                       <th className="px-6 py-3 text-left text-xs sm:text-sm font-medium text-gray-600 uppercase tracking-wider border-b border-r">
-                        Business Hours
+                        Business Hours <span className="text-gray-400 font-normal">(optional)</span>
                       </th>
                       <th className="px-6 py-3 text-left text-xs sm:text-sm font-medium text-gray-600 uppercase tracking-wider border-b border-r">
                         Number Plate
@@ -107,16 +133,16 @@ const PartnerPage = () => {
                           {partner.email}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap border-b border-r">
-                          {partner.location}
+                          {partner.location || "—"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap border-b border-r">
-                          {partner.businessName}
+                          {partner.businessName || "—"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap border-b border-r">
-                          {partner.businessAddress}
+                          {partner.businessAddress || "—"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap border-b border-r">
-                          {partner.businessHours}
+                          {partner.businessHours || "—"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap border-b border-r">
                           {partner.numberPlate}

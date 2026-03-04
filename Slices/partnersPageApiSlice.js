@@ -18,14 +18,16 @@ export const partnersPageApiSlice = apiSlice.injectEndpoints({
     }),
     verifyPartner: builder.mutation({
       query: (partnerId) => ({
-        url: `${BACKEND_URL}/admin/verify-partner/${partnerId}`,
-        method: "PUT",
+        url: `${BACKEND_URL}/api/partners/${partnerId}/status`,
+        method: "PATCH",
+        body: { status: "Verified" },
       }),
     }),
     rejectPartner: builder.mutation({
       query: (partnerId) => ({
-        url: `${BACKEND_URL}/admin/reject-partner/${partnerId}`,
-        method: "PUT",
+        url: `${BACKEND_URL}/api/partners/${partnerId}/status`,
+        method: "PATCH",
+        body: { status: "Rejected" },
       }),
     }),
   }),

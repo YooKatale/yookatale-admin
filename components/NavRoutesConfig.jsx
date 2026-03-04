@@ -17,6 +17,8 @@ import {
   Star,
   Mail,
   Globe,
+  Package,
+  Truck,
 } from "lucide-react";
 import { HiCreditCard, HiMenuAlt2, HiOutlineDocumentAdd } from "react-icons/hi";
 // Paths editors are allowed to access (settings, email sender, support, news blog, subscription, partners, categories, products)
@@ -27,6 +29,8 @@ export const EDITOR_ALLOWED_PATHS = [
   "/country-cuisines",
   "/homepage-config",
   "/partners",
+  "/orders",
+  "/drivers",
   "/subscriptions",
   "/newsblogs",
   "/support",
@@ -44,6 +48,8 @@ export const SideNavRoutes = [
   { name: "Homepage / Hero", icon: LayoutDashboard, path: "/homepage-config", editorCanAccess: true },
   { name: "Vendors", icon: Users2Icon, path: "/vendors", editorCanAccess: false },
   { name: "Delivery Partners", icon: UsersIcon, path: "/partners", editorCanAccess: true },
+  { name: "Orders", icon: Package, path: "/orders", editorCanAccess: true },
+  { name: "Drivers", icon: Truck, path: "/drivers", editorCanAccess: true },
   { name: "Seller Stores", icon: Store, path: "/seller-stores", editorCanAccess: false },
   { name: "Seller Listings", icon: ClipboardCheck, path: "/seller-listings", editorCanAccess: false },
   { name: "Subscriptions", icon: HiCreditCard, path: "/subscriptions", editorCanAccess: true },
