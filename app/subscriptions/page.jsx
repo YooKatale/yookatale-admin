@@ -738,6 +738,29 @@ function MealSlotGrid({ slots, overrides, upsertSlot, upsertOverride, toast, loa
   };
 
   const handleSaveSlot = async (form) => {
+    // Basic validation before hitting the API
+    if (!form.mealName || !form.mealName.trim()) {
+      toast({
+        title: "Meal name required",
+        description: "Please enter a meal name before saving.",
+        status: "warning",
+        duration: 6000,
+        isClosable: true,
+        position: "top-right",
+      });
+      return;
+    }
+    if (!form.priceWeekly && !form.priceMonthly) {
+      toast({
+        title: "Add at least one price",
+        description: "Set either a weekly or monthly price so the plan can be billed correctly.",
+        status: "warning",
+        duration: 6000,
+        isClosable: true,
+        position: "top-right",
+      });
+      return;
+    }
     try {
       await upsertSlot({
         incomeLevel: form.incomeLevel,
@@ -751,7 +774,14 @@ function MealSlotGrid({ slots, overrides, upsertSlot, upsertOverride, toast, loa
         priceMonthly: Number(form.priceMonthly) || 0,
         imageUrl: form.imageUrl || "",
       }).unwrap();
-      toast({ title: "Saved", description: "Meal slot updated" });
+      toast({
+        title: "Meal saved",
+        description: "Meal details have been updated on the calendar.",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+        position: "top-right",
+      });
       loadSlots();
       if (form.imageUrl) {
         await upsertOverride({
@@ -762,10 +792,26 @@ function MealSlotGrid({ slots, overrides, upsertSlot, upsertOverride, toast, loa
           imageUrl: form.imageUrl,
         }).unwrap();
         loadOverrides();
+        toast({
+          title: "Image saved",
+          description: "The meal image has been updated for this slot.",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+          position: "top-right",
+        });
       }
       onSlotModalClose();
     } catch (e) {
-      toast({ variant: "destructive", title: "Error", description: e?.data?.message });
+      const msg = e?.data?.message || e?.message || "Failed to save this meal. Please check your connection and try again.";
+      toast({
+        title: "Save failed",
+        description: msg,
+        status: "error",
+        duration: 8000,
+        isClosable: true,
+        position: "top-right",
+      });
     }
   };
 
@@ -834,6 +880,7 @@ function MealSlotGrid({ slots, overrides, upsertSlot, upsertOverride, toast, loa
         onClose={() => { onSlotModalClose(); setEditingSlot(null); }}
         slot={editingSlot}
         onSave={handleSaveSlot}
+        toast={toast}
       />
     </>
   );
@@ -855,7 +902,7 @@ function MealSlotCell({ slot, imgUrl, day, mealType, onEdit }) {
   );
 }
 
-function MealSlotEditorModal({ isOpen, onClose, slot, onSave }) {
+function MealSlotEditorModal({ isOpen, onClose, slot, onSave, toast }) {
   const [form, setForm] = useState({});
   const [uploading, setUploading] = useState(false);
 
@@ -871,6 +918,17 @@ function MealSlotEditorModal({ isOpen, onClose, slot, onSave }) {
   const handleImageUpload = async (e) => {
     const file = e?.target?.files?.[0];
     if (!file) return;
+    if (!file.type?.startsWith("image/")) {
+      toast?.({
+        title: "Invalid file",
+        description: "Please upload an image file (JPG, PNG, WEBP, etc).",
+        status: "warning",
+        duration: 6000,
+        isClosable: true,
+        position: "top-right",
+      });
+      return;
+    }
     setUploading(true);
     try {
       const fd = new FormData();
@@ -879,11 +937,28 @@ function MealSlotEditorModal({ isOpen, onClose, slot, onSave }) {
       const data = await res.json();
       if (data?.status === "Success" && data?.data?.imageUrl) {
         setForm((f) => ({ ...f, imageUrl: data.data.imageUrl }));
+        toast?.({
+          title: "Image uploaded",
+          description: "The image has been uploaded. Click Save to apply it to this meal slot.",
+          status: "success",
+          duration: 6000,
+          isClosable: true,
+          position: "top-right",
+        });
       } else {
         throw new Error(data?.message || "Upload failed");
       }
     } catch (err) {
       console.error(err);
+      const msg = err?.message || "Image upload failed. Please try again.";
+      toast?.({
+        title: "Upload failed",
+        description: msg,
+        status: "error",
+        duration: 8000,
+        isClosable: true,
+        position: "top-right",
+      });
     } finally {
       setUploading(false);
     }
