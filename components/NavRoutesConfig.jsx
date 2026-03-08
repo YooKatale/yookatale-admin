@@ -87,7 +87,7 @@ export const SideNavRoutesx = [
         icon: <UsersIcon size={25} />,
         path: "/partners"
       },
-      {
+      {     
         name: "Subscriptions",
         icon: <HiCreditCard size={25} />,
         path: "/subscriptions"
