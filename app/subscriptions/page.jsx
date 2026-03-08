@@ -699,6 +699,7 @@ function MealSlotGrid({ slots, overrides, upsertSlot, upsertOverride, toast, loa
   const [incomeLevel, setIncomeLevel] = useState("middle");
   const [prepType, setPrepType] = useState("ready-to-eat");
   const [editingSlot, setEditingSlot] = useState(null);
+  const [saving, setSaving] = useState(false);
   const { isOpen: isSlotModalOpen, onOpen: onSlotModalOpen, onClose: onSlotModalClose } = useDisclosure();
 
   const getSlot = (day, mealType) =>
@@ -738,29 +739,15 @@ function MealSlotGrid({ slots, overrides, upsertSlot, upsertOverride, toast, loa
   };
 
   const handleSaveSlot = async (form) => {
-    // Basic validation before hitting the API
     if (!form.mealName || !form.mealName.trim()) {
-      toast({
-        title: "Meal name required",
-        description: "Please enter a meal name before saving.",
-        status: "warning",
-        duration: 6000,
-        isClosable: true,
-        position: "top-right",
-      });
+      toast({ title: "Meal name required", description: "Please enter a meal name before saving.", status: "warning", duration: 6000, isClosable: true, position: "top-right" });
       return;
     }
     if (!form.priceWeekly && !form.priceMonthly) {
-      toast({
-        title: "Add at least one price",
-        description: "Set either a weekly or monthly price so the plan can be billed correctly.",
-        status: "warning",
-        duration: 6000,
-        isClosable: true,
-        position: "top-right",
-      });
+      toast({ title: "Add at least one price", description: "Set either a weekly or monthly price so the plan can be billed correctly.", status: "warning", duration: 6000, isClosable: true, position: "top-right" });
       return;
     }
+    setSaving(true);
     try {
       await upsertSlot({
         incomeLevel: form.incomeLevel,
@@ -774,44 +761,23 @@ function MealSlotGrid({ slots, overrides, upsertSlot, upsertOverride, toast, loa
         priceMonthly: Number(form.priceMonthly) || 0,
         imageUrl: form.imageUrl || "",
       }).unwrap();
-      toast({
-        title: "Meal saved",
-        description: "Meal details have been updated on the calendar.",
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-        position: "top-right",
-      });
+      await upsertOverride({
+        incomeLevel: form.incomeLevel,
+        prepType: form.prepType,
+        day: form.day,
+        mealType: form.mealType,
+        imageUrl: form.imageUrl || "",
+      }).unwrap();
       loadSlots();
-      if (form.imageUrl) {
-        await upsertOverride({
-          incomeLevel: form.incomeLevel,
-          prepType: form.prepType,
-          day: form.day,
-          mealType: form.mealType,
-          imageUrl: form.imageUrl,
-        }).unwrap();
-        loadOverrides();
-        toast({
-          title: "Image saved",
-          description: "The meal image has been updated for this slot.",
-          status: "success",
-          duration: 5000,
-          isClosable: true,
-          position: "top-right",
-        });
-      }
+      loadOverrides();
+      toast({ title: "Meal saved", description: "Meal details have been updated on the calendar.", status: "success", duration: 5000, isClosable: true, position: "top-right" });
       onSlotModalClose();
+      setEditingSlot(null);
     } catch (e) {
       const msg = e?.data?.message || e?.message || "Failed to save this meal. Please check your connection and try again.";
-      toast({
-        title: "Save failed",
-        description: msg,
-        status: "error",
-        duration: 8000,
-        isClosable: true,
-        position: "top-right",
-      });
+      toast({ title: "Save failed", description: msg, status: "error", duration: 8000, isClosable: true, position: "top-right" });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -878,10 +844,10 @@ function MealSlotGrid({ slots, overrides, upsertSlot, upsertOverride, toast, loa
 
       <MealSlotEditorModal
         isOpen={isSlotModalOpen}
-        onClose={() => { onSlotModalClose(); setEditingSlot(null); }}
+        onClose={() => { if (!saving) { onSlotModalClose(); setEditingSlot(null); } }}
         slot={editingSlot}
         onSave={handleSaveSlot}
-        toast={toast}
+        saving={saving}
       />
     </>
   );
@@ -903,9 +869,10 @@ function MealSlotCell({ slot, imgUrl, day, mealType, onEdit }) {
   );
 }
 
-function MealSlotEditorModal({ isOpen, onClose, slot, onSave, toast }) {
+function MealSlotEditorModal({ isOpen, onClose, slot, onSave, saving = false }) {
   const [form, setForm] = useState({});
   const [uploading, setUploading] = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
     if (slot) setForm({ ...slot });
@@ -913,6 +880,7 @@ function MealSlotEditorModal({ isOpen, onClose, slot, onSave, toast }) {
 
   const handleSubmit = (e) => {
     e?.preventDefault?.();
+    if (saving) return;
     onSave(form);
   };
 
@@ -920,7 +888,7 @@ function MealSlotEditorModal({ isOpen, onClose, slot, onSave, toast }) {
     const file = e?.target?.files?.[0];
     if (!file) return;
     if (!file.type?.startsWith("image/")) {
-      toast?.({
+      toast({
         title: "Invalid file",
         description: "Please upload an image file (JPG, PNG, WEBP, etc).",
         status: "warning",
@@ -935,40 +903,26 @@ function MealSlotEditorModal({ isOpen, onClose, slot, onSave, toast }) {
       const fd = new FormData();
       fd.append("image", file);
       const res = await fetch(`${BACKEND_URL}/api/meal-calendar/upload`, { method: "POST", body: fd });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (data?.status === "Success" && data?.data?.imageUrl) {
         setForm((f) => ({ ...f, imageUrl: data.data.imageUrl }));
-        toast?.({
-          title: "Image uploaded",
-          description: "The image has been uploaded. Click Save to apply it to this meal slot.",
-          status: "success",
-          duration: 6000,
-          isClosable: true,
-          position: "top-right",
-        });
+        toast({ title: "Image uploaded", description: "The image has been uploaded. Click Save to apply it to this meal slot.", status: "success", duration: 6000, isClosable: true, position: "top-right" });
       } else {
         throw new Error(data?.message || "Upload failed");
       }
     } catch (err) {
-      console.error(err);
-      const msg = err?.message || "Image upload failed. Please try again.";
-      toast?.({
-        title: "Upload failed",
-        description: msg,
-        status: "error",
-        duration: 8000,
-        isClosable: true,
-        position: "top-right",
-      });
+      const msg = err?.message || "Image upload failed. You can paste an image URL instead.";
+      toast({ title: "Upload failed", description: msg, status: "error", duration: 8000, isClosable: true, position: "top-right" });
     } finally {
       setUploading(false);
+      e.target.value = "";
     }
   };
 
   if (!slot) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size={{ base: "full", md: "lg" }} isCentered scrollBehavior="inside">
+    <Modal isOpen={isOpen} onClose={onClose} size={{ base: "full", md: "lg" }} isCentered scrollBehavior="inside" closeOnOverlayClick={!saving}>
       <ModalOverlay />
       <ModalContent maxH="90vh" borderRadius="xl">
         <ModalHeader>Edit meal — {slot.day} {slot.mealType}</ModalHeader>
@@ -1045,8 +999,8 @@ function MealSlotEditorModal({ isOpen, onClose, slot, onSave, toast }) {
             </VStack>
           </ModalBody>
           <ModalFooter>
-            <Button variant="outline" onClick={onClose}>Cancel</Button>
-            <Button colorScheme="green" type="submit">Save</Button>
+            <Button variant="outline" onClick={onClose} isDisabled={saving}>Cancel</Button>
+            <Button colorScheme="green" type="submit" isLoading={saving} loadingText="Saving...">Save</Button>
           </ModalFooter>
         </form>
       </ModalContent>
