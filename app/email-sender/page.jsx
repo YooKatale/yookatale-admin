@@ -565,6 +565,7 @@ export default function EmailSender() {
           
           const response = await fetch(apiUrl, {
             method: "POST",
+            mode: "cors",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               email: email,
@@ -615,48 +616,6 @@ export default function EmailSender() {
         duration: 3000,
         isClosable: true,
       });
-      return;
-    }
-
-    // Partner template uses backend bulk endpoint
-    if (templateId === "partner") {
-      setSending(true);
-      setSendingTemplate("partner");
-      setResults({ success: 0, failed: 0, errors: [], currentIndex: 0, total: emailList.length });
-      try {
-        const res = await fetch(`${BACKEND_URL}/api/bulk/partner`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ emails: emailList }),
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          throw new Error(data?.message || data?.error || `HTTP ${res.status}`);
-        }
-        const { sent = 0, failed = 0 } = data?.data || {};
-        setResults({ success: sent, failed, errors: [], currentIndex: emailList.length, total: emailList.length });
-        if (sent > 0) {
-          updateAllTimeStats(emailList.slice(0, sent), "partner");
-        }
-        toast({
-          title: "Emails Sent!",
-          description: `Sent: ${sent}, Failed: ${failed}`,
-          status: sent > 0 ? "success" : "error",
-          duration: 5000,
-          isClosable: true,
-        });
-      } catch (err) {
-        toast({
-          title: "Send failed",
-          description: err?.message || "Could not send partner emails",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
-      } finally {
-        setSending(false);
-        setSendingTemplate(null);
-      }
       return;
     }
 

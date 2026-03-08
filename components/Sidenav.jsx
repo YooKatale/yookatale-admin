@@ -249,7 +249,6 @@ const SidebarWithHeader = ({ children, ...rest }) => {
       setLoading({ ...isLoading, operation: "logout", status: true });
 
       try {
-        setisAuthenticated(false)
         const res = await logoutApiCall().unwrap();
         setLoading({ ...isLoading, operation: "", status: false });
         dispatch(logout());

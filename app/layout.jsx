@@ -14,8 +14,8 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className={inter.className} style={{ fontFamily: 'Inter, sans-serif' }}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className} style={{ fontFamily: 'Inter, sans-serif' }} suppressHydrationWarning>
         <Providers>
           <Suspense>
             <SidebarWithHeader>
