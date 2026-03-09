@@ -60,6 +60,7 @@ export const SideNavRoutes = [
   { name: "News Blog", icon: PenBoxIcon, path: "/newsblogs", editorCanAccess: true },
   { name: "Accounts", icon: UsersIcon, path: "/accounts", editorCanAccess: false },
   { name: "Cashout & Payments", icon: Banknote, path: "/cashout", editorCanAccess: false },
+  { name: "Referral Tracking", icon: UserCheck, path: "/referrals", editorCanAccess: false },
   { name: "Customer Support", icon: MessagesSquare, path: "/support", editorCanAccess: true },
   { name: "Email Sender", icon: Mail, path: "/email-sender", editorCanAccess: true },
   { name: "Settings", icon: Settings2, path: "/settings", editorCanAccess: true },

@@ -20,10 +20,18 @@ export const cashoutApiSlice = apiSlice.injectEndpoints({
         credentials: "include",
       }),
     }),
+    getAdminReferralOverview: builder.mutation({
+      query: () => ({
+        url: `${BACKEND_URL}/admin/cashout/referrals`,
+        method: "GET",
+        credentials: "include",
+      }),
+    }),
   }),
 });
 
 export const {
   useGetCashoutUsersMutation,
   useCreditUserCashoutMutation,
+  useGetAdminReferralOverviewMutation,
 } = cashoutApiSlice;
