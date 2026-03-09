@@ -1,144 +1,135 @@
 "use client";
 
-import React, { useState } from "react";
-import Navbar from "@components/Navbar";
-import Sidenav from "@components/Sidenav";
 import {
-  useFetchVendorsQuery,
-  useVerifyVendorMutation,
-} from "@Slices/vendorPageApiSlice";
+  Box, Card, CardBody, CardHeader, Center, Heading, HStack, Input, InputGroup,
+  InputLeftElement, Spinner, Table, TableCell, TableHead, TableHeader, TableRow,
+  TableBody, Text, VStack, Badge, Button, SimpleGrid, Icon, Flex,
+  useToast,
+} from "@chakra-ui/react";
+import { useAdminVendorsQuery, useRunVendorPayoutsMutation } from "@Slices/ordersDeliveryApiSlice";
 import { useVendorGetMutation } from "@Slices/vendorApiSlice";
-import VendorDetailsPopup from "@components/VendorDetailsPopup";
-import { Box } from "@chakra-ui/react";
+import { Search, Store, DollarSign, ShoppingBag, RefreshCw, CheckCircle, XCircle } from "lucide-react";
+import moment from "moment";
+import { useState, useMemo, useEffect } from "react";
 
-const VendorPage = () => {
-  const { data: vendors, isLoading, isError, error } = useFetchVendorsQuery();
-  const [verifyVendor] = useVerifyVendorMutation();
+export default function VendorsPage() {
+  const { data: vendors = [], isLoading, refetch } = useAdminVendorsQuery();
+  const [runPayouts, { isLoading: payingOut }] = useRunVendorPayoutsMutation();
+  const [searchInput, setSearchInput] = useState("");
+  const [tab, setTab] = useState("all");
+  const toast = useToast();
 
-  const [selectedVendor, setSelectedVendor] = useState(null);
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const displayVendors = useMemo(() => {
+    let list = tab === "verified" ? vendors.filter((v) => v.status === "Verified") :
+               tab === "pending" ? vendors.filter((v) => v.status === "Unverified") :
+               vendors;
+    if (searchInput) {
+      const q = searchInput.toLowerCase();
+      list = list.filter((v) => v?.name?.toLowerCase().includes(q) || v?.email?.toLowerCase().includes(q) || v?.phone?.includes(q));
+    }
+    return list;
+  }, [vendors, searchInput, tab]);
 
-  const handleRowClick = (vendor) => {
-    console.log(vendors);
-    console.log("Vendor clicked:", vendor);
-    setSelectedVendor(vendor);
-    setIsPopupOpen(true);
-  };
+  const totalRevenue = vendors.reduce((a, v) => a + (v.revenue || v.totalRevenue || 0), 0);
+  const totalPending = vendors.reduce((a, v) => a + (v.pendingPayout || 0), 0);
+  const totalOrders = vendors.reduce((a, v) => a + (v.orderCount || v.totalOrders || 0), 0);
 
-  const handleVerify = async (vendorId) => {
+  const handlePayout = async () => {
     try {
-      await verifyVendor(vendorId).unwrap();
-      console.log("Vendor verified successfully");
-    } catch (error) {
-      console.error("Failed to verify vendor:", error);
+      const res = await runPayouts().unwrap();
+      toast({ title: "Vendor Payouts Processed!", description: `${res?.data?.processed || 0} vendors paid.`, status: "success", duration: 4000 });
+      refetch();
+    } catch (e) {
+      toast({ title: "Error", description: e?.data?.message || "Failed", status: "error", duration: 4000 });
     }
   };
 
+  if (isLoading) return (<Center minH="50vh"><VStack spacing={4}><Spinner size="xl" color="green.500" thickness="4px" /><Text>Loading vendors...</Text></VStack></Center>);
+
   return (
-    <Box marginTop={20}
-    
-    >
-      
-      <div >
-        
-        <h1 className="text-2xl font-bold mb-4 text-center">
-          Registered Vendors
-        </h1>
-        {isLoading ? (
-          <p>Loading...</p>
-        ) : isError ? (
-          <p>Error: {error.message}</p>
-        ) : vendors && vendors.length > 0 ? (
-          <table className="divide-y divide-gray-200 paginated"> 
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b-2 border-r">
-                  Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b-2 border-r">
-                  Address
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b-2 border-r">
-                  Phone
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b-2 border-r">
-                  Email
-                </th>
-                {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b-2 border-r">
-                  Category
-                </th> */}
-                {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b-2 border-r">
-                  Verified
-                </th> */}
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b-2">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {vendors.map((vendor) => (
-                <tr
-                  key={vendor._id}
-                  className="bg-white hover:bg-gray-100 cursor-pointer"
-                  onClick={() => handleRowClick(vendor)}
-                >
-                  <td className="px-6 py-4 whitespace-nowrap border-b border-r">
-                    {vendor.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap border-b border-r">
-                    {vendor.address}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap border-b border-r">
-                    {vendor.phone}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap border-b border-r">
-                    {vendor.email}
-                  </td>
-                  {/* <td className="px-6 py-4 whitespace-nowrap border-b border-r">
-                    {vendor.category}
-                  </td> */}
-                  {/* <td className="px-6 py-4 whitespace-nowrap border-b border-r">
-                    {vendor.status === "Verified" ? (
-                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                        Verified
-                      </span>
-                    ) : (
-                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                        Not Verified
-                      </span>
-                    )}
-                  </td> */}
-                  <td className="px-6 py-4 whitespace-nowrap border-b">
-                    {vendor.status === "Unverified" && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleVerify(vendor._id);
-                        }}
-                        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-700 cursor-pointer"
-                      >
-                        Verify
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <div className="flex justify-center" style={{ marginTop: "20%" }}>
-            <p>No vendors found</p>
-          </div>
-        )}
-      </div>
-      {isPopupOpen && selectedVendor && (
-        <VendorDetailsPopup
-          vendor={selectedVendor}
-          onClose={() => setIsPopupOpen(false)}
-        />
-      )}
+    <Box>
+      <VStack align="stretch" spacing={6}>
+        <HStack justify="space-between" flexWrap="wrap" gap={4}>
+          <HStack spacing={3}><Icon as={Store} boxSize={7} color="green.600" /><Heading size="lg">Vendor Management</Heading></HStack>
+          <HStack spacing={2}>
+            <Button size="sm" colorScheme="orange" onClick={handlePayout} isLoading={payingOut} leftIcon={<DollarSign size={14} />}>Process Vendor Payouts</Button>
+            <Button size="sm" variant="outline" colorScheme="green" onClick={refetch} leftIcon={<RefreshCw size={14} />}>Refresh</Button>
+          </HStack>
+        </HStack>
+
+        {/* Stats */}
+        <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4}>
+          {[
+            { label: "Total Vendors", value: vendors.length, color: "blue" },
+            { label: "Verified", value: vendors.filter((v) => v.status === "Verified").length, color: "green" },
+            { label: "Total Orders", value: totalOrders, color: "purple" },
+            { label: "Pending Payouts", value: `UGX ${totalPending.toLocaleString()}`, color: "orange" },
+          ].map((s, i) => (
+            <Card key={i} size="sm"><CardBody textAlign="center">
+              <Text fontSize="xs" color="gray.500" fontWeight="600">{s.label}</Text>
+              <Text fontSize="xl" fontWeight="800" color={`${s.color}.600`}>{s.value}</Text>
+            </CardBody></Card>
+          ))}
+        </SimpleGrid>
+
+        {/* Tabs */}
+        <HStack spacing={2}>
+          {[{ key: "all", label: "All" }, { key: "verified", label: "Verified" }, { key: "pending", label: "Pending" }].map((t) => (
+            <Button key={t.key} size="sm" variant={tab === t.key ? "solid" : "outline"} colorScheme="green" onClick={() => setTab(t.key)}>{t.label}</Button>
+          ))}
+        </HStack>
+
+        <Card>
+          <CardHeader>
+            <HStack justify="space-between" flexWrap="wrap" gap={4}>
+              <Text fontSize="sm" color="gray.600">{displayVendors.length} vendor(s)</Text>
+              <InputGroup maxW="300px" size="sm">
+                <InputLeftElement pointerEvents="none"><Search size={14} color="gray" /></InputLeftElement>
+                <Input placeholder="Search vendors..." value={searchInput} onChange={(e) => setSearchInput(e.target.value)} borderRadius="lg" />
+              </InputGroup>
+            </HStack>
+          </CardHeader>
+          <CardBody pt={0}>
+            <Box overflowX="auto">
+              <Table size="sm">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Orders</TableHead>
+                    <TableHead>Revenue</TableHead>
+                    <TableHead>Pending Payout</TableHead>
+                    <TableHead>Joined</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {displayVendors.map((v, idx) => (
+                    <TableRow key={v._id || idx} _hover={{ bg: "gray.50" }}>
+                      <TableCell fontWeight="600" fontSize="sm">{v.name || "N/A"}</TableCell>
+                      <TableCell fontSize="sm"><Badge colorScheme="purple" borderRadius="full">{v.category || "General"}</Badge></TableCell>
+                      <TableCell fontSize="sm">{v.phone || "N/A"}</TableCell>
+                      <TableCell fontSize="sm">{v.email || "N/A"}</TableCell>
+                      <TableCell>
+                        <Badge colorScheme={v.status === "Verified" ? "green" : v.status === "Rejected" ? "red" : "yellow"} borderRadius="full" fontSize="xs">
+                          {v.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell fontWeight="600">{v.orderCount || v.totalOrders || 0}</TableCell>
+                      <TableCell fontWeight="600" color="green.600" fontSize="sm">UGX {(v.revenue || v.totalRevenue || 0).toLocaleString()}</TableCell>
+                      <TableCell fontWeight="600" color="orange.500" fontSize="sm">UGX {(v.pendingPayout || 0).toLocaleString()}</TableCell>
+                      <TableCell fontSize="xs" color="gray.500">{v.createdAt ? moment(v.createdAt).fromNow() : "N/A"}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
+            {displayVendors.length === 0 && <Center py={8}><Text color="gray.500">No vendors found</Text></Center>}
+          </CardBody>
+        </Card>
+      </VStack>
     </Box>
   );
-};
-
-export default VendorPage;
+}

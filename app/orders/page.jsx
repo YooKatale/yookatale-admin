@@ -1,139 +1,291 @@
 "use client";
 
 import {
-  Box,
-  Card,
-  CardBody,
-  CardHeader,
-  Center,
-  Heading,
-  HStack,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  Spinner,
-  Table,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  TableBody,
-  Text,
-  VStack,
-  Badge,
+  Box, Card, CardBody, CardHeader, Center, Heading, HStack, Input, InputGroup,
+  InputLeftElement, Spinner, Table, TableCell, TableHead, TableHeader, TableRow,
+  TableBody, Text, VStack, Badge, Button, Select, SimpleGrid, Flex, Icon,
+  Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, ModalFooter,
+  useDisclosure, useToast, Textarea, Tooltip, IconButton, Divider,
 } from "@chakra-ui/react";
-import { useOrdersAllQuery } from "@Slices/ordersDeliveryApiSlice";
-import { Search } from "lucide-react";
+import {
+  useAdminOrdersQuery, useOrderStatsQuery, useApproveOrderMutation,
+  useAssignDriverToOrderMutation, useUpdateOrderStatusMutation, useDriversByLocationQuery,
+} from "@Slices/ordersDeliveryApiSlice";
+import { Search, Package, CheckCircle, Truck, MapPin, XCircle, Clock, ArrowRight, RefreshCw, User } from "lucide-react";
 import moment from "moment";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
-export default function OrdersPage() {
-  const { data: orders = [], isLoading, isError } = useOrdersAllQuery();
+const STATUS_CONFIG = {
+  pending: { color: "yellow", label: "Pending", icon: Clock },
+  confirmed: { color: "blue", label: "Confirmed", icon: CheckCircle },
+  preparing: { color: "purple", label: "Preparing", icon: Package },
+  ready: { color: "cyan", label: "Ready", icon: Package },
+  assigned: { color: "orange", label: "Driver Assigned", icon: Truck },
+  picked_up: { color: "teal", label: "Picked Up", icon: Truck },
+  in_transit: { color: "blue", label: "In Transit", icon: MapPin },
+  delivered: { color: "green", label: "Delivered", icon: CheckCircle },
+  cancelled: { color: "red", label: "Cancelled", icon: XCircle },
+  refunded: { color: "gray", label: "Refunded", icon: XCircle },
+};
+
+export default function AdminOrdersPage() {
+  const [statusFilter, setStatusFilter] = useState("");
   const [searchInput, setSearchInput] = useState("");
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
 
-  const filteredOrders = searchInput
-    ? orders.filter(
-        (o) =>
-          o?.deliveryAddress?.address1?.toLowerCase().includes(searchInput.toLowerCase()) ||
-          o?.user?.firstname?.toLowerCase().includes(searchInput.toLowerCase()) ||
-          o?.user?.lastname?.toLowerCase().includes(searchInput.toLowerCase()) ||
-          o?.user?.email?.toLowerCase().includes(searchInput.toLowerCase())
-      )
-    : orders;
+  const { data: orderData = {}, isLoading, refetch } = useAdminOrdersQuery({ status: statusFilter || undefined });
+  const { data: stats = {} } = useOrderStatsQuery();
+  const { data: drivers = [] } = useDriversByLocationQuery();
+  const [approveOrder, { isLoading: approving }] = useApproveOrderMutation();
+  const [assignDriver, { isLoading: assigning }] = useAssignDriverToOrderMutation();
+  const [updateStatus, { isLoading: updating }] = useUpdateOrderStatusMutation();
 
-  if (isLoading) {
-    return (
-      <Center minH="50vh">
-        <VStack spacing={4}>
-          <Spinner size="xl" color="green.500" thickness="4px" />
-          <Text color="gray.600">Loading orders...</Text>
-        </VStack>
-      </Center>
+  const orders = orderData?.orders || [];
+  const filtered = useMemo(() => {
+    if (!searchInput) return orders;
+    const q = searchInput.toLowerCase();
+    return orders.filter((o) =>
+      o?.customerName?.toLowerCase().includes(q) ||
+      o?.deliveryAddress?.address1?.toLowerCase().includes(q) ||
+      o?._id?.includes(q) ||
+      o?.productItems?.toLowerCase().includes(q)
     );
-  }
+  }, [orders, searchInput]);
+
+  const handleApprove = async (orderId) => {
+    try {
+      await approveOrder({ orderId }).unwrap();
+      toast({ title: "Order Approved!", status: "success", duration: 3000 });
+      refetch();
+    } catch (e) {
+      toast({ title: "Error", description: e?.data?.message || "Failed", status: "error", duration: 4000 });
+    }
+  };
+
+  const handleAssignDriver = async (orderId, driverId) => {
+    try {
+      const res = await assignDriver({ orderId, driverId: driverId || undefined }).unwrap();
+      toast({ title: res?.message || "Driver Assigned!", status: "success", duration: 3000 });
+      refetch();
+    } catch (e) {
+      toast({ title: "Error", description: e?.data?.message || "Failed", status: "error", duration: 4000 });
+    }
+  };
+
+  const handleStatusUpdate = async (orderId, status, note) => {
+    try {
+      await updateStatus({ orderId, status, note }).unwrap();
+      toast({ title: "Status Updated!", status: "success", duration: 3000 });
+      refetch();
+      onClose();
+    } catch (e) {
+      toast({ title: "Error", description: e?.data?.message || "Failed", status: "error", duration: 4000 });
+    }
+  };
+
+  if (isLoading) return (<Center minH="50vh"><VStack spacing={4}><Spinner size="xl" color="green.500" thickness="4px" /><Text>Loading orders...</Text></VStack></Center>);
 
   return (
     <Box>
       <VStack align="stretch" spacing={6}>
-        <Heading size="lg" color="gray.800">
-          Orders
-        </Heading>
+        <HStack justify="space-between" flexWrap="wrap" gap={4}>
+          <HStack spacing={3}><Icon as={Package} boxSize={7} color="green.600" /><Heading size="lg">Order Management</Heading></HStack>
+          <Button size="sm" leftIcon={<RefreshCw size={14} />} onClick={refetch} variant="outline" colorScheme="green">Refresh</Button>
+        </HStack>
+
+        {/* Stats */}
+        <SimpleGrid columns={{ base: 2, md: 4, lg: 6 }} spacing={4}>
+          {[
+            { label: "Today", value: stats.todayOrders || 0, color: "blue" },
+            { label: "This Week", value: stats.weekOrders || 0, color: "green" },
+            { label: "Week Revenue", value: `UGX ${(stats.weekRevenue || 0).toLocaleString()}`, color: "green" },
+            { label: "Total Orders", value: stats.totalOrders || 0, color: "gray" },
+            { label: "Pending", value: stats.statusCounts?.pending?.count || 0, color: "yellow" },
+            { label: "Delivered", value: stats.statusCounts?.delivered?.count || 0, color: "green" },
+          ].map((s, i) => (
+            <Card key={i} size="sm"><CardBody textAlign="center">
+              <Text fontSize="xs" color="gray.500" fontWeight="600">{s.label}</Text>
+              <Text fontSize="xl" fontWeight="800" color={`${s.color}.600`}>{s.value}</Text>
+            </CardBody></Card>
+          ))}
+        </SimpleGrid>
+
+        {/* Filters */}
         <Card>
           <CardHeader>
             <HStack justify="space-between" flexWrap="wrap" gap={4}>
-              <Text fontSize="sm" color="gray.600">
-                {filteredOrders.length} order(s)
-              </Text>
-              <InputGroup maxW="300px">
-                <InputLeftElement pointerEvents="none">
-                  <Search size={18} color="gray" />
-                </InputLeftElement>
-                <Input
-                  placeholder="Search by address or customer..."
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  borderRadius="lg"
-                />
+              <HStack spacing={3}>
+                <Select size="sm" maxW="200px" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} borderRadius="lg" placeholder="All Statuses">
+                  {Object.entries(STATUS_CONFIG).map(([k, v]) => (<option key={k} value={k}>{v.label}</option>))}
+                </Select>
+                <Text fontSize="sm" color="gray.500">{filtered.length} orders</Text>
+              </HStack>
+              <InputGroup maxW="300px" size="sm">
+                <InputLeftElement pointerEvents="none"><Search size={14} color="gray" /></InputLeftElement>
+                <Input placeholder="Search orders..." value={searchInput} onChange={(e) => setSearchInput(e.target.value)} borderRadius="lg" />
               </InputGroup>
             </HStack>
           </CardHeader>
           <CardBody pt={0}>
-            {filteredOrders.length > 0 ? (
-              <Box overflowX="auto">
-                <Table size="sm">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Customer</TableHead>
-                      <TableHead>Items</TableHead>
-                      <TableHead>Payment</TableHead>
-                      <TableHead>Total</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Address</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredOrders.map((order, idx) => (
-                      <TableRow key={order?._id || idx} _hover={{ bg: "gray.50" }}>
-                        <TableCell fontWeight="600">
-                          {order?.user?.firstname} {order?.user?.lastname}
-                        </TableCell>
-                        <TableCell>{order?.productItems || "—"}</TableCell>
+            <Box overflowX="auto">
+              <Table size="sm">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Order</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Items</TableHead>
+                    <TableHead>Total</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Driver</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filtered.map((order, idx) => {
+                    const sc = STATUS_CONFIG[order?.status] || STATUS_CONFIG.pending;
+                    return (
+                      <TableRow key={order?._id || idx} _hover={{ bg: "gray.50" }} cursor="pointer" onClick={() => { setSelectedOrder(order); onOpen(); }}>
+                        <TableCell fontSize="xs" fontFamily="mono" color="gray.500">#{(order?._id || "").slice(-6)}</TableCell>
+                        <TableCell fontWeight="600" fontSize="sm">{order?.customerName || "N/A"}</TableCell>
+                        <TableCell fontSize="sm">{order?.productItems || `${order?.products?.length || 0} items`}</TableCell>
+                        <TableCell fontWeight="700" color="green.600" fontSize="sm">UGX {(order?.total || 0).toLocaleString()}</TableCell>
+                        <TableCell><Badge colorScheme={sc.color} borderRadius="full" px={2} fontSize="xs">{sc.label}</Badge></TableCell>
+                        <TableCell fontSize="xs">{order?.driverId?.name || "Unassigned"}</TableCell>
+                        <TableCell fontSize="xs" color="gray.500">{moment(order?.createdAt).fromNow()}</TableCell>
                         <TableCell>
-                          <Badge
-                            colorScheme={
-                              order?.paymentMethod === "card"
-                                ? "blue"
-                                : order?.paymentMethod === "mobileMoney"
-                                ? "green"
-                                : "orange"
-                            }
-                            borderRadius="full"
-                          >
-                            {order?.paymentMethod || order?.payment?.paymentMethod || "N/A"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell fontWeight="600" color="green.600">
-                          UGX {order?.total?.toLocaleString?.() || "0"}
-                        </TableCell>
-                        <TableCell fontSize="sm" color="gray.600">
-                          {moment(order?.createdAt).fromNow()}
-                        </TableCell>
-                        <TableCell fontSize="sm" color="gray.600">
-                          {order?.deliveryAddress?.address1 || "—"}
+                          <HStack spacing={1}>
+                            {order?.status === "pending" && (
+                              <Button size="xs" colorScheme="green" onClick={(e) => { e.stopPropagation(); handleApprove(order._id); }} isLoading={approving}>Approve</Button>
+                            )}
+                            {["confirmed", "preparing", "ready"].includes(order?.status) && (
+                              <Button size="xs" colorScheme="blue" onClick={(e) => { e.stopPropagation(); handleAssignDriver(order._id); }} isLoading={assigning}>Assign Driver</Button>
+                            )}
+                          </HStack>
                         </TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </Box>
-            ) : (
-              <Center py={12}>
-                <Text color="gray.500">No orders found</Text>
-              </Center>
-            )}
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </Box>
+            {filtered.length === 0 && <Center py={8}><Text color="gray.500">No orders found</Text></Center>}
           </CardBody>
         </Card>
       </VStack>
+
+      {/* Order Detail Modal */}
+      <OrderDetailModal
+        order={selectedOrder}
+        isOpen={isOpen}
+        onClose={onClose}
+        drivers={drivers}
+        onApprove={handleApprove}
+        onAssignDriver={handleAssignDriver}
+        onStatusUpdate={handleStatusUpdate}
+        approving={approving}
+        assigning={assigning}
+        updating={updating}
+      />
     </Box>
+  );
+}
+
+function OrderDetailModal({ order, isOpen, onClose, drivers, onApprove, onAssignDriver, onStatusUpdate, approving, assigning, updating }) {
+  const [selectedDriverId, setSelectedDriverId] = useState("");
+  const [newStatus, setNewStatus] = useState("");
+  const [note, setNote] = useState("");
+  if (!order) return null;
+  const sc = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} size="xl" scrollBehavior="inside">
+      <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
+      <ModalContent borderRadius="xl" mx={4}>
+        <ModalHeader pb={2}>
+          <HStack spacing={3}>
+            <Icon as={sc.icon} color={`${sc.color}.500`} boxSize={6} />
+            <Box>
+              <Heading size="md">Order #{(order._id || "").slice(-6)}</Heading>
+              <Badge colorScheme={sc.color} borderRadius="full" fontSize="xs">{sc.label}</Badge>
+            </Box>
+          </HStack>
+        </ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>
+          <VStack align="stretch" spacing={4}>
+            <SimpleGrid columns={2} spacing={3}>
+              <Box><Text fontSize="xs" color="gray.500">Customer</Text><Text fontWeight="600">{order.customerName || "N/A"}</Text></Box>
+              <Box><Text fontSize="xs" color="gray.500">Total</Text><Text fontWeight="700" color="green.600">UGX {(order.total || 0).toLocaleString()}</Text></Box>
+              <Box><Text fontSize="xs" color="gray.500">Items</Text><Text fontSize="sm">{order.productItems || `${order.products?.length || 0} items`}</Text></Box>
+              <Box><Text fontSize="xs" color="gray.500">Date</Text><Text fontSize="sm">{moment(order.createdAt).format("MMM D, YYYY h:mm A")}</Text></Box>
+              <Box><Text fontSize="xs" color="gray.500">Address</Text><Text fontSize="sm">{order.deliveryAddress?.address1 || "N/A"}</Text></Box>
+              <Box><Text fontSize="xs" color="gray.500">Driver</Text><Text fontSize="sm">{order.driverId?.name || "Unassigned"}</Text></Box>
+            </SimpleGrid>
+
+            {order.products && order.products.length > 0 && (
+              <Box bg="gray.50" borderRadius="lg" p={3}>
+                <Text fontSize="xs" fontWeight="600" color="gray.500" mb={2}>Products</Text>
+                {order.products.map((p, i) => (
+                  <HStack key={i} justify="space-between" py={1} borderBottom={i < order.products.length - 1 ? "1px" : "none"} borderColor="gray.200">
+                    <Text fontSize="sm">{p.name || "Item"} x{p.quantity || 1}</Text>
+                    <Text fontSize="sm" fontWeight="600">UGX {(p.price || 0).toLocaleString()}</Text>
+                  </HStack>
+                ))}
+              </Box>
+            )}
+
+            {order.trackingHistory && order.trackingHistory.length > 0 && (
+              <Box bg="blue.50" borderRadius="lg" p={3}>
+                <Text fontSize="xs" fontWeight="600" color="blue.600" mb={2}>Tracking History</Text>
+                {order.trackingHistory.map((t, i) => (
+                  <HStack key={i} spacing={2} py={1}>
+                    <Icon as={ArrowRight} boxSize={3} color="blue.400" />
+                    <Text fontSize="xs"><strong>{t.status}</strong> - {moment(t.timestamp).format("MMM D, h:mm A")}{t.note ? ` (${t.note})` : ""}</Text>
+                  </HStack>
+                ))}
+              </Box>
+            )}
+
+            <Divider />
+
+            {/* Actions */}
+            {order.status === "pending" && (
+              <Button colorScheme="green" onClick={() => onApprove(order._id)} isLoading={approving}>Approve Order</Button>
+            )}
+
+            {["confirmed", "preparing", "ready"].includes(order.status) && (
+              <Box>
+                <Text fontSize="sm" fontWeight="600" mb={2}>Assign Driver</Text>
+                <HStack>
+                  <Select size="sm" placeholder="Auto-assign nearest" value={selectedDriverId} onChange={(e) => setSelectedDriverId(e.target.value)}>
+                    {(drivers || []).filter(d => d.isAvailable).map((d) => (
+                      <option key={d._id} value={d._id}>{d.name} ({d.transport}) {d.distanceKm ? `- ${d.distanceKm.toFixed(1)}km` : ""}</option>
+                    ))}
+                  </Select>
+                  <Button size="sm" colorScheme="blue" onClick={() => onAssignDriver(order._id, selectedDriverId)} isLoading={assigning}>Assign</Button>
+                </HStack>
+              </Box>
+            )}
+
+            {!["delivered", "cancelled", "refunded"].includes(order.status) && (
+              <Box>
+                <Text fontSize="sm" fontWeight="600" mb={2}>Update Status</Text>
+                <HStack>
+                  <Select size="sm" placeholder="Select status" value={newStatus} onChange={(e) => setNewStatus(e.target.value)}>
+                    {Object.entries(STATUS_CONFIG).map(([k, v]) => (<option key={k} value={k}>{v.label}</option>))}
+                  </Select>
+                  <Button size="sm" colorScheme="purple" onClick={() => onStatusUpdate(order._id, newStatus, note)} isLoading={updating} isDisabled={!newStatus}>Update</Button>
+                </HStack>
+                <Textarea size="sm" placeholder="Optional note..." value={note} onChange={(e) => setNote(e.target.value)} mt={2} rows={2} />
+              </Box>
+            )}
+          </VStack>
+        </ModalBody>
+        <ModalFooter><Button variant="ghost" onClick={onClose}>Close</Button></ModalFooter>
+      </ModalContent>
+    </Modal>
   );
 }
