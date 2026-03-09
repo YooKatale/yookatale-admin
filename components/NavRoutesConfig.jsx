@@ -19,6 +19,7 @@ import {
   Globe,
   Package,
   Truck,
+  UserCheck,
 } from "lucide-react";
 import { HiCreditCard, HiMenuAlt2, HiOutlineDocumentAdd } from "react-icons/hi";
 // Paths editors are allowed to access (settings, email sender, support, news blog, subscription, partners, categories, products)
