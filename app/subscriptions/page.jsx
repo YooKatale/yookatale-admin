@@ -76,6 +76,12 @@ const MEAL_TYPES = ["breakfast", "lunch", "supper"];
 const INCOME_LEVELS = ["middle", "low", "high"];
 const PREP_TYPES = ["ready-to-eat", "ready-to-cook"];
 
+const getSubUserLabel = (sub) => {
+  const user = sub?.user || {};
+  const fullName = [user?.firstname, user?.lastname].filter(Boolean).join(" ").trim();
+  return fullName || user?.email || "Unknown User";
+};
+
 export default function SubscriptionsPage() {
   const bg = useColorModeValue("white", "gray.900");
   const [subscriptionsData, setSubscriptionsData] = useState([]);
@@ -303,7 +309,7 @@ export default function SubscriptionsPage() {
                       <Tbody>
                         {subscriptionsData.map((sub) => (
                           <Tr key={sub._id}>
-                            <Td>{`${sub?.user?.firstname} ${sub?.user?.lastname}`}</Td>
+                            <Td>{getSubUserLabel(sub)}</Td>
                             <Td>
                               {sub?.cards?.length > 0 ? (
                                 sub.cards.map((c, i) => (
@@ -333,7 +339,7 @@ export default function SubscriptionsPage() {
                                   <AlertDialogHeader>
                                     <AlertDialogTitle>Approve subscription?</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                      This will activate {`${sub?.user?.firstname} ${sub?.user?.lastname}'s`} subscription.
+                                      This will activate {`${getSubUserLabel(sub)}'s`} subscription.
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>

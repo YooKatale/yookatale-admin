@@ -127,9 +127,9 @@ export default function DriversPage() {
                 <Tbody>
                   {displayDrivers.map((d, idx) => (
                     <Tr key={d._id || idx} _hover={{ bg: "gray.50" }}>
-                      <Td fontWeight="600" fontSize="sm">{d.name || "N/A"}</Td>
-                      <Td fontSize="sm">{d.phone || "N/A"}</Td>
-                      <Td fontSize="sm"><Badge colorScheme="blue" borderRadius="full">{d.transport || d.numberPlate || "N/A"}</Badge></Td>
+                      <Td fontWeight="600" fontSize="sm">{d.name || d.email || "Unknown Driver"}</Td>
+                      <Td fontSize="sm">{d.phone || "-"}</Td>
+                      <Td fontSize="sm"><Badge colorScheme="blue" borderRadius="full">{d.transport || d.numberPlate || "-"}</Badge></Td>
                       <Td>
                         <Badge colorScheme={d.status === "Verified" ? "green" : d.status === "Rejected" ? "red" : "yellow"} borderRadius="full" fontSize="xs">
                           {d.status}
@@ -144,7 +144,7 @@ export default function DriversPage() {
                       </Td>
                       <Td fontWeight="600" fontSize="sm">{d.totalDeliveries || 0}</Td>
                       <Td fontWeight="600" color="green.600" fontSize="sm">UGX {(d.commissionEarned || 0).toLocaleString()}</Td>
-                      <Td fontSize="xs" color="gray.500">{d.createdAt ? moment(d.createdAt).fromNow() : "N/A"}</Td>
+                      <Td fontSize="xs" color="gray.500">{d.createdAt ? moment(d.createdAt).fromNow() : "-"}</Td>
                       <Td>
                         <HStack spacing={1}>
                           {d.status === "Unverified" && (
