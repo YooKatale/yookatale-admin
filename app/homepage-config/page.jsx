@@ -19,7 +19,7 @@ import { LayoutDashboard } from "lucide-react";
 
 const getImageUrl = (url) => {
   if (!url || typeof url !== "string") return null;
-  if (url.startsWith("http")) return url;
+  if (url.startsWith("http") || url.startsWith("data:")) return url;
   return BACKEND_URL.replace(/\/$/, "") + (url.startsWith("/") ? url : "/" + url);
 };
 
