@@ -2,8 +2,8 @@
 
 import {
   Box, Card, CardBody, CardHeader, Center, Heading, HStack, Input, InputGroup,
-  InputLeftElement, Spinner, Table, TableCell, TableHead, TableHeader, TableRow,
-  TableBody, Text, VStack, Badge, Button, SimpleGrid, Icon, Flex,
+  InputLeftElement, Spinner, Table, Tbody, Td, Th, Thead, Tr,
+   Text, VStack, Badge, Button, SimpleGrid, Icon, Flex,
   useToast,
 } from "@chakra-ui/react";
 import { useAdminVendorsQuery, useRunVendorPayoutsMutation } from "@Slices/ordersDeliveryApiSlice";
@@ -92,38 +92,38 @@ export default function VendorsPage() {
           <CardBody pt={0}>
             <Box overflowX="auto">
               <Table size="sm">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Orders</TableHead>
-                    <TableHead>Revenue</TableHead>
-                    <TableHead>Pending Payout</TableHead>
-                    <TableHead>Joined</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+                <Thead>
+                  <Tr>
+                    <Th>Name</Th>
+                    <Th>Category</Th>
+                    <Th>Phone</Th>
+                    <Th>Email</Th>
+                    <Th>Status</Th>
+                    <Th>Orders</Th>
+                    <Th>Revenue</Th>
+                    <Th>Pending Payout</Th>
+                    <Th>Joined</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
                   {displayVendors.map((v, idx) => (
-                    <TableRow key={v._id || idx} _hover={{ bg: "gray.50" }}>
-                      <TableCell fontWeight="600" fontSize="sm">{v.name || "N/A"}</TableCell>
-                      <TableCell fontSize="sm"><Badge colorScheme="purple" borderRadius="full">{v.category || "General"}</Badge></TableCell>
-                      <TableCell fontSize="sm">{v.phone || "N/A"}</TableCell>
-                      <TableCell fontSize="sm">{v.email || "N/A"}</TableCell>
-                      <TableCell>
+                    <Tr key={v._id || idx} _hover={{ bg: "gray.50" }}>
+                      <Td fontWeight="600" fontSize="sm">{v.name || "N/A"}</Td>
+                      <Td fontSize="sm"><Badge colorScheme="purple" borderRadius="full">{v.category || "General"}</Badge></Td>
+                      <Td fontSize="sm">{v.phone || "N/A"}</Td>
+                      <Td fontSize="sm">{v.email || "N/A"}</Td>
+                      <Td>
                         <Badge colorScheme={v.status === "Verified" ? "green" : v.status === "Rejected" ? "red" : "yellow"} borderRadius="full" fontSize="xs">
                           {v.status}
                         </Badge>
-                      </TableCell>
-                      <TableCell fontWeight="600">{v.orderCount || v.totalOrders || 0}</TableCell>
-                      <TableCell fontWeight="600" color="green.600" fontSize="sm">UGX {(v.revenue || v.totalRevenue || 0).toLocaleString()}</TableCell>
-                      <TableCell fontWeight="600" color="orange.500" fontSize="sm">UGX {(v.pendingPayout || 0).toLocaleString()}</TableCell>
-                      <TableCell fontSize="xs" color="gray.500">{v.createdAt ? moment(v.createdAt).fromNow() : "N/A"}</TableCell>
-                    </TableRow>
+                      </Td>
+                      <Td fontWeight="600">{v.orderCount || v.totalOrders || 0}</Td>
+                      <Td fontWeight="600" color="green.600" fontSize="sm">UGX {(v.revenue || v.totalRevenue || 0).toLocaleString()}</Td>
+                      <Td fontWeight="600" color="orange.500" fontSize="sm">UGX {(v.pendingPayout || 0).toLocaleString()}</Td>
+                      <Td fontSize="xs" color="gray.500">{v.createdAt ? moment(v.createdAt).fromNow() : "N/A"}</Td>
+                    </Tr>
                   ))}
-                </TableBody>
+                </Tbody>
               </Table>
             </Box>
             {displayVendors.length === 0 && <Center py={8}><Text color="gray.500">No vendors found</Text></Center>}

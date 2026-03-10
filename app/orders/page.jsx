@@ -2,8 +2,8 @@
 
 import {
   Box, Card, CardBody, CardHeader, Center, Heading, HStack, Input, InputGroup,
-  InputLeftElement, Spinner, Table, TableCell, TableHead, TableHeader, TableRow,
-  TableBody, Text, VStack, Badge, Button, Select, SimpleGrid, Flex, Icon,
+  InputLeftElement, Spinner, Table, Tbody, Td, Th, Thead, Tr,
+   Text, VStack, Badge, Button, Select, SimpleGrid, Flex, Icon,
   Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, ModalFooter,
   useDisclosure, useToast, Textarea, Tooltip, IconButton, Divider,
 } from "@chakra-ui/react";
@@ -131,31 +131,31 @@ export default function AdminOrdersPage() {
           <CardBody pt={0}>
             <Box overflowX="auto">
               <Table size="sm">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Order</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Items</TableHead>
-                    <TableHead>Total</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Driver</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+                <Thead>
+                  <Tr>
+                    <Th>Order</Th>
+                    <Th>Customer</Th>
+                    <Th>Items</Th>
+                    <Th>Total</Th>
+                    <Th>Status</Th>
+                    <Th>Driver</Th>
+                    <Th>Date</Th>
+                    <Th>Actions</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
                   {filtered.map((order, idx) => {
                     const sc = STATUS_CONFIG[order?.status] || STATUS_CONFIG.pending;
                     return (
-                      <TableRow key={order?._id || idx} _hover={{ bg: "gray.50" }} cursor="pointer" onClick={() => { setSelectedOrder(order); onOpen(); }}>
-                        <TableCell fontSize="xs" fontFamily="mono" color="gray.500">#{(order?._id || "").slice(-6)}</TableCell>
-                        <TableCell fontWeight="600" fontSize="sm">{order?.customerName || "N/A"}</TableCell>
-                        <TableCell fontSize="sm">{order?.productItems || `${order?.products?.length || 0} items`}</TableCell>
-                        <TableCell fontWeight="700" color="green.600" fontSize="sm">UGX {(order?.total || 0).toLocaleString()}</TableCell>
-                        <TableCell><Badge colorScheme={sc.color} borderRadius="full" px={2} fontSize="xs">{sc.label}</Badge></TableCell>
-                        <TableCell fontSize="xs">{order?.driverId?.name || "Unassigned"}</TableCell>
-                        <TableCell fontSize="xs" color="gray.500">{moment(order?.createdAt).fromNow()}</TableCell>
-                        <TableCell>
+                      <Tr key={order?._id || idx} _hover={{ bg: "gray.50" }} cursor="pointer" onClick={() => { setSelectedOrder(order); onOpen(); }}>
+                        <Td fontSize="xs" fontFamily="mono" color="gray.500">#{(order?._id || "").slice(-6)}</Td>
+                        <Td fontWeight="600" fontSize="sm">{order?.customerName || "N/A"}</Td>
+                        <Td fontSize="sm">{order?.productItems || `${order?.products?.length || 0} items`}</Td>
+                        <Td fontWeight="700" color="green.600" fontSize="sm">UGX {(order?.total || 0).toLocaleString()}</Td>
+                        <Td><Badge colorScheme={sc.color} borderRadius="full" px={2} fontSize="xs">{sc.label}</Badge></Td>
+                        <Td fontSize="xs">{order?.driverId?.name || "Unassigned"}</Td>
+                        <Td fontSize="xs" color="gray.500">{moment(order?.createdAt).fromNow()}</Td>
+                        <Td>
                           <HStack spacing={1}>
                             {order?.status === "pending" && (
                               <Button size="xs" colorScheme="green" onClick={(e) => { e.stopPropagation(); handleApprove(order._id); }} isLoading={approving}>Approve</Button>
@@ -164,11 +164,11 @@ export default function AdminOrdersPage() {
                               <Button size="xs" colorScheme="blue" onClick={(e) => { e.stopPropagation(); handleAssignDriver(order._id); }} isLoading={assigning}>Assign Driver</Button>
                             )}
                           </HStack>
-                        </TableCell>
-                      </TableRow>
+                        </Td>
+                      </Tr>
                     );
                   })}
-                </TableBody>
+                </Tbody>
               </Table>
             </Box>
             {filtered.length === 0 && <Center py={8}><Text color="gray.500">No orders found</Text></Center>}

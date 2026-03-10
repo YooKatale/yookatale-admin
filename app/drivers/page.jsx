@@ -2,8 +2,8 @@
 
 import {
   Box, Card, CardBody, CardHeader, Center, Heading, HStack, Input, InputGroup,
-  InputLeftElement, Spinner, Table, TableCell, TableHead, TableHeader, TableRow,
-  TableBody, Text, VStack, Badge, Button, SimpleGrid, Icon, Flex, Divider,
+  InputLeftElement, Spinner, Table, Tbody, Td, Th, Thead, Tr,
+   Text, VStack, Badge, Button, SimpleGrid, Icon, Flex, Divider,
   useToast, Tooltip,
 } from "@chakra-ui/react";
 import { useAdminDriversQuery, useRunDriverPayoutsMutation, useDriversByLocationQuery } from "@Slices/ordersDeliveryApiSlice";
@@ -111,41 +111,41 @@ export default function DriversPage() {
           <CardBody pt={0}>
             <Box overflowX="auto">
               <Table size="sm">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Transport</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Online</TableHead>
-                    <TableHead>Deliveries</TableHead>
-                    <TableHead>Earnings</TableHead>
-                    <TableHead>Joined</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+                <Thead>
+                  <Tr>
+                    <Th>Name</Th>
+                    <Th>Phone</Th>
+                    <Th>Transport</Th>
+                    <Th>Status</Th>
+                    <Th>Online</Th>
+                    <Th>Deliveries</Th>
+                    <Th>Earnings</Th>
+                    <Th>Joined</Th>
+                    <Th>Actions</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
                   {displayDrivers.map((d, idx) => (
-                    <TableRow key={d._id || idx} _hover={{ bg: "gray.50" }}>
-                      <TableCell fontWeight="600" fontSize="sm">{d.name || "N/A"}</TableCell>
-                      <TableCell fontSize="sm">{d.phone || "N/A"}</TableCell>
-                      <TableCell fontSize="sm"><Badge colorScheme="blue" borderRadius="full">{d.transport || d.numberPlate || "N/A"}</Badge></TableCell>
-                      <TableCell>
+                    <Tr key={d._id || idx} _hover={{ bg: "gray.50" }}>
+                      <Td fontWeight="600" fontSize="sm">{d.name || "N/A"}</Td>
+                      <Td fontSize="sm">{d.phone || "N/A"}</Td>
+                      <Td fontSize="sm"><Badge colorScheme="blue" borderRadius="full">{d.transport || d.numberPlate || "N/A"}</Badge></Td>
+                      <Td>
                         <Badge colorScheme={d.status === "Verified" ? "green" : d.status === "Rejected" ? "red" : "yellow"} borderRadius="full" fontSize="xs">
                           {d.status}
                         </Badge>
-                      </TableCell>
-                      <TableCell>
+                      </Td>
+                      <Td>
                         {d.isAvailable || d.isOnline ? (
                           <Tooltip label="Online"><Icon as={Wifi} color="green.500" boxSize={4} /></Tooltip>
                         ) : (
                           <Tooltip label="Offline"><Icon as={WifiOff} color="gray.400" boxSize={4} /></Tooltip>
                         )}
-                      </TableCell>
-                      <TableCell fontWeight="600" fontSize="sm">{d.totalDeliveries || 0}</TableCell>
-                      <TableCell fontWeight="600" color="green.600" fontSize="sm">UGX {(d.commissionEarned || 0).toLocaleString()}</TableCell>
-                      <TableCell fontSize="xs" color="gray.500">{d.createdAt ? moment(d.createdAt).fromNow() : "N/A"}</TableCell>
-                      <TableCell>
+                      </Td>
+                      <Td fontWeight="600" fontSize="sm">{d.totalDeliveries || 0}</Td>
+                      <Td fontWeight="600" color="green.600" fontSize="sm">UGX {(d.commissionEarned || 0).toLocaleString()}</Td>
+                      <Td fontSize="xs" color="gray.500">{d.createdAt ? moment(d.createdAt).fromNow() : "N/A"}</Td>
+                      <Td>
                         <HStack spacing={1}>
                           {d.status === "Unverified" && (
                             <>
@@ -154,10 +154,10 @@ export default function DriversPage() {
                             </>
                           )}
                         </HStack>
-                      </TableCell>
-                    </TableRow>
+                      </Td>
+                    </Tr>
                   ))}
-                </TableBody>
+                </Tbody>
               </Table>
             </Box>
             {displayDrivers.length === 0 && <Center py={8}><Text color="gray.500">No drivers found</Text></Center>}
