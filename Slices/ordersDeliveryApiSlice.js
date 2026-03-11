@@ -51,6 +51,26 @@ export const ordersDeliveryApiSlice = apiSlice.injectEndpoints({
         body: { status, note },
       }),
     }),
+    adminCancelOrder: builder.mutation({
+      query: ({ orderId, reason }) => ({
+        url: `${BACKEND_URL}/api/orders/${orderId}/admin-cancel`,
+        method: "PATCH",
+        body: { reason },
+      }),
+    }),
+    adminDeleteOrder: builder.mutation({
+      query: ({ orderId }) => ({
+        url: `${BACKEND_URL}/api/orders/${orderId}/admin-delete`,
+        method: "DELETE",
+      }),
+    }),
+    getOrderDeliveryTracking: builder.query({
+      query: ({ orderId }) => ({
+        url: `${BACKEND_URL}/api/delivery/order/${orderId}`,
+        method: "GET",
+      }),
+      transformResponse: (res) => (res?.status === "Success" ? res.data : {}),
+    }),
     openOrders: builder.query({
       query: () => ({
         url: `${BACKEND_URL}/api/delivery/orders/open`,
@@ -127,6 +147,9 @@ export const {
   useApproveOrderMutation,
   useAssignDriverToOrderMutation,
   useUpdateOrderStatusMutation,
+  useAdminCancelOrderMutation,
+  useAdminDeleteOrderMutation,
+  useGetOrderDeliveryTrackingQuery,
   useOpenOrdersQuery,
   useDriversByLocationQuery,
   useAdminDriversQuery,

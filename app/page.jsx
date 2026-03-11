@@ -26,6 +26,7 @@ import Product from "@components/product";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import { Search, TrendingUp, Users, ShoppingCart, Package, DollarSign, Activity, Calendar, Clock } from "lucide-react";
+import { useOrderStatsQuery, useAdminOrdersQuery, useAdminDriversQuery, useAdminVendorsQuery } from "@Slices/ordersDeliveryApiSlice";
 
 // Dynamically import ApexCharts to avoid SSR issues
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
@@ -48,6 +49,12 @@ export default function Home() {
   const { userInfo } = useSelector((state) => state.auth);
   const accountType = userInfo?.accountType ?? userInfo?.account ?? "";
   const isEditor = accountType === "editor";
+
+
+  const { data: liveOrderStats = {} } = useOrderStatsQuery(undefined, { skip: isEditor });
+  const { data: liveOrdersData = { orders: [] } } = useAdminOrdersQuery({ page: 1, limit: 200 }, { skip: isEditor });
+  const { data: liveDrivers = [] } = useAdminDriversQuery(undefined, { skip: isEditor });
+  const { data: liveVendors = [] } = useAdminVendorsQuery(undefined, { skip: isEditor });
 
   const handleDataFetch = async () => {
     try {
@@ -268,6 +275,18 @@ export default function Home() {
     </motion.div>
   );
 
+
+  const statusCounts = liveOrderStats?.statusCounts || {};
+  const activeDeliveries = ["assigned", "picked_up", "in_transit"].reduce(
+    (sum, key) => sum + Number(statusCounts?.[key]?.count || 0),
+    0
+  );
+  const unassignedOrders = (liveOrdersData?.orders || []).filter(
+    (order) => ["confirmed", "preparing", "ready"].includes(order?.status) && !order?.driverId
+  ).length;
+  const availableDrivers = (liveDrivers || []).filter((d) => Boolean(d?.isAvailable)).length;
+  const vendorsPendingPayout = (liveVendors || []).filter((v) => Number(v?.pendingPayout || 0) > 0).length;
+
   if (loading) {
     return (
       <Center minH="100vh">
@@ -363,6 +382,39 @@ export default function Home() {
             </>
           )}
         </Grid>
+
+        {!isEditor && (
+          <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(4, 1fr)" }} gap={6} mb={8}>
+            <StatCard
+              icon={Activity}
+              title="Active Deliveries"
+              value={activeDeliveries}
+              color="teal"
+              subtitle="Assigned / picked / in transit"
+            />
+            <StatCard
+              icon={Clock}
+              title="Unassigned Orders"
+              value={unassignedOrders}
+              color="red"
+              subtitle="Confirmed/ready waiting for driver"
+            />
+            <StatCard
+              icon={Users}
+              title="Available Drivers"
+              value={`${availableDrivers}/${(liveDrivers || []).length}`}
+              color="cyan"
+              subtitle="Ready for nearest assignment"
+            />
+            <StatCard
+              icon={DollarSign}
+              title="Vendors Pending Payout"
+              value={vendorsPendingPayout}
+              color="pink"
+              subtitle="Vendors with pending payout balance"
+            />
+          </Grid>
+        )}
 
         {/* Orders Trend - Admin only; hidden for editors */}
         {!isEditor && orderData.length > 0 && orderData.some(d => d.count > 0) && (

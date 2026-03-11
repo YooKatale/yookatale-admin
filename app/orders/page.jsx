@@ -1,19 +1,69 @@
 "use client";
 
 import {
-  Box, Card, CardBody, CardHeader, Center, Heading, HStack, Input, InputGroup,
-  InputLeftElement, Spinner, Table, Tbody, Td, Th, Thead, Tr,
-   Text, VStack, Badge, Button, Select, SimpleGrid, Flex, Icon,
-  Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, ModalFooter,
-  useDisclosure, useToast, Textarea, Tooltip, IconButton, Divider,
+  Box,
+  Card,
+  CardBody,
+  CardHeader,
+  Center,
+  Heading,
+  HStack,
+  Input,
+  InputGroup,
+  InputLeftElement,
+  Spinner,
+  Table,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+  Text,
+  VStack,
+  Badge,
+  Button,
+  Select,
+  SimpleGrid,
+  Icon,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalCloseButton,
+  ModalFooter,
+  useDisclosure,
+  useToast,
+  Textarea,
+  Divider,
+  Link,
 } from "@chakra-ui/react";
 import {
-  useAdminOrdersQuery, useOrderStatsQuery, useApproveOrderMutation,
-  useAssignDriverToOrderMutation, useUpdateOrderStatusMutation, useDriversByLocationQuery,
+  useAdminOrdersQuery,
+  useOrderStatsQuery,
+  useApproveOrderMutation,
+  useAssignDriverToOrderMutation,
+  useUpdateOrderStatusMutation,
+  useAdminDriversQuery,
+  useAdminCancelOrderMutation,
+  useAdminDeleteOrderMutation,
+  useGetOrderDeliveryTrackingQuery,
 } from "@Slices/ordersDeliveryApiSlice";
-import { Search, Package, CheckCircle, Truck, MapPin, XCircle, Clock, ArrowRight, RefreshCw, User } from "lucide-react";
+import {
+  Search,
+  Package,
+  CheckCircle,
+  Truck,
+  MapPin,
+  XCircle,
+  Clock,
+  ArrowRight,
+  RefreshCw,
+  Navigation,
+  Trash2,
+} from "lucide-react";
 import moment from "moment";
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 
 const STATUS_CONFIG = {
   pending: { color: "yellow", label: "Pending", icon: Clock },
@@ -35,30 +85,46 @@ export default function AdminOrdersPage() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
-  const { data: orderData = {}, isLoading, refetch } = useAdminOrdersQuery({ status: statusFilter || undefined });
+  const { data: orderData = {}, isLoading, refetch } = useAdminOrdersQuery({
+    status: statusFilter || undefined,
+    page: 1,
+    limit: 250,
+  });
   const { data: stats = {} } = useOrderStatsQuery();
-  const { data: drivers = [] } = useDriversByLocationQuery();
+  const { data: drivers = [] } = useAdminDriversQuery();
+
   const [approveOrder, { isLoading: approving }] = useApproveOrderMutation();
   const [assignDriver, { isLoading: assigning }] = useAssignDriverToOrderMutation();
   const [updateStatus, { isLoading: updating }] = useUpdateOrderStatusMutation();
+  const [adminCancelOrder, { isLoading: cancelling }] = useAdminCancelOrderMutation();
+  const [adminDeleteOrder, { isLoading: deleting }] = useAdminDeleteOrderMutation();
 
   const orders = orderData?.orders || [];
   const filtered = useMemo(() => {
     if (!searchInput) return orders;
     const q = searchInput.toLowerCase();
     return orders.filter((o) =>
-      o?.customerName?.toLowerCase().includes(q) ||
-      o?.deliveryAddress?.address1?.toLowerCase().includes(q) ||
-      o?._id?.includes(q) ||
-      o?.productItems?.toLowerCase().includes(q)
+      (o?.customerName || "").toLowerCase().includes(q)
+      || (o?.deliveryAddress?.address1 || "").toLowerCase().includes(q)
+      || (o?._id || "").toLowerCase().includes(q)
+      || (o?.productItems || "").toLowerCase().includes(q)
+      || (o?.driverId?.name || "").toLowerCase().includes(q)
     );
   }, [orders, searchInput]);
+
+  const safeRefresh = () => {
+    refetch();
+    if (selectedOrder?._id) {
+      const next = orders.find((o) => o._id === selectedOrder._id);
+      if (next) setSelectedOrder(next);
+    }
+  };
 
   const handleApprove = async (orderId) => {
     try {
       await approveOrder({ orderId }).unwrap();
-      toast({ title: "Order Approved!", status: "success", duration: 3000 });
-      refetch();
+      toast({ title: "Order approved", status: "success", duration: 2500 });
+      safeRefresh();
     } catch (e) {
       toast({ title: "Error", description: e?.data?.message || "Failed", status: "error", duration: 4000 });
     }
@@ -67,8 +133,8 @@ export default function AdminOrdersPage() {
   const handleAssignDriver = async (orderId, driverId) => {
     try {
       const res = await assignDriver({ orderId, driverId: driverId || undefined }).unwrap();
-      toast({ title: res?.message || "Driver Assigned!", status: "success", duration: 3000 });
-      refetch();
+      toast({ title: res?.message || "Driver assigned", status: "success", duration: 2500 });
+      safeRefresh();
     } catch (e) {
       toast({ title: "Error", description: e?.data?.message || "Failed", status: "error", duration: 4000 });
     }
@@ -77,25 +143,58 @@ export default function AdminOrdersPage() {
   const handleStatusUpdate = async (orderId, status, note) => {
     try {
       await updateStatus({ orderId, status, note }).unwrap();
-      toast({ title: "Status Updated!", status: "success", duration: 3000 });
-      refetch();
-      onClose();
+      toast({ title: "Status updated", status: "success", duration: 2500 });
+      safeRefresh();
     } catch (e) {
       toast({ title: "Error", description: e?.data?.message || "Failed", status: "error", duration: 4000 });
     }
   };
 
-  if (isLoading) return (<Center minH="50vh"><VStack spacing={4}><Spinner size="xl" color="green.500" thickness="4px" /><Text>Loading orders...</Text></VStack></Center>);
+  const handleAdminCancel = async (orderId, reason) => {
+    try {
+      await adminCancelOrder({ orderId, reason }).unwrap();
+      toast({ title: "Order cancelled", status: "success", duration: 2500 });
+      safeRefresh();
+    } catch (e) {
+      toast({ title: "Error", description: e?.data?.message || "Failed", status: "error", duration: 4000 });
+    }
+  };
+
+  const handleAdminDelete = async (orderId) => {
+    try {
+      await adminDeleteOrder({ orderId }).unwrap();
+      toast({ title: "Order deleted", status: "success", duration: 2500 });
+      if (selectedOrder?._id === orderId) onClose();
+      safeRefresh();
+    } catch (e) {
+      toast({ title: "Error", description: e?.data?.message || "Failed", status: "error", duration: 4000 });
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Center minH="50vh">
+        <VStack spacing={4}>
+          <Spinner size="xl" color="green.500" thickness="4px" />
+          <Text>Loading orders...</Text>
+        </VStack>
+      </Center>
+    );
+  }
 
   return (
     <Box>
       <VStack align="stretch" spacing={6}>
         <HStack justify="space-between" flexWrap="wrap" gap={4}>
-          <HStack spacing={3}><Icon as={Package} boxSize={7} color="green.600" /><Heading size="lg">Order Management</Heading></HStack>
-          <Button size="sm" leftIcon={<RefreshCw size={14} />} onClick={refetch} variant="outline" colorScheme="green">Refresh</Button>
+          <HStack spacing={3}>
+            <Icon as={Package} boxSize={7} color="green.600" />
+            <Heading size="lg">Order Management</Heading>
+          </HStack>
+          <Button size="sm" leftIcon={<RefreshCw size={14} />} onClick={safeRefresh} variant="outline" colorScheme="green">
+            Refresh
+          </Button>
         </HStack>
 
-        {/* Stats */}
         <SimpleGrid columns={{ base: 2, md: 4, lg: 6 }} spacing={4}>
           {[
             { label: "Today", value: stats.todayOrders || 0, color: "blue" },
@@ -105,14 +204,15 @@ export default function AdminOrdersPage() {
             { label: "Pending", value: stats.statusCounts?.pending?.count || 0, color: "yellow" },
             { label: "Delivered", value: stats.statusCounts?.delivered?.count || 0, color: "green" },
           ].map((s, i) => (
-            <Card key={i} size="sm"><CardBody textAlign="center">
-              <Text fontSize="xs" color="gray.500" fontWeight="600">{s.label}</Text>
-              <Text fontSize="xl" fontWeight="800" color={`${s.color}.600`}>{s.value}</Text>
-            </CardBody></Card>
+            <Card key={i} size="sm">
+              <CardBody textAlign="center">
+                <Text fontSize="xs" color="gray.500" fontWeight="600">{s.label}</Text>
+                <Text fontSize="xl" fontWeight="800" color={`${s.color}.600`}>{s.value}</Text>
+              </CardBody>
+            </Card>
           ))}
         </SimpleGrid>
 
-        {/* Filters */}
         <Card>
           <CardHeader>
             <HStack justify="space-between" flexWrap="wrap" gap={4}>
@@ -122,9 +222,9 @@ export default function AdminOrdersPage() {
                 </Select>
                 <Text fontSize="sm" color="gray.500">{filtered.length} orders</Text>
               </HStack>
-              <InputGroup maxW="300px" size="sm">
+              <InputGroup maxW="360px" size="sm">
                 <InputLeftElement pointerEvents="none"><Search size={14} color="gray" /></InputLeftElement>
-                <Input placeholder="Search orders..." value={searchInput} onChange={(e) => setSearchInput(e.target.value)} borderRadius="lg" />
+                <Input placeholder="Search customer, order, address..." value={searchInput} onChange={(e) => setSearchInput(e.target.value)} borderRadius="lg" />
               </InputGroup>
             </HStack>
           </CardHeader>
@@ -135,7 +235,6 @@ export default function AdminOrdersPage() {
                   <Tr>
                     <Th>Order</Th>
                     <Th>Customer</Th>
-                    <Th>Items</Th>
                     <Th>Total</Th>
                     <Th>Status</Th>
                     <Th>Driver</Th>
@@ -149,8 +248,7 @@ export default function AdminOrdersPage() {
                     return (
                       <Tr key={order?._id || idx} _hover={{ bg: "gray.50" }} cursor="pointer" onClick={() => { setSelectedOrder(order); onOpen(); }}>
                         <Td fontSize="xs" fontFamily="mono" color="gray.500">#{(order?._id || "").slice(-6)}</Td>
-                        <Td fontWeight="600" fontSize="sm">{order?.customerName || "N/A"}</Td>
-                        <Td fontSize="sm">{order?.productItems || `${order?.products?.length || 0} items`}</Td>
+                        <Td fontWeight="600" fontSize="sm">{order?.customerName || "Unknown"}</Td>
                         <Td fontWeight="700" color="green.600" fontSize="sm">UGX {(order?.total || 0).toLocaleString()}</Td>
                         <Td><Badge colorScheme={sc.color} borderRadius="full" px={2} fontSize="xs">{sc.label}</Badge></Td>
                         <Td fontSize="xs">{order?.driverId?.name || "Unassigned"}</Td>
@@ -161,7 +259,7 @@ export default function AdminOrdersPage() {
                               <Button size="xs" colorScheme="green" onClick={(e) => { e.stopPropagation(); handleApprove(order._id); }} isLoading={approving}>Approve</Button>
                             )}
                             {["confirmed", "preparing", "ready"].includes(order?.status) && (
-                              <Button size="xs" colorScheme="blue" onClick={(e) => { e.stopPropagation(); handleAssignDriver(order._id); }} isLoading={assigning}>Assign Driver</Button>
+                              <Button size="xs" colorScheme="blue" onClick={(e) => { e.stopPropagation(); handleAssignDriver(order._id); }} isLoading={assigning}>Auto Assign</Button>
                             )}
                           </HStack>
                         </Td>
@@ -176,7 +274,6 @@ export default function AdminOrdersPage() {
         </Card>
       </VStack>
 
-      {/* Order Detail Modal */}
       <OrderDetailModal
         order={selectedOrder}
         isOpen={isOpen}
@@ -185,23 +282,55 @@ export default function AdminOrdersPage() {
         onApprove={handleApprove}
         onAssignDriver={handleAssignDriver}
         onStatusUpdate={handleStatusUpdate}
+        onAdminCancel={handleAdminCancel}
+        onAdminDelete={handleAdminDelete}
         approving={approving}
         assigning={assigning}
         updating={updating}
+        cancelling={cancelling}
+        deleting={deleting}
       />
     </Box>
   );
 }
 
-function OrderDetailModal({ order, isOpen, onClose, drivers, onApprove, onAssignDriver, onStatusUpdate, approving, assigning, updating }) {
+function OrderDetailModal({
+  order,
+  isOpen,
+  onClose,
+  drivers,
+  onApprove,
+  onAssignDriver,
+  onStatusUpdate,
+  onAdminCancel,
+  onAdminDelete,
+  approving,
+  assigning,
+  updating,
+  cancelling,
+  deleting,
+}) {
   const [selectedDriverId, setSelectedDriverId] = useState("");
   const [newStatus, setNewStatus] = useState("");
   const [note, setNote] = useState("");
+
+  const { data: tracking = {} } = useGetOrderDeliveryTrackingQuery(
+    { orderId: order?._id },
+    { skip: !order?._id }
+  );
+
   if (!order) return null;
   const sc = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
 
+  const lat = tracking?.deliveryLocation?.location?.lat;
+  const lng = tracking?.deliveryLocation?.location?.lng;
+  const hasCoords = lat != null && lng != null;
+  const mapEmbed = hasCoords
+    ? `https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.02}%2C${lat - 0.02}%2C${lng + 0.02}%2C${lat + 0.02}&layer=mapnik&marker=${lat}%2C${lng}`
+    : null;
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="xl" scrollBehavior="inside">
+    <Modal isOpen={isOpen} onClose={onClose} size="3xl" scrollBehavior="inside">
       <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
       <ModalContent borderRadius="xl" mx={4}>
         <ModalHeader pb={2}>
@@ -216,28 +345,33 @@ function OrderDetailModal({ order, isOpen, onClose, drivers, onApprove, onAssign
         <ModalCloseButton />
         <ModalBody>
           <VStack align="stretch" spacing={4}>
-            <SimpleGrid columns={2} spacing={3}>
-              <Box><Text fontSize="xs" color="gray.500">Customer</Text><Text fontWeight="600">{order.customerName || "N/A"}</Text></Box>
+            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={3}>
+              <Box><Text fontSize="xs" color="gray.500">Customer</Text><Text fontWeight="600">{order.customerName || "Unknown"}</Text></Box>
               <Box><Text fontSize="xs" color="gray.500">Total</Text><Text fontWeight="700" color="green.600">UGX {(order.total || 0).toLocaleString()}</Text></Box>
-              <Box><Text fontSize="xs" color="gray.500">Items</Text><Text fontSize="sm">{order.productItems || `${order.products?.length || 0} items`}</Text></Box>
-              <Box><Text fontSize="xs" color="gray.500">Date</Text><Text fontSize="sm">{moment(order.createdAt).format("MMM D, YYYY h:mm A")}</Text></Box>
               <Box><Text fontSize="xs" color="gray.500">Address</Text><Text fontSize="sm">{order.deliveryAddress?.address1 || "N/A"}</Text></Box>
-              <Box><Text fontSize="xs" color="gray.500">Driver</Text><Text fontSize="sm">{order.driverId?.name || "Unassigned"}</Text></Box>
+              <Box><Text fontSize="xs" color="gray.500">Driver</Text><Text fontSize="sm">{order.driverId?.name || tracking?.deliveryLocation?.partnerName || "Unassigned"}</Text></Box>
             </SimpleGrid>
 
-            {order.products && order.products.length > 0 && (
-              <Box bg="gray.50" borderRadius="lg" p={3}>
-                <Text fontSize="xs" fontWeight="600" color="gray.500" mb={2}>Products</Text>
-                {order.products.map((p, i) => (
-                  <HStack key={i} justify="space-between" py={1} borderBottom={i < order.products.length - 1 ? "1px" : "none"} borderColor="gray.200">
-                    <Text fontSize="sm">{p.name || "Item"} x{p.quantity || 1}</Text>
-                    <Text fontSize="sm" fontWeight="600">UGX {(p.price || 0).toLocaleString()}</Text>
+            <Box borderWidth="1px" borderColor="gray.100" rounded="lg" p={3}>
+              <HStack justify="space-between" mb={2}>
+                <HStack spacing={2}><Navigation size={14} /><Text fontSize="sm" fontWeight="600">Live Driver Tracking</Text></HStack>
+                {hasCoords && (
+                  <HStack spacing={2}>
+                    <Link href={tracking?.navigation?.googleMaps || `https://www.google.com/maps?q=${lat},${lng}`} isExternal color="blue.600" fontSize="xs">Google Maps</Link>
+                    <Link href={tracking?.navigation?.openStreetMap || `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=16/${lat}/${lng}`} isExternal color="blue.600" fontSize="xs">OpenStreetMap</Link>
                   </HStack>
-                ))}
-              </Box>
-            )}
+                )}
+              </HStack>
+              {hasCoords ? (
+                <Box borderWidth="1px" borderColor="gray.200" rounded="md" overflow="hidden">
+                  <iframe title="order-tracking-map" src={mapEmbed} width="100%" height="260" style={{ border: 0 }} loading="lazy" />
+                </Box>
+              ) : (
+                <Text fontSize="xs" color="gray.500">No live coordinates yet. Driver location appears after dispatch updates.</Text>
+              )}
+            </Box>
 
-            {order.trackingHistory && order.trackingHistory.length > 0 && (
+            {order.trackingHistory?.length > 0 && (
               <Box bg="blue.50" borderRadius="lg" p={3}>
                 <Text fontSize="xs" fontWeight="600" color="blue.600" mb={2}>Tracking History</Text>
                 {order.trackingHistory.map((t, i) => (
@@ -251,7 +385,6 @@ function OrderDetailModal({ order, isOpen, onClose, drivers, onApprove, onAssign
 
             <Divider />
 
-            {/* Actions */}
             {order.status === "pending" && (
               <Button colorScheme="green" onClick={() => onApprove(order._id)} isLoading={approving}>Approve Order</Button>
             )}
@@ -261,8 +394,8 @@ function OrderDetailModal({ order, isOpen, onClose, drivers, onApprove, onAssign
                 <Text fontSize="sm" fontWeight="600" mb={2}>Assign Driver</Text>
                 <HStack>
                   <Select size="sm" placeholder="Auto-assign nearest" value={selectedDriverId} onChange={(e) => setSelectedDriverId(e.target.value)}>
-                    {(drivers || []).filter(d => d.isAvailable).map((d) => (
-                      <option key={d._id} value={d._id}>{d.name} ({d.transport}) {d.distanceKm ? `- ${d.distanceKm.toFixed(1)}km` : ""}</option>
+                    {(drivers || []).filter((d) => d.isAvailable).map((d) => (
+                      <option key={d._id} value={d._id}>{d.name} ({d.transport || "driver"})</option>
                     ))}
                   </Select>
                   <Button size="sm" colorScheme="blue" onClick={() => onAssignDriver(order._id, selectedDriverId)} isLoading={assigning}>Assign</Button>
@@ -270,7 +403,7 @@ function OrderDetailModal({ order, isOpen, onClose, drivers, onApprove, onAssign
               </Box>
             )}
 
-            {!["delivered", "cancelled", "refunded"].includes(order.status) && (
+            {!(["delivered", "cancelled", "refunded"].includes(order.status)) && (
               <Box>
                 <Text fontSize="sm" fontWeight="600" mb={2}>Update Status</Text>
                 <HStack>
@@ -282,6 +415,20 @@ function OrderDetailModal({ order, isOpen, onClose, drivers, onApprove, onAssign
                 <Textarea size="sm" placeholder="Optional note..." value={note} onChange={(e) => setNote(e.target.value)} mt={2} rows={2} />
               </Box>
             )}
+
+            <Box>
+              <Text fontSize="sm" fontWeight="600" mb={2}>Safety Actions</Text>
+              <HStack>
+                {!(["delivered", "cancelled", "refunded"].includes(order.status)) && (
+                  <Button size="sm" colorScheme="orange" onClick={() => onAdminCancel(order._id, note || "Cancelled by admin")} isLoading={cancelling}>
+                    Cancel Order
+                  </Button>
+                )}
+                <Button size="sm" leftIcon={<Trash2 size={14} />} colorScheme="red" variant="outline" onClick={() => onAdminDelete(order._id)} isLoading={deleting}>
+                  Delete Order
+                </Button>
+              </HStack>
+            </Box>
           </VStack>
         </ModalBody>
         <ModalFooter><Button variant="ghost" onClick={onClose}>Close</Button></ModalFooter>

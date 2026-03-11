@@ -11,7 +11,19 @@ export const vendorApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+    verifyVendor: builder.mutation({
+      query: (vendorId) => ({
+        url: `${BACKEND_URL}/admin/verify-vendor/${vendorId}`,
+        method: "PUT",
+      }),
+    }),
+    rejectVendor: builder.mutation({
+      query: (vendorId) => ({
+        url: `${BACKEND_URL}/admin/reject-vendor/${vendorId}`,
+        method: "PUT",
+      }),
+    }),
   }),
 });
 
-export const { useVendorGetMutation } = vendorApiSlice;
+export const { useVendorGetMutation, useVerifyVendorMutation, useRejectVendorMutation } = vendorApiSlice;
