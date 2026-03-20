@@ -3,10 +3,11 @@
 import {
   useNewsArticleCreatePostMutation,
   useNewsArticleUpdateMutation,
+  useNewsArticlesFetchMutation,
 } from "@Slices/newsArticle.js";
 import {
-  Box, Flex, Heading, Text, Input, Textarea, Select, Switch,
-  FormControl, FormLabel, Button, HStack, VStack, Badge,
+  Box, Flex, Heading, Text, Input, Textarea, Switch,
+  FormControl, FormLabel, Button, VStack,
   useToast, Icon, SimpleGrid, Spinner,
 } from "@chakra-ui/react";
 import { FiArrowLeft, FiSave, FiImage, FiStar } from "react-icons/fi";
@@ -15,11 +16,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, Suspense } from "react";
 import Link from "next/link";
 import "react-quill/dist/quill.snow.css";
-import { BACKEND_URL } from "@constants/constant";
 
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
-const CATEGORIES = ["Company", "Promotions", "Food & Recipes", "Agriculture", "Technology", "General"];
+const DEFAULT_CATEGORIES = ["Company", "Promotions", "Food & Recipes", "Agriculture", "Technology", "General"];
 
 const PRIMARY = "#185f2d";
 
@@ -55,19 +55,34 @@ function ArticleForm() {
   const [imagePreview, setImagePreview] = useState("");
   const [saving, setSaving] = useState(false);
   const [loadingEdit, setLoadingEdit] = useState(!!editId);
+  const [availableCategories, setAvailableCategories] = useState(DEFAULT_CATEGORIES);
 
   const [createArticle] = useNewsArticleCreatePostMutation();
   const [updateArticle] = useNewsArticleUpdateMutation();
+  const [fetchAllArticles] = useNewsArticlesFetchMutation();
 
-  // load article for edit
+  // load existing categories + article for edit
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const res = await fetchAllArticles().unwrap();
+        if (res.status === "Success") {
+          const cats = [...new Set(res.data.map((a) => a.category).filter(Boolean))];
+          const merged = [...new Set([...DEFAULT_CATEGORIES, ...cats])];
+          setAvailableCategories(merged);
+        }
+      } catch {}
+    };
+    loadCategories();
+  }, []);
+
   useEffect(() => {
     if (!editId) return;
     const load = async () => {
       try {
-        const res = await fetch(`${BACKEND_URL}/admin/newsarticles`);
-        const json = await res.json();
-        if (json.status === "Success") {
-          const found = json.data.find((a) => a._id === editId);
+        const res = await fetchAllArticles().unwrap();
+        if (res.status === "Success") {
+          const found = res.data.find((a) => a._id === editId);
           if (found) {
             setForm({
               title: found.title || "",
@@ -186,14 +201,17 @@ function ArticleForm() {
           <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
             <FormControl>
               <FormLabel fontSize="sm" fontWeight="700" color="gray.700" mb={1}>Category</FormLabel>
-              <Select
+              <Input
+                list="category-options"
                 name="category" value={form.category} onChange={handleField}
+                placeholder="Select or type a new category..."
                 bg="white" borderRadius="xl" border="1px solid" borderColor="gray.200"
                 h="42px" fontSize="sm"
                 _focus={{ borderColor: PRIMARY, boxShadow: `0 0 0 1px ${PRIMARY}` }}
-              >
-                {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-              </Select>
+              />
+              <datalist id="category-options">
+                {availableCategories.map((c) => <option key={c} value={c} />)}
+              </datalist>
             </FormControl>
             <FormControl>
               <FormLabel fontSize="sm" fontWeight="700" color="gray.700" mb={1}>Author</FormLabel>

@@ -3,7 +3,7 @@ import React from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Image from "next/image";
 import Link from "next/link";
-import { SideNavRoutes, isPathAllowedForEditor } from "./NavRoutesConfig";
+import { SideNavGroups, isPathAllowedForEditor } from "./NavRoutesConfig";
 import PerfectScrollbar from 'react-perfect-scrollbar'
 import 'react-perfect-scrollbar/dist/css/styles.css'
 import {
@@ -31,7 +31,9 @@ import {
   FiMenu,
   FiBell,
   FiChevronDown,
+  FiChevronRight,
 } from 'react-icons/fi'
+import { ChevronDown } from 'lucide-react'
 import { IsAccountValid, IsLoggedIn } from "@middleware/middleware";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -112,13 +114,60 @@ const NavItem = ({ icon: IconComponent, path, children, index, size, ...rest }) 
   )
 }
 
+const NavGroup = ({ groupLabel, groupIcon: GroupIcon, items, isEditor }) => {
+  const pathname = usePathname();
+  const isAnyActive = items.some((item) => item.path === pathname);
+  const [isOpen, setIsOpen] = useState(isAnyActive);
+
+  useEffect(() => {
+    if (isAnyActive) setIsOpen(true);
+  }, [pathname]);
+
+  const visibleItems = isEditor ? items.filter((i) => i.editorCanAccess) : items;
+  if (visibleItems.length === 0) return null;
+
+  return (
+    <Box mb={1}>
+      <Flex
+        align="center" justify="space-between"
+        mx={2} px={3} py={1.5} borderRadius="lg"
+        cursor="pointer" onClick={() => setIsOpen((o) => !o)}
+        color="gray.400" fontSize="10px" fontWeight="700"
+        letterSpacing="0.1em" textTransform="uppercase"
+        _hover={{ bg: 'gray.50', color: 'gray.600' }}
+        transition="all 0.15s"
+        userSelect="none"
+      >
+        <HStack spacing={1.5}>
+          {GroupIcon && <GroupIcon size={11} />}
+          <Text>{groupLabel}</Text>
+        </HStack>
+        <Box
+          as={ChevronDown}
+          size={11}
+          style={{
+            transform: isOpen ? 'rotate(0deg)' : 'rotate(-90deg)',
+            transition: 'transform 0.2s',
+          }}
+        />
+      </Flex>
+      {isOpen && (
+        <Box>
+          {visibleItems.map((link, i) => (
+            <NavItem key={link.name} icon={link.icon} path={link.path} index={i}>
+              {link.name}
+            </NavItem>
+          ))}
+        </Box>
+      )}
+    </Box>
+  );
+};
+
 const SidebarContent = ({ onClose, ...rest }) => {
   const { userInfo } = useSelector((state) => state.auth);
   const accountType = userInfo?.accountType ?? userInfo?.account ?? "";
   const isEditor = accountType === "editor";
-  const navRoutes = isEditor
-    ? SideNavRoutes.filter((r) => r.editorCanAccess)
-    : SideNavRoutes;
 
   return (
     <Box
@@ -179,17 +228,26 @@ const SidebarContent = ({ onClose, ...rest }) => {
             px={3}
             py={2}
           >
-            {navRoutes.map((link, index) => (
-              <NavItem
-                key={link.name}
-                icon={link.icon}
-                path={link.path}
-                index={index}
-                size={navRoutes.length}
-              >
-                {link.name}
-              </NavItem>
-            ))}
+            {SideNavGroups.map((group, gi) => {
+              if (!group.groupLabel) {
+                // Standalone items (Dashboard, Settings)
+                const visible = isEditor ? group.items.filter((i) => i.editorCanAccess) : group.items;
+                return visible.map((link) => (
+                  <NavItem key={link.name} icon={link.icon} path={link.path}>
+                    {link.name}
+                  </NavItem>
+                ));
+              }
+              return (
+                <NavGroup
+                  key={gi}
+                  groupLabel={group.groupLabel}
+                  groupIcon={group.groupIcon}
+                  items={group.items}
+                  isEditor={isEditor}
+                />
+              );
+            })}
           </Box>
         </PerfectScrollbar>
       </Box>

@@ -3,6 +3,7 @@
 import {
   useNewsArticlesFetchMutation,
   useNewsArticleDeleteMutation,
+  useNewsArticleUpdateMutation,
 } from "@Slices/newsArticle.js";
 import {
   Box, Flex, Heading, Text, Badge, Input, InputGroup, InputLeftElement,
@@ -13,7 +14,7 @@ import {
 } from "@chakra-ui/react";
 import {
   FiSearch, FiPlus, FiEdit2, FiTrash2, FiStar, FiImage,
-  FiClock, FiUser, FiMoreVertical, FiEye,
+  FiClock, FiUser, FiExternalLink,
 } from "react-icons/fi";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -42,11 +43,13 @@ export default function NewsArticlesPage() {
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [togglingId, setTogglingId] = useState(null);
   const cancelRef = useRef();
   const toast = useToast();
 
   const [fetchArticles] = useNewsArticlesFetchMutation();
   const [deleteArticle] = useNewsArticleDeleteMutation();
+  const [updateArticle] = useNewsArticleUpdateMutation();
 
   const load = async () => {
     setLoading(true);
@@ -65,6 +68,22 @@ export default function NewsArticlesPage() {
     const q = search.toLowerCase();
     return !q || a.title?.toLowerCase().includes(q) || a.category?.toLowerCase().includes(q) || a.author?.toLowerCase().includes(q);
   });
+
+  const handleToggleFeatured = async (article) => {
+    setTogglingId(article._id);
+    try {
+      const fd = new FormData();
+      fd.append("featured", String(!article.featured));
+      const res = await updateArticle({ id: article._id, data: fd }).unwrap();
+      if (res.status === "Success") {
+        setArticles((prev) => prev.map((a) => a._id === article._id ? { ...a, featured: !article.featured } : a));
+        toast({ title: article.featured ? "Removed from featured" : "Marked as featured", status: "success", duration: 2000 });
+      }
+    } catch {
+      toast({ title: "Failed to update", status: "error", duration: 2000 });
+    }
+    setTogglingId(null);
+  };
 
   const handleDelete = async () => {
     if (!deleteId) return;
@@ -215,8 +234,8 @@ export default function NewsArticlesPage() {
                 <Text fontSize="10px" color="gray.300" mb={3}>{moment(article.createdAt).format("DD MMM YYYY")}</Text>
 
                 {/* Actions */}
-                <Flex gap={2}>
-                  <Link href={`/newsarticle?id=${article._id}`} style={{ flex: 1 }}>
+                <Flex gap={2} flexWrap="wrap">
+                  <Link href={`/newsarticle?id=${article._id}`} style={{ flex: 1, minWidth: "70px" }}>
                     <Button
                       leftIcon={<FiEdit2 />} size="xs" variant="outline"
                       borderColor="gray.200" color="gray.600" borderRadius="lg"
@@ -226,6 +245,28 @@ export default function NewsArticlesPage() {
                       Edit
                     </Button>
                   </Link>
+                  <Button
+                    leftIcon={<FiStar />} size="xs" variant="outline"
+                    borderColor={article.featured ? "yellow.300" : "gray.200"}
+                    color={article.featured ? "yellow.600" : "gray.400"}
+                    bg={article.featured ? "yellow.50" : "transparent"}
+                    borderRadius="lg" fontWeight="600"
+                    isLoading={togglingId === article._id}
+                    onClick={() => handleToggleFeatured(article)}
+                    _hover={{ borderColor: "yellow.400", color: "yellow.600", bg: "yellow.50" }}
+                    title={article.featured ? "Remove from featured" : "Mark as featured"}
+                  >
+                    {article.featured ? "Unfeature" : "Feature"}
+                  </Button>
+                  <Button
+                    leftIcon={<FiExternalLink />} size="xs" variant="ghost"
+                    color="blue.500" borderRadius="lg" fontWeight="600"
+                    as="a" href={`https://www.yookatale.app/news/${article.slug || article._id}`} target="_blank"
+                    _hover={{ bg: "blue.50" }}
+                    title="View on website"
+                  >
+                    View
+                  </Button>
                   <Button
                     leftIcon={<FiTrash2 />} size="xs" colorScheme="red" variant="ghost"
                     borderRadius="lg" fontWeight="600"
