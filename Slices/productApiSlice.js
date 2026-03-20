@@ -18,22 +18,12 @@ export const productApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
-    // productEdit: builder.mutation({
-    //   query: (data) => ({
-    //     url: `${BACKEND_URL}/admin/product/edit/${data.id}`,
-    //     method: "PUT",
-    //     body: data,
-    //   }),
-    // }),
     productEdit: builder.mutation({
-      query: (data) => {
-        const isFormData = data instanceof FormData;
-        return {
-          url: `${BACKEND_URL}/admin/product/edit/${data.id}`, // Fixed missing slash
-          method: "PUT",
-          body: isFormData ? data : JSON.stringify(data), // If it's FormData, pass it as-is; otherwise, stringify
-        };
-      },
+      query: ({ id, formData }) => ({
+        url: `${BACKEND_URL}/admin/product/edit/${id}`,
+        method: "PUT",
+        body: formData,
+      }),
     }),
     productGet: builder.mutation({
       query: (data) => ({

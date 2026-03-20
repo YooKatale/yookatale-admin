@@ -1,313 +1,148 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { X, Loader2 } from "lucide-react";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
-import { Loader2, X } from "lucide-react";
-import { useSelector } from "react-redux";
-import {
-  useProductCreateMutation,
-  useProductEditMutation,
-} from "@Slices/productApiSlice";
-import { useCategoriesGetMutation } from "@Slices/categoryApiSlice";
 import { useToast } from "@components/ui/use-toast";
-import { useRouter } from "next/navigation";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectGroup, SelectItem,
+  SelectLabel, SelectTrigger, SelectValue,
 } from "@components/ui/select";
-import { useState, useEffect } from "react";
-import axios from "axios";
-import { DB_URL } from "@config/config";
-import { BACKEND_URL } from "@constants/constant";
+import { useProductEditMutation } from "@Slices/productApiSlice";
+import { useCategoriesGetMutation } from "@Slices/categoryApiSlice";
 
-const EditProduct = ({ closeModal, product }) => {
+const EditProduct = ({ closeModal, product, onSuccess }) => {
+  const { toast } = useToast();
   const [isLoading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
-  const [Product, setProduct] = useState({
-    id: product._id,
-    name: product.name,
-    category: product.category,
-    subCategory: product.subCategory,
-    price: product.price,
-    description: product.description,
+  const [selectedCategory, setSelectedCategory] = useState(product?.category || "");
+  const [form, setForm] = useState({
+    name: product?.name || "",
+    subCategory: product?.subCategory || "",
+    price: product?.price || "",
+    quantity: product?.quantity || "",
+    unit: product?.unit || "kg",
+    discountPercentage: product?.discountPercentage || "0",
+    description: product?.description || "",
   });
-
-  const router = useRouter();
 
   const [editProduct] = useProductEditMutation();
   const [fetchCategories] = useCategoriesGetMutation();
 
-  const { toast } = useToast();
-
-  const { userInfo } = useSelector((state) => state.auth);
-
-  // Fetch categories on component mount
   useEffect(() => {
-    const loadCategories = async () => {
+    const load = async () => {
       try {
         const res = await fetchCategories().unwrap();
-        if (res?.success && res?.categories) {
-          setCategories(res.categories);
-        }
-      } catch (err) {
-        console.error("Error fetching categories:", err);
-      }
+        if (res?.success && res?.categories) setCategories(res.categories);
+      } catch {}
     };
-    loadCategories();
+    load();
   }, []);
 
-  const submitHandlerd = async (e) => {
-    
-    setLoading({ ...isLoading, operation: "", status: false });
+  const handleChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const form = e.target;
-      const NewFormData = new FormData(form);
-      const formDataObject = {};
-  // Loop through the FormData entries
-  for (const [key, value] of NewFormData.entries()) {
-    if (value instanceof File) {
-      // Log any file present
-      console.log(`${key}:`, value); 
-      formDataObject[key] = value;
-    } else {
-      formDataObject[key] = value;
-    }
-  }
+    setLoading(true);
     try {
-      //append form values if empty
-      NewFormData.append("product", JSON.stringify(Product));
-      const res = await editProduct(formDataObject).unwrap();
-      // set loading to be false
-      setLoading({ ...isLoading, operation: "", status: false });
-      if (res?.status == "Success") {
-        toast({
-          title: "Success",
-          description: "Product edited successfully",
-        });
+      const fd = new FormData(e.target);
+      fd.set("category", selectedCategory || form.name);
+      // include all controlled fields explicitly
+      Object.entries(form).forEach(([k, v]) => fd.set(k, v));
 
-        router.push("/products");
+      const res = await editProduct({ id: product._id, formData: fd }).unwrap();
+
+      if (res?.status === "Success") {
+        toast({ title: "Product updated successfully" });
+        onSuccess?.();
+        closeModal();
       }
     } catch (err) {
-      // set loading to be false
-      setLoading((prevState) => (prevState ? false : true));
       toast({
         variant: "destructive",
-        title: "Error occured",
-        description: err.data?.message
-          ? err.data?.message
-          : err.data || err.error,
+        title: "Update failed",
+        description: err?.data?.message || err?.data?.error || "Something went wrong",
       });
+    } finally {
+      setLoading(false);
     }
   };
-  const submitHandler = async (e) => {
-    e.preventDefault(); // Prevent default form submission
-    const config = {
-      headers: {
-          'content-type': 'multipart/form-data'
-      }
-  };
-    setLoading({ ...isLoading, operation: "", status: false });
-  
-    const form = e.target;
-    const NewFormData = new FormData(form); // Create FormData from form
-  
-    // Manually add the selected category since Select component doesn't work with FormData directly
-    if (Product.category) {
-      NewFormData.set('category', Product.category);
-    }
-  
-    // Append the product details to FormData
-    //NewFormData.append("product", JSON.stringify(Product));
-    try {
-      // Send the form data through the mutation
-      //const res = await editProduct(NewFormData).unwrap(); // Pass FormData directly
-      const res = await axios.put(`${BACKEND_URL}/admin/product/edit/${Product.id}`, NewFormData, config);
-      // Stop loading
-      setLoading({ ...isLoading, operation: "", status: false });
 
-      // Handle success
-      if (res.data?.status === "Success") {
-        toast({
-          title: "Success",
-          description: "Product edited successfully",
-        });
-        router.push("/products");
-      }
-    } catch (err) {
-      // Stop loading
-      setLoading({ ...isLoading, operation: "", status: false });
-  
-      // Handle errors
-      toast({
-        variant: "destructive",
-        title: "Error occurred",
-        description: err.data?.error,
-      });
-    }
-  };
   return (
-    <>
-      <div className="p-8 flex bg-none justify-center items-center fixed z-30 top-0 left-0 right-0 bottom-0">
-        <div className="m-auto w-4/5 h-full p-4 bg-white overflow-y-auto overflow-x-hidden rounded-md shadow-md relative">
-          <div
-            className="absolute top-4 right-8 cursor-pointer"
-            onClick={() => closeModal(false)}
-          >
-            <X size={30} />
-          </div>
-          <div className="pt-8 pb-4">
-            <p className="text-center text-3xl font-thin">Edit Product</p>
-          </div>
-          <div className="py-2">
-            <div className="flex">
-              <div className="m-auto py-2 w-4/5">
-                <form onSubmit={submitHandler} encType="multipart/form-data">
-                  <div className="grid grid-cols-2">
-                    <div className="p-2" hidden>
-                      <Label htmlFor="name" className="text-lg mb-1">
-                        Product Name
-                      </Label>
-                      <Input type="text" name="id" value={product?._id} />
-                    </div>
-                    <div className="p-2">
-                      <Label htmlFor="name" className="text-lg mb-1">
-                        Product Name
-                      </Label>
-                      <Input
-                        type="text"
-                        id="name"
-                        // placeholder="Name of product"
-                        name="name"
-                        placeholder={product?.name}
-                        value={Product.name}
-                        onChange={(e) =>
-                          setProduct({
-                            ...Product,
-                            [e.target.name]: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                    <div className="p-2">
-                      <Label htmlFor="category" className="text-lg mb-1">
-                        Product Category
-                      </Label>
-                      <Select 
-                        value={Product.category}
-                        onValueChange={(value) =>
-                          setProduct({
-                            ...Product,
-                            category: value,
-                          })
-                        }
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue
-                            placeholder={product?.category || "Select a category"}
-                          />
-                        </SelectTrigger>
-                        <SelectContent className="max-h-80 overflow-y-auto">
-                          <SelectGroup>
-                            <SelectLabel>Available Categories</SelectLabel>
-                            {categories.length > 0 ? (
-                              categories.map((category) => (
-                                <SelectItem 
-                                  key={category._id} 
-                                  value={category.name.toLowerCase().split(/[\s-]+/)[0]}
-                                >
-                                  {category.name}
-                                </SelectItem>
-                              ))
-                            ) : (
-                              <SelectItem value="no-category" disabled>
-                                No categories available
-                              </SelectItem>
-                            )}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="p-2">
-                      <Label htmlFor="subCategory" className="text-lg mb-1">
-                        Product Sub-Category
-                      </Label>
-                      <Input
-                        type="text"
-                        id="subCategory"
-                        placeholder="eg featured, recommended, popular..."
-                        name="subCategory"
-                        value={Product.subCategory}
-                        onChange={(e) =>
-                          setProduct({
-                            ...Product,
-                            [e.target.name]: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                    <div className="p-2">
-                      <Label htmlFor="price" className="text-lg mb-1">
-                        Product Price
-                      </Label>
-                      <Input
-                        type="number"
-                        id="price"
-                        // placeholder="Price is required"
-                        name="price"
-                        placeholder={product?.price}
-                        value={Product.price}
-                        onChange={(e) =>
-                          setProduct({
-                            ...Product,
-                            [e.target.name]: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div className="p-2">
-                    <Label htmlFor="description" className="text-lg mb-1">
-                      Product Description
-                    </Label>
-                    <Textarea
-                      name="description"
-                      //   placeholder="Product description is required"
-                      placeholder={product?.description}
-                      value={Product.description}
-                      onChange={(e) =>
-                        setProduct({
-                          ...Product,
-                          [e.target.name]: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                  <div className="p-2">
-                    <Label htmlFor="images" className="text-lg mb-1">
-                      Product Images
-                    </Label>
-                    <Input type="file" id="images" name="images" multiple />
-                  </div>
-                  <div className="py-2">
-                    <Button type="submit">
-                      {isLoading ? <Loader2 /> : ""}Edit Product
-                    </Button>
-                  </div>
-                </form>
-              </div>
+    <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/40 px-4 py-8">
+      <div className="relative m-auto w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl">
+        <div className="absolute right-5 top-5 cursor-pointer text-slate-400 hover:text-slate-700" onClick={closeModal}>
+          <X size={22} />
+        </div>
+        <div className="px-8 pt-7 pb-4 border-b border-slate-100">
+          <p className="text-xl font-bold text-slate-800">Edit Product</p>
+          <p className="text-sm text-slate-500 mt-0.5">Update product details below</p>
+        </div>
+        <form onSubmit={handleSubmit} encType="multipart/form-data" className="px-8 pb-8 pt-5 space-y-5">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label className="text-sm font-semibold text-slate-700">Product Name</Label>
+              <Input name="name" value={form.name} onChange={handleChange} required />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm font-semibold text-slate-700">Category</Label>
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={product?.category || "Select category"} />
+                </SelectTrigger>
+                <SelectContent className="max-h-72 overflow-y-auto">
+                  <SelectGroup>
+                    <SelectLabel>Categories</SelectLabel>
+                    {categories.map((c) => (
+                      <SelectItem key={c._id} value={c.name.toLowerCase().split(/[\s-]+/)[0]}>{c.name}</SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm font-semibold text-slate-700">Sub-Category</Label>
+              <Input name="subCategory" value={form.subCategory} onChange={handleChange} placeholder="e.g. featured, popular..." />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm font-semibold text-slate-700">Price (UGX)</Label>
+              <Input type="number" name="price" value={form.price} onChange={handleChange} required />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm font-semibold text-slate-700">Quantity</Label>
+              <Input type="number" name="quantity" value={form.quantity} onChange={handleChange} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm font-semibold text-slate-700">Unit</Label>
+              <Input name="unit" value={form.unit} onChange={handleChange} placeholder="kg, pieces, litres..." />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm font-semibold text-slate-700">Discount (%)</Label>
+              <Input type="number" name="discountPercentage" value={form.discountPercentage} onChange={handleChange} min="0" max="100" />
             </div>
           </div>
-        </div>
+          <div className="space-y-1.5">
+            <Label className="text-sm font-semibold text-slate-700">Description</Label>
+            <Textarea name="description" value={form.description} onChange={handleChange} rows={3} />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-sm font-semibold text-slate-700">Replace Images (optional)</Label>
+            <Input type="file" name="images" multiple accept="image/*" />
+            <p className="text-xs text-slate-400">Leave empty to keep existing images</p>
+          </div>
+          <div className="flex justify-end gap-3 pt-2">
+            <Button type="button" variant="outline" onClick={closeModal} disabled={isLoading}>Cancel</Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Save Changes
+            </Button>
+          </div>
+        </form>
       </div>
-    </>
+    </div>
   );
 };
 
