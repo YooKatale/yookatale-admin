@@ -30,7 +30,7 @@ const defaultSlides = [
 ];
 
 const defaultCards = [
-  { eyebrow: "Occasion", title: "Mother's Day Special Offers", ctaText: "Shop now", link: "/search?q=promotions", gradientColors: ["#1a0510", "#5c0a30"], order: 0 },
+  { eyebrow: "Now Hiring", title: "We're Looking for You — Join Our Team!", ctaText: "View Openings", link: "/careers", gradientColors: ["#0d2b18", "#185f2d"], order: 0 },
   { eyebrow: "Free Delivery", title: "Orders over UGX 50,000", ctaText: "See details", link: "/subscription", gradientColors: ["#001a2e", "#003d6b"], order: 1 },
   { eyebrow: "Download", title: "Yookatale App — Android & iOS", ctaText: "Get the app", link: "https://play.google.com/store/apps/details?id=com.yookataleapp.app", gradientColors: ["#0a1a00", "#294d00"], order: 2 },
 ];

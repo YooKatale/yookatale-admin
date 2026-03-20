@@ -104,53 +104,9 @@ const EMAIL_TEMPLATES = [
   },
 ];
 
-// Get Frontend API URL - works in both development and production
-// The frontend email API is at: https://www.yookatale.app/api/mail (production)
-// or http://localhost:3000/api/mail / http://localhost:3001/api/mail (development)
-const getFrontendApiUrl = () => {
-  if (typeof window === 'undefined') {
-    return null; // Server-side, will use development ports
-  }
-
-  const origin = window.location.origin;
-  const isLocalhost = origin.includes('localhost') || origin.includes('127.0.0.1');
-  
-  if (isLocalhost) {
-    // Development: return null to try multiple ports
-    return null;
-  } else {
-    // Production: use the frontend URL
-    // You can set NEXT_PUBLIC_FRONTEND_URL in your .env file, or it defaults to yookatale.app
-    // Note: In client components, only NEXT_PUBLIC_* env vars are available
-    const frontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://www.yookatale.app';
-    return frontendUrl;
-  }
-};
-
-// Get API endpoints to try - handles both dev and production
-const getApiEndpoints = () => {
-  const baseUrl = getFrontendApiUrl();
-  
-  if (baseUrl) {
-    // Production: single endpoint
-    return [`${baseUrl}/api/mail`];
-  }
-  
-  // Development: try multiple ports
-  if (typeof window !== 'undefined') {
-    const protocol = window.location.protocol;
-    const hostname = window.location.hostname;
-    return [
-      `${protocol}//${hostname}:3000/api/mail`,
-      `${protocol}//${hostname}:3001/api/mail`
-    ];
-  }
-  
-  return [
-    'http://localhost:3000/api/mail',
-    'http://localhost:3001/api/mail'
-  ];
-};
+// Route directly through the backend (Render) which has SMTP properly configured
+// This avoids Vercel serverless SMTP restrictions on the frontend
+const getApiEndpoints = () => [`${BACKEND_URL}/admin/email/send`];
 
 export default function EmailSender() {
   const [emails, setEmails] = useState("");
