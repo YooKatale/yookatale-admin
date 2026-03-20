@@ -46,7 +46,7 @@ import Signin from '@app/signin/page';
 import { motion } from "framer-motion";
 import Navbar from "./Navbar";
 
-const NavItem = ({ icon: IconComponent, path, children, index, size, ...rest }) => {
+const NavItem = ({ icon: IconComponent, path, children, index, size, onClose, ...rest }) => {
   const [isActive, setisActive] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
@@ -60,7 +60,7 @@ const NavItem = ({ icon: IconComponent, path, children, index, size, ...rest }) 
   }, [pathname, path]);
 
   return (
-    <Link href={path} passHref key={index}>
+    <Link href={path} passHref key={index} onClick={onClose}>
       <motion.div
         whileHover={{ scale: 1.02, x: 4 }}
         whileTap={{ scale: 0.98 }}
@@ -114,7 +114,7 @@ const NavItem = ({ icon: IconComponent, path, children, index, size, ...rest }) 
   )
 }
 
-const NavGroup = ({ groupLabel, groupIcon: GroupIcon, items, isEditor }) => {
+const NavGroup = ({ groupLabel, groupIcon: GroupIcon, items, isEditor, onClose }) => {
   const pathname = usePathname();
   const isAnyActive = items.some((item) => item.path === pathname);
   const [isOpen, setIsOpen] = useState(isAnyActive);
@@ -154,7 +154,7 @@ const NavGroup = ({ groupLabel, groupIcon: GroupIcon, items, isEditor }) => {
       {isOpen && (
         <Box>
           {visibleItems.map((link, i) => (
-            <NavItem key={link.name} icon={link.icon} path={link.path} index={i}>
+            <NavItem key={link.name} icon={link.icon} path={link.path} index={i} onClose={onClose}>
               {link.name}
             </NavItem>
           ))}
@@ -233,7 +233,7 @@ const SidebarContent = ({ onClose, ...rest }) => {
                 // Standalone items (Dashboard, Settings)
                 const visible = isEditor ? group.items.filter((i) => i.editorCanAccess) : group.items;
                 return visible.map((link) => (
-                  <NavItem key={link.name} icon={link.icon} path={link.path}>
+                  <NavItem key={link.name} icon={link.icon} path={link.path} onClose={onClose}>
                     {link.name}
                   </NavItem>
                 ));
@@ -245,6 +245,7 @@ const SidebarContent = ({ onClose, ...rest }) => {
                   groupIcon={group.groupIcon}
                   items={group.items}
                   isEditor={isEditor}
+                  onClose={onClose}
                 />
               );
             })}

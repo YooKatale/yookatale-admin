@@ -22,11 +22,11 @@ import { useEffect, useState } from "react";
 import { Box, Input, InputGroup, InputLeftElement, useColorModeValue, Flex, Text, Heading, Grid, GridItem, Card, CardBody, CardHeader, HStack, VStack, Badge, Spinner, Center } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
-import Product from "@components/product";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { Search, TrendingUp, Users, ShoppingCart, Package, DollarSign, Activity, Calendar, Clock } from "lucide-react";
+import { Search, TrendingUp, Users, ShoppingCart, Package, DollarSign, Activity, Clock, Eye } from "lucide-react";
 import { useOrderStatsQuery, useAdminOrdersQuery, useAdminDriversQuery, useAdminVendorsQuery } from "@Slices/ordersDeliveryApiSlice";
+import { useGetVisitStatsMutation } from "@Slices/taskApiSlice";
 
 // Dynamically import ApexCharts to avoid SSR issues
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
@@ -40,8 +40,10 @@ export default function Home() {
   const [partners, setPartners] = useState([]);
   const [searchPartner, setSearchPartner] = useState("");
   const [loading, setLoading] = useState(true);
+  const [visitStats, setVisitStats] = useState({ daily: [], total: 0, today: 0 });
 
   const [fetchDashboardData] = useDashboardDataMutation();
+  const [fetchVisitStats] = useGetVisitStatsMutation();
   const [vendorGet] = useVendorGetMutation();
   const [partnerGet] = usePartnerGetMutation();
 
@@ -97,6 +99,9 @@ export default function Home() {
     handleDataFetch();
     handleVendorFetch();
     handlePartnerFetch();
+    if (!isEditor) {
+      fetchVisitStats(30).unwrap().then((r) => { if (r?.status === "Success") setVisitStats(r.data); }).catch(() => {});
+    }
   }, []);
 
   useEffect(() => {
@@ -204,6 +209,28 @@ export default function Home() {
     name: 'Orders',
     data: orderData.map(d => d.count),
   }];
+
+  // Visitor chart data
+  const visitorChartCategories = visitStats.daily.map(d => `${d._id.d}/${d._id.m}`);
+  const visitorChartData = visitStats.daily.map(d => d.count);
+  const visitorUniqueData = visitStats.daily.map(d => d.unique?.length || 0);
+
+  const visitorChartOptions = {
+    chart: { type: "line", height: 280, toolbar: { show: false }, zoom: { enabled: false }, fontFamily: "Inter, sans-serif" },
+    stroke: { curve: "smooth", width: [3, 2] },
+    colors: ["#185f2d", "#48BB78"],
+    dataLabels: { enabled: false },
+    legend: { position: "top", horizontalAlign: "right", fontSize: "12px" },
+    xaxis: { categories: visitorChartCategories, labels: { style: { fontSize: "10px" }, rotate: -45 }, tickAmount: 10 },
+    yaxis: { labels: { style: { fontSize: "11px" } } },
+    grid: { borderColor: "#f1f1f1", strokeDashArray: 3 },
+    tooltip: { theme: "light" },
+    fill: { type: ["gradient", "solid"], gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.05 } },
+  };
+  const visitorChartSeries = [
+    { name: "Page Views", type: "area", data: visitorChartData },
+    { name: "Unique Visitors", type: "line", data: visitorUniqueData },
+  ];
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -548,12 +575,34 @@ export default function Home() {
         </motion.div>
         )}
 
-        {/* Additional sections - Products, Vendors, Partners */}
-        <Grid templateColumns={{ base: "1fr", lg: "1fr" }} gap={6} mt={8}>
-          <motion.div variants={itemVariants}>
-            <Product />
-          </motion.div>
-        </Grid>
+        {/* Visitor stats + chart — admin only */}
+        {!isEditor && (
+          <>
+            <Grid templateColumns={{ base: "1fr 1fr", md: "repeat(3, 1fr)" }} gap={4} mb={6} mt={2}>
+              <StatCard icon={Eye} title="Total Visitors" value={visitStats.total.toLocaleString()} color="purple" subtitle="All-time page views" />
+              <StatCard icon={Eye} title="Today's Visitors" value={visitStats.today.toLocaleString()} color="teal" subtitle="Page views today" />
+              <StatCard icon={Activity} title="Tracked Days" value={visitStats.daily.length} color="blue" subtitle="Days with data" />
+            </Grid>
+            {visitorChartData.length > 0 && (
+              <motion.div variants={itemVariants}>
+                <Card bg="white" borderRadius="xl" boxShadow="0 4px 20px rgba(0,0,0,0.08)" border="1px solid" borderColor="gray.100" mb={8}>
+                  <CardHeader pb={2}>
+                    <HStack justify="space-between">
+                      <VStack align="start" spacing={0}>
+                        <Heading size="md" color="gray.800" fontFamily="Inter, sans-serif">Visitor Traffic</Heading>
+                        <Text fontSize="sm" color="gray.500">Page views & unique visitors — last 30 days</Text>
+                      </VStack>
+                      <Eye size={20} color="#185f2d" />
+                    </HStack>
+                  </CardHeader>
+                  <CardBody pt={0}>
+                    <Chart options={visitorChartOptions} series={visitorChartSeries} type="line" height={280} />
+                  </CardBody>
+                </Card>
+              </motion.div>
+            )}
+          </>
+        )}
 
         {/* Vendors and Partners Section - Vendors hidden for editors */}
         <Grid templateColumns={{ base: "1fr", lg: isEditor ? "1fr" : "1fr 1fr" }} gap={6} mt={8}>

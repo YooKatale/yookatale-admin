@@ -39,6 +39,7 @@ export const EDITOR_ALLOWED_PATHS = [
   "/email-sender",
   "/newsblogs",
   "/newsarticle",
+  "/hrreports",
   "/settings",
 ];
 
@@ -94,9 +95,10 @@ export const SideNavGroups = [
     ],
   },
   {
-    groupLabel: "Support & Reports",
+    groupLabel: "Team & Reports",
     groupIcon: BarChart2,
     items: [
+      { name: "Team Tasks", icon: ClipboardCheck, path: "/hrreports", editorCanAccess: true },
       { name: "Customer Support", icon: MessagesSquare, path: "/support", editorCanAccess: true },
       { name: "Daily Reports", icon: BarChart2, path: "/dailyreports", editorCanAccess: false },
     ],
