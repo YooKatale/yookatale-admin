@@ -13,7 +13,7 @@ export const applicationsApiSlice = apiSlice.injectEndpoints({
     }),
     deleteApplication: builder.mutation({
       query: (id) => ({
-        url: `${BACKEND_URL}/careers/applications/${id}`,
+        url: `${BACKEND_URL}/admin/careers/applications/${id}`,
         method: "DELETE",
       }),
     }),
