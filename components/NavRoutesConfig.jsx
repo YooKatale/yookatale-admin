@@ -11,7 +11,6 @@ import {
   Store,
   FolderTree,
   Banknote,
-  Star,
   Mail,
   Globe,
   Package,
@@ -20,7 +19,6 @@ import {
   RadioTower,
   FileText,
   Newspaper,
-  BarChart2,
 } from "lucide-react";
 import { HiCreditCard, HiMenuAlt2 } from "react-icons/hi";
 
@@ -45,29 +43,33 @@ export const EDITOR_ALLOWED_PATHS = [
 
 export const isPathAllowedForEditor = (path) => EDITOR_ALLOWED_PATHS.includes(path);
 
-// Grouped nav — null groupLabel = standalone (no collapsible wrapper)
+// null groupLabel = standalone (renders directly, no collapsible wrapper)
 export const SideNavGroups = [
   {
     groupLabel: null,
-    items: [
-      { name: "Dashboard", icon: HiMenuAlt2, path: "/", editorCanAccess: true },
-    ],
+    items: [{ name: "Dashboard", icon: HiMenuAlt2, path: "/", editorCanAccess: true }],
+  },
+  {
+    groupLabel: null,
+    items: [{ name: "Orders", icon: Package, path: "/orders", editorCanAccess: true }],
+  },
+  {
+    groupLabel: null,
+    items: [{ name: "Products", icon: LucideSalad, path: "/products", editorCanAccess: true }],
   },
   {
     groupLabel: "Operations",
     groupIcon: RadioTower,
     items: [
       { name: "Ops Control", icon: RadioTower, path: "/ops-control", editorCanAccess: false },
-      { name: "Orders", icon: Package, path: "/orders", editorCanAccess: true },
       { name: "Drivers", icon: Truck, path: "/drivers", editorCanAccess: true },
       { name: "Delivery Partners", icon: UsersIcon, path: "/partners", editorCanAccess: true },
     ],
   },
   {
     groupLabel: "Marketplace",
-    groupIcon: LucideSalad,
+    groupIcon: Store,
     items: [
-      { name: "Products", icon: LucideSalad, path: "/products", editorCanAccess: true },
       { name: "Categories", icon: FolderTree, path: "/categories", editorCanAccess: true },
       { name: "Country Cuisines", icon: Globe, path: "/country-cuisines", editorCanAccess: true },
       { name: "Vendors", icon: Users2Icon, path: "/vendors", editorCanAccess: false },
@@ -86,28 +88,28 @@ export const SideNavGroups = [
     ],
   },
   {
-    groupLabel: "Content",
-    groupIcon: Newspaper,
+    groupLabel: null,
+    items: [{ name: "News Articles", icon: Newspaper, path: "/newsblogs", editorCanAccess: true }],
+  },
+  {
+    groupLabel: null,
+    items: [{ name: "Team Tasks", icon: ClipboardCheck, path: "/hrreports", editorCanAccess: true }],
+  },
+  {
+    groupLabel: null,
+    items: [{ name: "Customer Support", icon: MessagesSquare, path: "/support", editorCanAccess: true }],
+  },
+  {
+    groupLabel: "Content & Tools",
+    groupIcon: LayoutDashboard,
     items: [
       { name: "Homepage / Hero", icon: LayoutDashboard, path: "/homepage-config", editorCanAccess: true },
-      { name: "News Articles", icon: Newspaper, path: "/newsblogs", editorCanAccess: true },
       { name: "Email Sender", icon: Mail, path: "/email-sender", editorCanAccess: true },
     ],
   },
   {
-    groupLabel: "Team & Reports",
-    groupIcon: BarChart2,
-    items: [
-      { name: "Team Tasks", icon: ClipboardCheck, path: "/hrreports", editorCanAccess: true },
-      { name: "Customer Support", icon: MessagesSquare, path: "/support", editorCanAccess: true },
-      { name: "Daily Reports", icon: BarChart2, path: "/dailyreports", editorCanAccess: false },
-    ],
-  },
-  {
     groupLabel: null,
-    items: [
-      { name: "Settings", icon: Settings2, path: "/settings", editorCanAccess: true },
-    ],
+    items: [{ name: "Settings", icon: Settings2, path: "/settings", editorCanAccess: true }],
   },
 ];
 

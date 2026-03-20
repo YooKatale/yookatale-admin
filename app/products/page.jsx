@@ -124,7 +124,7 @@ export default function ProductsPage() {
         </SimpleGrid>
       ) : filtered.length === 0 ? (
         <Box textAlign="center" py={20} bg="white" borderRadius="xl" border="1px solid" borderColor="gray.100">
-          <Text fontSize="4xl" mb={3}>📦</Text>
+          <Box mb={3} display="flex" justifyContent="center"><Package size={40} color="#CBD5E0" /></Box>
           <Heading size="sm" color="gray.600" mb={2}>{search || filterCategory !== "all" ? "No products match your search" : "No products yet"}</Heading>
           <Text color="gray.400" fontSize="sm" mb={4}>{!search && filterCategory === "all" && "Add your first product to get started"}</Text>
           {!search && filterCategory === "all" && (

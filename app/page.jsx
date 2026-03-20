@@ -443,40 +443,6 @@ export default function Home() {
           </Grid>
         )}
 
-        {/* Orders Trend - Admin only; hidden for editors */}
-        {!isEditor && orderData.length > 0 && orderData.some(d => d.count > 0) && (
-          <motion.div variants={itemVariants} mb={8}>
-            <Card
-              bg="white"
-              borderRadius="xl"
-              boxShadow="0 4px 20px rgba(0, 0, 0, 0.08)"
-              border="1px solid"
-              borderColor="gray.100"
-            >
-              <CardHeader pb={4}>
-                <HStack justify="space-between">
-                  <VStack align="start" spacing={1}>
-                    <Heading size="md" color="gray.800" fontFamily="Inter, sans-serif">
-                      Orders Trend
-                    </Heading>
-                    <Text fontSize="sm" color="gray.600">
-                      {Dashboard?.ordermonthlycounts ? "Monthly order statistics" : "Last 7 days order statistics"}
-                    </Text>
-                  </VStack>
-                  <Activity size={20} color="#48BB78" />
-                </HStack>
-              </CardHeader>
-              <CardBody pt={0}>
-                <Chart
-                  options={ordersChartOptions}
-                  series={ordersChartSeries}
-                  type="area"
-                  height={350}
-                />
-              </CardBody>
-            </Card>
-          </motion.div>
-        )}
 
         {/* Recent Orders - Admin only; hidden for editors */}
         {!isEditor && (
@@ -575,32 +541,52 @@ export default function Home() {
         </motion.div>
         )}
 
-        {/* Visitor stats + chart — admin only */}
+        {/* Trends row — visitor stats + side-by-side charts, admin only */}
         {!isEditor && (
           <>
-            <Grid templateColumns={{ base: "1fr 1fr", md: "repeat(3, 1fr)" }} gap={4} mb={6} mt={2}>
+            <Grid templateColumns={{ base: "1fr 1fr", md: "repeat(3, 1fr)" }} gap={4} mb={6} mt={8}>
               <StatCard icon={Eye} title="Total Visitors" value={visitStats.total.toLocaleString()} color="purple" subtitle="All-time page views" />
               <StatCard icon={Eye} title="Today's Visitors" value={visitStats.today.toLocaleString()} color="teal" subtitle="Page views today" />
               <StatCard icon={Activity} title="Tracked Days" value={visitStats.daily.length} color="blue" subtitle="Days with data" />
             </Grid>
-            {visitorChartData.length > 0 && (
-              <motion.div variants={itemVariants}>
-                <Card bg="white" borderRadius="xl" boxShadow="0 4px 20px rgba(0,0,0,0.08)" border="1px solid" borderColor="gray.100" mb={8}>
-                  <CardHeader pb={2}>
-                    <HStack justify="space-between">
-                      <VStack align="start" spacing={0}>
-                        <Heading size="md" color="gray.800" fontFamily="Inter, sans-serif">Visitor Traffic</Heading>
-                        <Text fontSize="sm" color="gray.500">Page views & unique visitors — last 30 days</Text>
-                      </VStack>
-                      <Eye size={20} color="#185f2d" />
-                    </HStack>
-                  </CardHeader>
-                  <CardBody pt={0}>
-                    <Chart options={visitorChartOptions} series={visitorChartSeries} type="line" height={280} />
-                  </CardBody>
-                </Card>
-              </motion.div>
-            )}
+            <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={6} mb={8}>
+              {orderData.length > 0 && orderData.some(d => d.count > 0) && (
+                <motion.div variants={itemVariants} style={{ display: "flex", flexDirection: "column" }}>
+                  <Card bg="white" borderRadius="xl" boxShadow="0 4px 20px rgba(0,0,0,0.08)" border="1px solid" borderColor="gray.100" flex={1}>
+                    <CardHeader pb={2}>
+                      <HStack justify="space-between">
+                        <VStack align="start" spacing={0}>
+                          <Heading size="md" color="gray.800" fontFamily="Inter, sans-serif">Orders Trend</Heading>
+                          <Text fontSize="sm" color="gray.500">{Dashboard?.ordermonthlycounts ? "Monthly statistics" : "Last 7 days"}</Text>
+                        </VStack>
+                        <Activity size={20} color="#48BB78" />
+                      </HStack>
+                    </CardHeader>
+                    <CardBody pt={0}>
+                      <Chart options={ordersChartOptions} series={ordersChartSeries} type="area" height={240} />
+                    </CardBody>
+                  </Card>
+                </motion.div>
+              )}
+              {visitorChartData.length > 0 && (
+                <motion.div variants={itemVariants} style={{ display: "flex", flexDirection: "column" }}>
+                  <Card bg="white" borderRadius="xl" boxShadow="0 4px 20px rgba(0,0,0,0.08)" border="1px solid" borderColor="gray.100" flex={1}>
+                    <CardHeader pb={2}>
+                      <HStack justify="space-between">
+                        <VStack align="start" spacing={0}>
+                          <Heading size="md" color="gray.800" fontFamily="Inter, sans-serif">Visitor Traffic</Heading>
+                          <Text fontSize="sm" color="gray.500">Page views & unique visitors — last 30 days</Text>
+                        </VStack>
+                        <Eye size={20} color="#185f2d" />
+                      </HStack>
+                    </CardHeader>
+                    <CardBody pt={0}>
+                      <Chart options={visitorChartOptions} series={visitorChartSeries} type="line" height={240} />
+                    </CardBody>
+                  </Card>
+                </motion.div>
+              )}
+            </Grid>
           </>
         )}
 

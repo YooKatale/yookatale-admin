@@ -282,7 +282,7 @@ export default function TeamTasksPage() {
       {/* Task list */}
       {filtered.length === 0 ? (
         <Box textAlign="center" py={20} bg="white" borderRadius="xl" border="1px solid" borderColor="gray.100">
-          <Text fontSize="4xl" mb={3}>✅</Text>
+          <Box mb={3} display="flex" justifyContent="center"><Icon as={FiCheckCircle} boxSize={10} color="gray.300" /></Box>
           <Heading size="sm" color="gray.600" mb={2}>{search || filterStatus !== "all" ? "No tasks match your filters" : "No tasks yet"}</Heading>
           <Text color="gray.400" fontSize="sm">{!search && filterStatus === "all" && "Create your first task to get the team moving"}</Text>
         </Box>

@@ -74,36 +74,38 @@ const NavItem = ({ icon: IconComponent, path, children, index, size, onClose, ..
         >
           <Flex
             align="center"
-            m="2"
-            p={4}
-            borderRadius="xl"
+            mx={2}
+            my="1px"
+            px={3}
+            py="9px"
+            borderRadius="lg"
             role="group"
             cursor="pointer"
-            bg={isActive ? 'green.500' : 'transparent'}
+            bg={isActive ? '#185f2d' : 'transparent'}
             color={isActive ? 'white' : 'gray.700'}
             _hover={{
-              bg: isActive ? 'green.600' : 'gray.100',
-              color: isActive ? 'white' : 'gray.800',
+              bg: isActive ? '#1f793a' : 'gray.100',
+              color: isActive ? 'white' : 'gray.900',
             }}
-            transition="all 0.2s"
-            boxShadow={isActive ? '0 4px 12px rgba(72, 187, 120, 0.3)' : 'none'}
-            fontWeight={isActive ? '600' : '500'}
+            transition="all 0.15s"
+            boxShadow={isActive ? '0 2px 8px rgba(24, 95, 45, 0.25)' : 'none'}
           >
             {IconComponent && (
               <Box
-                mr={4}
-                fontSize="20px"
-                color={isActive ? 'white' : 'gray.600'}
+                mr={3}
                 display="flex"
                 alignItems="center"
+                flexShrink={0}
+                color={isActive ? 'white' : 'gray.500'}
               >
-                <IconComponent size={20} />
+                <IconComponent size={17} />
               </Box>
             )}
             <Text
-              fontSize="sm"
-              fontWeight={isActive ? '600' : '500'}
-              letterSpacing="0.01em"
+              fontSize="0.8125rem"
+              fontWeight={isActive ? '700' : '600'}
+              letterSpacing="-0.01em"
+              fontFamily="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif"
             >
               {children}
             </Text>
@@ -127,24 +129,28 @@ const NavGroup = ({ groupLabel, groupIcon: GroupIcon, items, isEditor, onClose }
   if (visibleItems.length === 0) return null;
 
   return (
-    <Box mb={1}>
+    <Box mb={1} mt={4}>
       <Flex
         align="center" justify="space-between"
-        mx={2} px={3} py={1.5} borderRadius="lg"
+        mx={2} px={3} py="5px"
         cursor="pointer" onClick={() => setIsOpen((o) => !o)}
-        color="gray.400" fontSize="10px" fontWeight="700"
-        letterSpacing="0.1em" textTransform="uppercase"
-        _hover={{ bg: 'gray.50', color: 'gray.600' }}
+        color="gray.400"
+        _hover={{ color: 'gray.600' }}
         transition="all 0.15s"
         userSelect="none"
       >
-        <HStack spacing={1.5}>
-          {GroupIcon && <GroupIcon size={11} />}
-          <Text>{groupLabel}</Text>
-        </HStack>
+        <Text
+          fontSize="10px"
+          fontWeight="700"
+          letterSpacing="0.08em"
+          textTransform="uppercase"
+          fontFamily="-apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif"
+        >
+          {groupLabel}
+        </Text>
         <Box
           as={ChevronDown}
-          size={11}
+          size={10}
           style={{
             transform: isOpen ? 'rotate(0deg)' : 'rotate(-90deg)',
             transition: 'transform 0.2s',
