@@ -11,7 +11,13 @@ export const applicationsApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+    deleteApplication: builder.mutation({
+      query: (id) => ({
+        url: `${BACKEND_URL}/careers/applications/${id}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 
-export const { useGetApplicationsMutation } = applicationsApiSlice;
+export const { useGetApplicationsMutation, useDeleteApplicationMutation } = applicationsApiSlice;
