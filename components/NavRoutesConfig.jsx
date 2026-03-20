@@ -22,6 +22,7 @@ import {
   UserCheck,
   RadioTower,
   FileText,
+  Newspaper,
 } from "lucide-react";
 import { HiCreditCard, HiMenuAlt2, HiOutlineDocumentAdd } from "react-icons/hi";
 // Paths editors are allowed to access (settings, email sender, support, news blog, subscription, partners, categories, products)
@@ -37,6 +38,8 @@ export const EDITOR_ALLOWED_PATHS = [
   "/subscriptions",
   "/support",
   "/email-sender",
+  "/newsblogs",
+  "/newsarticle",
   "/settings",
 ];
 
@@ -63,4 +66,5 @@ export const SideNavRoutes = [
   { name: "Settings", icon: Settings2, path: "/settings", editorCanAccess: true },
   { name: "Daily Reports", icon: Store, path: "/dailyreports", editorCanAccess: false },
   { name: "Job Applications", icon: FileText, path: "/applications", editorCanAccess: false },
+  { name: "News Articles", icon: Newspaper, path: "/newsblogs", editorCanAccess: true },
 ];
