@@ -3,14 +3,16 @@
 import {
   Box, Card, CardBody, CardHeader, Center, Heading, HStack, Input, InputGroup,
   InputLeftElement, Spinner, Table, Tbody, Td, Th, Thead, Tr,
-   Text, VStack, Badge, Button, SimpleGrid, Icon, Flex, Divider,
-  useToast, Tooltip,
+  Text, VStack, Badge, Button, SimpleGrid, Icon, Flex, Divider,
+  useToast, Tooltip, Modal, ModalOverlay, ModalContent, ModalHeader,
+  ModalBody, ModalFooter, ModalCloseButton, useDisclosure, FormControl,
+  FormLabel, Switch, InputRightElement, IconButton,
 } from "@chakra-ui/react";
-import { useAdminDriversQuery, useRunDriverPayoutsMutation, useDriversByLocationQuery } from "@Slices/ordersDeliveryApiSlice";
+import { useAdminDriversQuery, useRunDriverPayoutsMutation, useDriversByLocationQuery, useSetDriverCredentialsMutation } from "@Slices/ordersDeliveryApiSlice";
 import { useFetchPartnersQuery, useVerifyPartnerMutation, useRejectPartnerMutation } from "@Slices/partnersPageApiSlice";
-import { Search, Truck, MapPin, DollarSign, Star, CheckCircle, XCircle, Wifi, WifiOff, RefreshCw } from "lucide-react";
+import { Search, Truck, MapPin, DollarSign, Star, CheckCircle, XCircle, Wifi, WifiOff, RefreshCw, Key, Eye, EyeOff } from "lucide-react";
 import moment from "moment";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 
 export default function DriversPage() {
   const { data: partners = [], isLoading, refetch } = useFetchPartnersQuery();
@@ -18,8 +20,17 @@ export default function DriversPage() {
   const [runPayouts, { isLoading: payingOut }] = useRunDriverPayoutsMutation();
   const [verifyPartner] = useVerifyPartnerMutation();
   const [rejectPartner] = useRejectPartnerMutation();
+  const [setDriverCredentials, { isLoading: settingCreds }] = useSetDriverCredentialsMutation();
   const [searchInput, setSearchInput] = useState("");
   const [tab, setTab] = useState("all");
+
+  // Set credentials modal state
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [selectedDriver, setSelectedDriver] = useState(null);
+  const [credPassword, setCredPassword] = useState("");
+  const [showCred, setShowCred] = useState(false);
+  const [sendEmail, setSendEmail] = useState(true);
+
   const toast = useToast();
 
   const displayDrivers = useMemo(() => {
@@ -54,6 +65,34 @@ export default function DriversPage() {
 
   const handleReject = async (id) => {
     try { await rejectPartner(id).unwrap(); toast({ title: "Driver Rejected", status: "info", duration: 3000 }); refetch(); } catch { toast({ title: "Failed", status: "error" }); }
+  };
+
+  const openSetCredentials = (driver) => {
+    setSelectedDriver(driver);
+    setCredPassword("");
+    setShowCred(false);
+    setSendEmail(true);
+    onOpen();
+  };
+
+  const handleSetCredentials = async () => {
+    if (!credPassword || credPassword.length < 6) {
+      toast({ title: "Password must be at least 6 characters", status: "warning", duration: 3000 });
+      return;
+    }
+    try {
+      await setDriverCredentials({ driverId: selectedDriver._id, password: credPassword, sendEmail }).unwrap();
+      toast({
+        title: "Credentials Set!",
+        description: sendEmail ? `Login details sent to ${selectedDriver.email || "driver"}.` : "Password updated.",
+        status: "success",
+        duration: 4000,
+      });
+      onClose();
+      refetch();
+    } catch (e) {
+      toast({ title: "Failed", description: e?.data?.message || "Could not set credentials", status: "error", duration: 4000 });
+    }
   };
 
   if (isLoading) return (<Center minH="50vh"><VStack spacing={4}><Spinner size="xl" color="green.500" thickness="4px" /><Text>Loading drivers...</Text></VStack></Center>);
@@ -127,7 +166,12 @@ export default function DriversPage() {
                 <Tbody>
                   {displayDrivers.map((d, idx) => (
                     <Tr key={d._id || idx} _hover={{ bg: "gray.50" }}>
-                      <Td fontWeight="600" fontSize="sm">{d.name || d.email || "Unknown Driver"}</Td>
+                      <Td fontWeight="600" fontSize="sm">
+                        <VStack align="start" spacing={0}>
+                          <Text>{d.name || "Unknown Driver"}</Text>
+                          {d.email && <Text fontSize="xs" color="gray.400">{d.email}</Text>}
+                        </VStack>
+                      </Td>
                       <Td fontSize="sm">{d.phone || "-"}</Td>
                       <Td fontSize="sm"><Badge colorScheme="blue" borderRadius="full">{d.transport || d.numberPlate || "-"}</Badge></Td>
                       <Td>
@@ -153,6 +197,17 @@ export default function DriversPage() {
                               <Button size="xs" colorScheme="red" variant="outline" onClick={() => handleReject(d._id)}>Reject</Button>
                             </>
                           )}
+                          <Tooltip label="Set Login Credentials">
+                            <Button
+                              size="xs"
+                              colorScheme="purple"
+                              variant="outline"
+                              leftIcon={<Key size={11} />}
+                              onClick={() => openSetCredentials(d)}
+                            >
+                              Credentials
+                            </Button>
+                          </Tooltip>
                         </HStack>
                       </Td>
                     </Tr>
@@ -164,6 +219,79 @@ export default function DriversPage() {
           </CardBody>
         </Card>
       </VStack>
+
+      {/* Set Credentials Modal */}
+      <Modal isOpen={isOpen} onClose={onClose} isCentered size="sm">
+        <ModalOverlay backdropFilter="blur(4px)" />
+        <ModalContent>
+          <ModalHeader>
+            <HStack spacing={2}>
+              <Icon as={Key} color="purple.500" />
+              <Text>Set Driver Credentials</Text>
+            </HStack>
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={2}>
+            {selectedDriver && (
+              <VStack align="stretch" spacing={4}>
+                <Box p={3} bg="gray.50" borderRadius="lg">
+                  <Text fontWeight="700" fontSize="sm">{selectedDriver.name || "Driver"}</Text>
+                  <Text fontSize="xs" color="gray.500">{selectedDriver.email}</Text>
+                  <Badge mt={1} colorScheme={selectedDriver.status === "Verified" ? "green" : "yellow"} fontSize="xs">
+                    {selectedDriver.status}
+                  </Badge>
+                </Box>
+
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="600">New Password</FormLabel>
+                  <InputGroup size="sm">
+                    <Input
+                      type={showCred ? "text" : "password"}
+                      placeholder="Minimum 6 characters"
+                      value={credPassword}
+                      onChange={(e) => setCredPassword(e.target.value)}
+                      borderRadius="lg"
+                      pr="2.5rem"
+                    />
+                    <InputRightElement>
+                      <IconButton
+                        aria-label="toggle"
+                        size="xs"
+                        variant="ghost"
+                        icon={showCred ? <EyeOff size={14} /> : <Eye size={14} />}
+                        onClick={() => setShowCred((v) => !v)}
+                      />
+                    </InputRightElement>
+                  </InputGroup>
+                </FormControl>
+
+                <FormControl display="flex" alignItems="center" justifyContent="space-between">
+                  <FormLabel mb={0} fontSize="sm" fontWeight="600">Send login email to driver</FormLabel>
+                  <Switch colorScheme="green" isChecked={sendEmail} onChange={(e) => setSendEmail(e.target.checked)} />
+                </FormControl>
+
+                {sendEmail && (
+                  <Box p={3} bg="blue.50" borderRadius="lg" fontSize="xs" color="blue.700">
+                    Driver will receive their email + password at <strong>{selectedDriver.email || "their email"}</strong>
+                  </Box>
+                )}
+              </VStack>
+            )}
+          </ModalBody>
+          <ModalFooter gap={2}>
+            <Button size="sm" variant="ghost" onClick={onClose}>Cancel</Button>
+            <Button
+              size="sm"
+              colorScheme="purple"
+              leftIcon={<Key size={13} />}
+              isLoading={settingCreds}
+              onClick={handleSetCredentials}
+            >
+              Set Credentials
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 }

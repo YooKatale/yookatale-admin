@@ -137,6 +137,13 @@ export const ordersDeliveryApiSlice = apiSlice.injectEndpoints({
         body,
       }),
     }),
+    setDriverCredentials: builder.mutation({
+      query: ({ driverId, password, sendEmail }) => ({
+        url: `${BACKEND_URL}/admin/drivers/${driverId}/set-credentials`,
+        method: "PATCH",
+        body: { password, sendEmail },
+      }),
+    }),
   }),
 });
 
@@ -159,4 +166,5 @@ export const {
   useDeliveryAcceptMutation,
   useOrderStatusUpdateMutation,
   useDeliveryAssignMutation,
+  useSetDriverCredentialsMutation,
 } = ordersDeliveryApiSlice;
