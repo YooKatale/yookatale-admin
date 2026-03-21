@@ -144,6 +144,19 @@ export const ordersDeliveryApiSlice = apiSlice.injectEndpoints({
         body: { password, sendEmail },
       }),
     }),
+    confirmCod: builder.mutation({
+      query: ({ orderId }) => ({
+        url: `${BACKEND_URL}/api/orders/${orderId}/confirm-cod`,
+        method: "PATCH",
+      }),
+    }),
+    getAppSettings: builder.query({
+      query: () => ({ url: `${BACKEND_URL}/admin/settings`, method: "GET" }),
+      transformResponse: (res) => (res?.status === "Success" ? res.data : res?.data || {}),
+    }),
+    updateAppSettings: builder.mutation({
+      query: (body) => ({ url: `${BACKEND_URL}/admin/settings`, method: "PUT", body }),
+    }),
   }),
 });
 
@@ -167,4 +180,7 @@ export const {
   useOrderStatusUpdateMutation,
   useDeliveryAssignMutation,
   useSetDriverCredentialsMutation,
+  useConfirmCodMutation,
+  useGetAppSettingsQuery,
+  useUpdateAppSettingsMutation,
 } = ordersDeliveryApiSlice;

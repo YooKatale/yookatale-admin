@@ -9,7 +9,7 @@ import {
   FormLabel, Switch, InputRightElement, IconButton,
 } from "@chakra-ui/react";
 import { useAdminDriversQuery, useRunDriverPayoutsMutation, useDriversByLocationQuery, useSetDriverCredentialsMutation } from "@Slices/ordersDeliveryApiSlice";
-import { useFetchPartnersQuery, useVerifyPartnerMutation, useRejectPartnerMutation } from "@Slices/partnersPageApiSlice";
+import { useFetchPartnersQuery, useVerifyPartnerMutation, useRejectPartnerMutation, useUpdatePartnerServiceAreaMutation } from "@Slices/partnersPageApiSlice";
 import { Search, Truck, MapPin, DollarSign, Star, CheckCircle, XCircle, Wifi, WifiOff, RefreshCw, Key, Eye, EyeOff } from "lucide-react";
 
 import moment from "moment";
@@ -22,8 +22,14 @@ export default function DriversPage() {
   const [verifyPartner] = useVerifyPartnerMutation();
   const [rejectPartner] = useRejectPartnerMutation();
   const [setDriverCredentials, { isLoading: settingCreds }] = useSetDriverCredentialsMutation();
-  const [searchInput, setSearchInput] = useState("");
-  const [tab, setTab] = useState("all");
+  const [updateServiceArea, { isLoading: updatingArea }]   = useUpdatePartnerServiceAreaMutation();
+  const [searchInput, setSearchInput]   = useState("");
+  const [tab, setTab]                   = useState("all");
+
+  // Service area modal state
+  const { isOpen: isAreaOpen, onOpen: onAreaOpen, onClose: onAreaClose } = useDisclosure();
+  const [areaDriver, setAreaDriver]     = useState(null);
+  const [radiusKm, setRadiusKm]         = useState(10);
 
   // Set credentials modal state
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -74,6 +80,24 @@ export default function DriversPage() {
     setShowCred(false);
     setSendEmail(true);
     onOpen();
+  };
+
+  const openEditArea = (driver) => {
+    setAreaDriver(driver);
+    setRadiusKm(driver?.serviceArea?.radiusKm || 10);
+    onAreaOpen();
+  };
+
+  const handleUpdateServiceArea = async () => {
+    if (!areaDriver?._id) return;
+    try {
+      await updateServiceArea({ partnerId: areaDriver._id, radiusKm }).unwrap();
+      toast({ title: "Service area updated", status: "success", duration: 3000 });
+      onAreaClose();
+      refetch();
+    } catch (e) {
+      toast({ title: "Failed", description: e?.data?.message || "Could not update", status: "error", duration: 4000 });
+    }
   };
 
   const handleSetCredentials = async () => {
@@ -158,10 +182,11 @@ export default function DriversPage() {
                     <Th>Transport</Th>
                     <Th>Status</Th>
                     <Th>Online</Th>
+                    <Th>Area</Th>
                     <Th>Deliveries</Th>
                     <Th>Rating</Th>
                     <Th>Earnings</Th>
-                    <Th>Joined</Th>
+                    <Th>Last Seen</Th>
                     <Th>Actions</Th>
                   </Tr>
                 </Thead>
@@ -188,6 +213,9 @@ export default function DriversPage() {
                           <Tooltip label="Offline"><Icon as={WifiOff} color="gray.400" boxSize={4} /></Tooltip>
                         )}
                       </Td>
+                      <Td fontSize="xs" color="gray.500">
+                        {d.serviceArea?.radiusKm ? `${d.serviceArea.radiusKm} km` : "—"}
+                      </Td>
                       <Td fontWeight="600" fontSize="sm">{d.totalDeliveries || 0}</Td>
                       <Td fontSize="sm">
                         <HStack spacing={1}>
@@ -197,7 +225,7 @@ export default function DriversPage() {
                         </HStack>
                       </Td>
                       <Td fontWeight="600" color="green.600" fontSize="sm">UGX {(d.commissionEarned || 0).toLocaleString()}</Td>
-                      <Td fontSize="xs" color="gray.500">{d.createdAt ? moment(d.createdAt).fromNow() : "-"}</Td>
+                      <Td fontSize="xs" color="gray.500">{d.lastSeen ? moment(d.lastSeen).fromNow() : d.createdAt ? moment(d.createdAt).fromNow() : "-"}</Td>
                       <Td>
                         <HStack spacing={1}>
                           {d.status === "Unverified" && (
@@ -217,6 +245,14 @@ export default function DriversPage() {
                               Credentials
                             </Button>
                           </Tooltip>
+                          <Button
+                            size="xs"
+                            colorScheme="teal"
+                            variant="outline"
+                            onClick={() => openEditArea(d)}
+                          >
+                            Edit Area
+                          </Button>
                         </HStack>
                       </Td>
                     </Tr>
@@ -228,6 +264,59 @@ export default function DriversPage() {
           </CardBody>
         </Card>
       </VStack>
+
+      {/* Edit Service Area Modal */}
+      <Modal isOpen={isAreaOpen} onClose={onAreaClose} isCentered size="sm">
+        <ModalOverlay backdropFilter="blur(4px)" />
+        <ModalContent>
+          <ModalHeader>
+            <HStack spacing={2}>
+              <Icon as={MapPin} color="teal.500" />
+              <Text>Edit Service Area</Text>
+            </HStack>
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={2}>
+            {areaDriver && (
+              <VStack align="stretch" spacing={4}>
+                <Box p={3} bg="gray.50" borderRadius="lg">
+                  <Text fontWeight="700" fontSize="sm">{areaDriver.name || "Driver"}</Text>
+                  <Text fontSize="xs" color="gray.500">{areaDriver.email}</Text>
+                </Box>
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="600">
+                    Service Radius: <strong>{radiusKm} km</strong>
+                  </FormLabel>
+                  <input
+                    type="range"
+                    min={5}
+                    max={50}
+                    step={1}
+                    value={radiusKm}
+                    onChange={(e) => setRadiusKm(Number(e.target.value))}
+                    style={{ width: "100%", accentColor: "#185f2d" }}
+                  />
+                  <HStack justify="space-between" mt={1}>
+                    <Text fontSize="xs" color="gray.400">5 km</Text>
+                    <Text fontSize="xs" color="gray.400">50 km</Text>
+                  </HStack>
+                </FormControl>
+              </VStack>
+            )}
+          </ModalBody>
+          <ModalFooter gap={2}>
+            <Button size="sm" variant="ghost" onClick={onAreaClose}>Cancel</Button>
+            <Button
+              size="sm"
+              colorScheme="teal"
+              isLoading={updatingArea}
+              onClick={handleUpdateServiceArea}
+            >
+              Save
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
 
       {/* Set Credentials Modal */}
       <Modal isOpen={isOpen} onClose={onClose} isCentered size="sm">

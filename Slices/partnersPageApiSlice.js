@@ -30,6 +30,13 @@ export const partnersPageApiSlice = apiSlice.injectEndpoints({
         body: { status: "Rejected" },
       }),
     }),
+    updatePartnerServiceArea: builder.mutation({
+      query: ({ partnerId, radiusKm }) => ({
+        url: `${BACKEND_URL}/api/partners/${partnerId}`,
+        method: "PATCH",
+        body: { serviceArea: { radiusKm } },
+      }),
+    }),
   }),
 });
 
@@ -37,4 +44,5 @@ export const {
   useFetchPartnersQuery,
   useVerifyPartnerMutation,
   useRejectPartnerMutation,
+  useUpdatePartnerServiceAreaMutation,
 } = partnersPageApiSlice;

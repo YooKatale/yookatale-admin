@@ -35,7 +35,9 @@ import {
 } from 'react-icons/fi'
 import { ChevronDown } from 'lucide-react'
 import { IsAccountValid, IsLoggedIn } from "@middleware/middleware";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { io } from "socket.io-client";
+import { BACKEND_URL } from "@constants/constant";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "./ui/button";
 import { Loader2, LogOut, Settings } from "lucide-react";
@@ -170,7 +172,7 @@ const NavGroup = ({ groupLabel, groupIcon: GroupIcon, items, isEditor, onClose }
   );
 };
 
-const SidebarContent = ({ onClose, ...rest }) => {
+const SidebarContent = ({ onClose, socketConnected = false, ...rest }) => {
   const { userInfo } = useSelector((state) => state.auth);
   const accountType = userInfo?.accountType ?? userInfo?.account ?? "";
   const isEditor = accountType === "editor";
@@ -218,11 +220,20 @@ const SidebarContent = ({ onClose, ...rest }) => {
             <Text fontSize="lg" fontWeight="700" color="gray.800" letterSpacing="-0.02em">
               Yookatale
             </Text>
-            <Text fontSize="xs" color="gray.500" fontWeight="600" letterSpacing="0.05em">
-              ADMIN PANEL
-            </Text>
+            <HStack spacing={1.5} align="center">
+              <Text fontSize="xs" color="gray.500" fontWeight="600" letterSpacing="0.05em">
+                ADMIN PANEL
+              </Text>
+              <Box
+                w="6px" h="6px" borderRadius="full"
+                bg={socketConnected ? "green.400" : "gray.300"}
+                title={socketConnected ? "Live" : "Offline"}
+                style={socketConnected ? { animation: "adm-pulse 2s ease-in-out infinite" } : {}}
+              />
+            </HStack>
           </VStack>
         </Flex>
+        <style>{`@keyframes adm-pulse { 0%,100%{opacity:1;} 50%{opacity:0.5;} }`}</style>
         <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} />
       </Flex>
 
@@ -287,6 +298,8 @@ const SidebarWithHeader = ({ children, ...rest }) => {
   const isAuthenticated = !!(userInfo?._id);
   const accountType = userInfo?.accountType ?? userInfo?.account ?? "";
   const isEditor = accountType === "editor";
+  const [socketConnected, setSocketConnected] = useState(false);
+  const adminSocketRef = useRef(null);
 
   useEffect(() => {
     if (!userInfo?._id) {
@@ -294,6 +307,16 @@ const SidebarWithHeader = ({ children, ...rest }) => {
     }
     IsAccountValid();
   }, [userInfo, router]);
+
+  useEffect(() => {
+    if (!userInfo?._id) return;
+    const socket = io(BACKEND_URL, { transports: ["websocket"], reconnection: true });
+    adminSocketRef.current = socket;
+    socket.on("connect",    () => setSocketConnected(true));
+    socket.on("disconnect", () => setSocketConnected(false));
+    socket.emit("join:admin");
+    return () => { socket.disconnect(); };
+  }, [userInfo?._id]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   // Restrict editors to allowed paths only
   useEffect(() => {
@@ -444,6 +467,7 @@ const SidebarWithHeader = ({ children, ...rest }) => {
       <Box bg="gray.50" minH="100vh">
         <SidebarContent
           onClose={() => onClose}
+          socketConnected={socketConnected}
           display={{ base: 'none', md: 'block' }}
         />
         <Drawer
@@ -456,7 +480,7 @@ const SidebarWithHeader = ({ children, ...rest }) => {
           size="full"
         >
           <DrawerContent>
-            <SidebarContent onClose={onClose} />
+            <SidebarContent onClose={onClose} socketConnected={socketConnected} />
           </DrawerContent>
         </Drawer>
 

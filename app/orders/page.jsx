@@ -48,7 +48,10 @@ import {
   useAdminCancelOrderMutation,
   useAdminDeleteOrderMutation,
   useGetOrderDeliveryTrackingQuery,
+  useConfirmCodMutation,
 } from "@Slices/ordersDeliveryApiSlice";
+import { io } from "socket.io-client";
+import { BACKEND_URL } from "@constants/constant";
 import {
   Search,
   Package,
@@ -63,27 +66,36 @@ import {
   Trash2,
 } from "lucide-react";
 import moment from "moment";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 
 const STATUS_CONFIG = {
-  pending: { color: "yellow", label: "Pending", icon: Clock },
-  confirmed: { color: "blue", label: "Confirmed", icon: CheckCircle },
-  preparing: { color: "purple", label: "Preparing", icon: Package },
-  ready: { color: "cyan", label: "Ready", icon: Package },
-  assigned: { color: "orange", label: "Driver Assigned", icon: Truck },
-  picked_up: { color: "teal", label: "Picked Up", icon: Truck },
-  in_transit: { color: "blue", label: "In Transit", icon: MapPin },
-  delivered: { color: "green", label: "Delivered", icon: CheckCircle },
-  cancelled: { color: "red", label: "Cancelled", icon: XCircle },
-  refunded: { color: "gray", label: "Refunded", icon: XCircle },
+  pending:              { color: "yellow",  label: "Pending",           icon: Clock },
+  confirmed:            { color: "blue",    label: "Confirmed",          icon: CheckCircle },
+  preparing:            { color: "purple",  label: "Preparing",          icon: Package },
+  ready:                { color: "cyan",    label: "Ready",              icon: Package },
+  assigned:             { color: "orange",  label: "Driver Assigned",    icon: Truck },
+  awaiting_driver:      { color: "orange",  label: "Awaiting Driver",    icon: Truck },
+  picked_up:            { color: "teal",    label: "Picked Up",          icon: Truck },
+  in_transit:           { color: "blue",    label: "In Transit",         icon: MapPin },
+  delivered:            { color: "green",   label: "Delivered",          icon: CheckCircle },
+  cancelled:            { color: "red",     label: "Cancelled",          icon: XCircle },
+  refunded:             { color: "gray",    label: "Refunded",           icon: XCircle },
+  pending_cod_approval: { color: "orange",  label: "COD Pending",        icon: Clock },
 };
+
+const STATUS_TABS = [
+  "all", "pending", "confirmed", "preparing", "assigned", "awaiting_driver",
+  "in_transit", "delivered", "cancelled", "pending_cod_approval",
+];
 
 export default function AdminOrdersPage() {
   const [statusFilter, setStatusFilter] = useState("");
-  const [searchInput, setSearchInput] = useState("");
+  const [activeTab, setActiveTab]       = useState("all");
+  const [searchInput, setSearchInput]   = useState("");
   const [selectedOrder, setSelectedOrder] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const toast = useToast();
+  const toast    = useToast();
+  const socketRef = useRef(null);
 
   const { data: orderData = {}, isLoading, refetch } = useAdminOrdersQuery({
     status: statusFilter || undefined,
@@ -93,24 +105,46 @@ export default function AdminOrdersPage() {
   const { data: stats = {} } = useOrderStatsQuery();
   const { data: drivers = [] } = useAdminDriversQuery();
 
-  const [approveOrder, { isLoading: approving }] = useApproveOrderMutation();
-  const [assignDriver, { isLoading: assigning }] = useAssignDriverToOrderMutation();
-  const [updateStatus, { isLoading: updating }] = useUpdateOrderStatusMutation();
+  const [approveOrder, { isLoading: approving }]     = useApproveOrderMutation();
+  const [assignDriver, { isLoading: assigning }]     = useAssignDriverToOrderMutation();
+  const [updateStatus, { isLoading: updating }]     = useUpdateOrderStatusMutation();
   const [adminCancelOrder, { isLoading: cancelling }] = useAdminCancelOrderMutation();
-  const [adminDeleteOrder, { isLoading: deleting }] = useAdminDeleteOrderMutation();
+  const [adminDeleteOrder, { isLoading: deleting }]  = useAdminDeleteOrderMutation();
+  const [confirmCod, { isLoading: confirmingCod }]   = useConfirmCodMutation();
+
+  // Real-time socket feed
+  useEffect(() => {
+    const socket = io(BACKEND_URL, { transports: ["websocket"], reconnection: true });
+    socketRef.current = socket;
+    socket.emit("join:admin");
+    socket.on("admin:order_update", (data) => {
+      toast({
+        title: `Order update: #${(data?.orderId || "").slice(-6)} → ${data?.status || "updated"}`,
+        status: "info", duration: 4000, isClosable: true,
+      });
+      refetch();
+    });
+    return () => { socket.disconnect(); };
+  }, []);  // eslint-disable-line react-hooks/exhaustive-deps
 
   const orders = orderData?.orders || [];
+
+  const tabFiltered = useMemo(() => {
+    if (activeTab === "all") return orders;
+    return orders.filter((o) => o?.status === activeTab);
+  }, [orders, activeTab]);
+
   const filtered = useMemo(() => {
-    if (!searchInput) return orders;
+    if (!searchInput) return tabFiltered;
     const q = searchInput.toLowerCase();
-    return orders.filter((o) =>
+    return tabFiltered.filter((o) =>
       (o?.customerName || "").toLowerCase().includes(q)
       || (o?.deliveryAddress?.address1 || "").toLowerCase().includes(q)
       || (o?._id || "").toLowerCase().includes(q)
       || (o?.productItems || "").toLowerCase().includes(q)
       || (o?.driverId?.name || "").toLowerCase().includes(q)
     );
-  }, [orders, searchInput]);
+  }, [tabFiltered, searchInput]);
 
   const safeRefresh = () => {
     refetch();
@@ -154,6 +188,16 @@ export default function AdminOrdersPage() {
     try {
       await adminCancelOrder({ orderId, reason }).unwrap();
       toast({ title: "Order cancelled", status: "success", duration: 2500 });
+      safeRefresh();
+    } catch (e) {
+      toast({ title: "Error", description: e?.data?.message || "Failed", status: "error", duration: 4000 });
+    }
+  };
+
+  const handleConfirmCod = async (orderId) => {
+    try {
+      await confirmCod({ orderId }).unwrap();
+      toast({ title: "COD Approved", status: "success", duration: 2500 });
       safeRefresh();
     } catch (e) {
       toast({ title: "Error", description: e?.data?.message || "Failed", status: "error", duration: 4000 });
@@ -213,6 +257,29 @@ export default function AdminOrdersPage() {
           ))}
         </SimpleGrid>
 
+        {/* Status tabs */}
+        <Box overflowX="auto" pb={1}>
+          <HStack spacing={2} minW="max-content">
+            {STATUS_TABS.map((t) => {
+              const label = t === "all" ? "All" : STATUS_CONFIG[t]?.label || t;
+              const count = t === "all" ? orders.length : orders.filter((o) => o?.status === t).length;
+              return (
+                <Button
+                  key={t}
+                  size="sm"
+                  variant={activeTab === t ? "solid" : "outline"}
+                  colorScheme={t === "pending_cod_approval" ? "orange" : t === "awaiting_driver" ? "orange" : "green"}
+                  onClick={() => setActiveTab(t)}
+                  borderRadius="full"
+                  fontSize="xs"
+                >
+                  {label} {count > 0 && <Badge ml={1} colorScheme={activeTab === t ? "whiteAlpha" : "gray"} borderRadius="full" fontSize="10px" px={1.5}>{count}</Badge>}
+                </Button>
+              );
+            })}
+          </HStack>
+        </Box>
+
         <Card>
           <CardHeader>
             <HStack justify="space-between" flexWrap="wrap" gap={4}>
@@ -260,6 +327,15 @@ export default function AdminOrdersPage() {
                             )}
                             {["confirmed", "preparing", "ready"].includes(order?.status) && (
                               <Button size="xs" colorScheme="blue" onClick={(e) => { e.stopPropagation(); handleAssignDriver(order._id); }} isLoading={assigning}>Auto Assign</Button>
+                            )}
+                            {order?.status === "awaiting_driver" && (
+                              <Button size="xs" colorScheme="orange" onClick={(e) => { e.stopPropagation(); handleAssignDriver(order._id); }} isLoading={assigning}>Assign Driver</Button>
+                            )}
+                            {order?.status === "pending_cod_approval" && (
+                              <Button size="xs" colorScheme="orange" onClick={(e) => { e.stopPropagation(); handleConfirmCod(order._id); }} isLoading={confirmingCod}>Approve COD</Button>
+                            )}
+                            {order?.status === "pending_cod_approval" && (
+                              <Button size="xs" colorScheme="red" variant="outline" onClick={(e) => { e.stopPropagation(); handleAdminCancel(order._id, "COD rejected by admin"); }}>Reject</Button>
                             )}
                           </HStack>
                         </Td>
