@@ -11,6 +11,7 @@ import {
 import { useAdminDriversQuery, useRunDriverPayoutsMutation, useDriversByLocationQuery, useSetDriverCredentialsMutation } from "@Slices/ordersDeliveryApiSlice";
 import { useFetchPartnersQuery, useVerifyPartnerMutation, useRejectPartnerMutation } from "@Slices/partnersPageApiSlice";
 import { Search, Truck, MapPin, DollarSign, Star, CheckCircle, XCircle, Wifi, WifiOff, RefreshCw, Key, Eye, EyeOff } from "lucide-react";
+
 import moment from "moment";
 import { useState, useMemo, useRef } from "react";
 
@@ -158,6 +159,7 @@ export default function DriversPage() {
                     <Th>Status</Th>
                     <Th>Online</Th>
                     <Th>Deliveries</Th>
+                    <Th>Rating</Th>
                     <Th>Earnings</Th>
                     <Th>Joined</Th>
                     <Th>Actions</Th>
@@ -187,6 +189,13 @@ export default function DriversPage() {
                         )}
                       </Td>
                       <Td fontWeight="600" fontSize="sm">{d.totalDeliveries || 0}</Td>
+                      <Td fontSize="sm">
+                        <HStack spacing={1}>
+                          <Icon as={Star} color="orange.400" boxSize={3.5} />
+                          <Text fontWeight="600">{d.averageRating ? d.averageRating.toFixed(1) : "—"}</Text>
+                          {d.ratingCount > 0 && <Text fontSize="xs" color="gray.400">({d.ratingCount})</Text>}
+                        </HStack>
+                      </Td>
                       <Td fontWeight="600" color="green.600" fontSize="sm">UGX {(d.commissionEarned || 0).toLocaleString()}</Td>
                       <Td fontSize="xs" color="gray.500">{d.createdAt ? moment(d.createdAt).fromNow() : "-"}</Td>
                       <Td>
