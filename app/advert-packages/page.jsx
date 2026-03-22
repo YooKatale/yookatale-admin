@@ -23,12 +23,11 @@ const AdvertPackages = () => {
   const handleCardFetch = async () => {
     try {
       const res = await fetchCards().unwrap();
-      console.log('res', res);
       if (res.success == true) {
         setYooCards(res.packages);
       }
     } catch (error) {
-      console.log(error);
+      // silently handled
     }
   };
 

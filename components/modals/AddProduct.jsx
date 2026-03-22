@@ -43,7 +43,7 @@ const AddProduct = ({ closeModal }) => {
           setCategories(res.categories);
         }
       } catch (err) {
-        console.error("Error fetching categories:", err);
+        // category fetch error silently handled
       }
     };
     loadCategories();
@@ -71,7 +71,6 @@ const AddProduct = ({ closeModal }) => {
         closeModal(false);
       }
     } catch (err) {
-      console.log({ err });
       toast({
         variant: "destructive",
         title: "Error occured",

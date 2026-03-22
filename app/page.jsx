@@ -99,7 +99,7 @@ export default function Home() {
         setFilteredOrders(res?.data?.PendingOrders?.orders || []);
       }
     } catch (error) {
-      console.error("Error fetching dashboard data: ", error);
+      // fetch error silently handled
     } finally {
       setLoading(false);
     }
@@ -109,14 +109,14 @@ export default function Home() {
     try {
       const res = await vendorGet().unwrap();
       if (res?.status === "Success") setVendors(res?.data);
-    } catch (error) { console.error("Error fetching vendor data: ", error); }
+    } catch (error) { /* silently handled */ }
   };
 
   const handlePartnerFetch = async () => {
     try {
       const res = await partnerGet().unwrap();
       if (res?.status === "Success") setPartners(res?.data);
-    } catch (error) { console.error("Error fetching partner data: ", error); }
+    } catch (error) { /* silently handled */ }
   };
 
   useEffect(() => { handleDataFetch(); handleVendorFetch(); handlePartnerFetch(); }, []);

@@ -40,8 +40,13 @@ import { createSlice } from "@reduxjs/toolkit";
 // Local storage helper functions
 const getUserInfoFromLocalStorage = () => {
   if (typeof window === "undefined") return null;
-  const userInfo = localStorage.getItem("yookatale-app-admin");
-  return userInfo ? JSON.parse(userInfo) : null;
+  try {
+    const userInfo = localStorage.getItem("yookatale-app-admin");
+    return userInfo ? JSON.parse(userInfo) : null;
+  } catch {
+    localStorage.removeItem("yookatale-app-admin");
+    return null;
+  }
 };
 
 const saveUserInfoToLocalStorage = (userInfo) => {

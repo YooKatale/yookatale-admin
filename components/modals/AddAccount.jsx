@@ -75,8 +75,6 @@ const AddAccount = ({ closeModal, accountData, editmode, reloadAccounts }) => {
           variant: res?.message?.includes("email failed") ? "warning" : "default",
         });
 
-        console.log("Account operation response:", res);
-
         resetForm();
         reloadAccounts?.();
         closeModal(false);

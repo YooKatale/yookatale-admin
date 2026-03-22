@@ -35,7 +35,7 @@ const AddNewsArticle = ({ closeModal }) => {
                   formats={quillFormats}
                 />
                 <div className="py-4">
-                  <Button onClick={() => console.log(EditorValue)}>
+                  <Button onClick={() => {}}>
                     Submit
                   </Button>
                 </div>

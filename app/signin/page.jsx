@@ -29,12 +29,40 @@ const Signin = () => {
     }
   }, []);
 
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [lockUntil, setLockUntil] = useState(null);
+
   const submitHandler = async (e) => {
     e.preventDefault();
+
+    // Client-side rate limiting
+    if (lockUntil && Date.now() < lockUntil) {
+      const seconds = Math.ceil((lockUntil - Date.now()) / 1000);
+      toast({
+        variant: "destructive",
+        title: "Too many attempts",
+        description: `Please wait ${seconds}s before trying again.`,
+      });
+      return;
+    }
+
+    // Input validation
+    const trimmedUsername = username.trim();
+    if (!trimmedUsername || !password) {
+      toast({
+        variant: "destructive",
+        title: "Validation error",
+        description: "Username and password are required.",
+      });
+      return;
+    }
+
     try {
       setLoading(true);
-      const data = { username, password };
+      const data = { username: trimmedUsername, password };
       const res = await login(data).unwrap();
+      setLoginAttempts(0);
+      setLockUntil(null);
       dispatch(setCredentials({ ...res }));
       setLoading(false);
       if (typeof window !== "undefined") {
@@ -42,14 +70,20 @@ const Signin = () => {
       }
       toast({
         title: "Logged In",
-        description: `Successfully logged in as ${res?.lastname}`,
+        description: `Welcome back, ${res?.firstname || res?.lastname || "Admin"}`,
       });
     } catch (err) {
       setLoading(false);
+      const attempts = loginAttempts + 1;
+      setLoginAttempts(attempts);
+      if (attempts >= 5) {
+        setLockUntil(Date.now() + 30000);
+        setLoginAttempts(0);
+      }
       toast({
         variant: "destructive",
-        title: "Error occured",
-        description: err.data?.message ? err.data?.message : err.data || err.error,
+        title: "Login failed",
+        description: err.data?.message || "Invalid credentials. Please try again.",
       });
     }
   };

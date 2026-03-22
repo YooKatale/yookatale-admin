@@ -26,7 +26,7 @@ const SubscriptionCards = () => {
         setYooCards(res.data);
       }
     } catch (error) {
-      console.log(error);
+      // silently handled
     }
   };
 

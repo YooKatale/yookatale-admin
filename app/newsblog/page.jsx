@@ -1,5 +1,6 @@
 "use client";
 
+import DOMPurify from "dompurify";
 import {
   useNewsblogDeleteMutation,
   useNewsblogFetchMutation,
@@ -180,11 +181,10 @@ const [queryParameters, setqueryParameters]=useState()
                       <div
                         className="py-4"
                         dangerouslySetInnerHTML={{
-                          __html: Newsblog
-                            ? Newsblog?.blog
-                              ? Newsblog?.blog
-                              : "__"
-                            : "__",
+                          __html: DOMPurify.sanitize(
+                            Newsblog?.blog || "__",
+                            { ALLOWED_TAGS: ["p", "br", "b", "i", "u", "strong", "em", "a", "ul", "ol", "li", "h1", "h2", "h3", "h4", "blockquote", "span", "div", "img"], ALLOWED_ATTR: ["href", "target", "rel", "src", "alt", "class", "style"] }
+                          ),
                         }}
                       ></div>
                     </div>

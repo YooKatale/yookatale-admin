@@ -274,10 +274,16 @@ const SidebarWithHeader = ({ children }) => {
 
   useEffect(() => {
     if (!userInfo?._id) return;
-    const socket = io(BACKEND_URL, { transports: ["websocket"], reconnection: true });
+    const socket = io(BACKEND_URL, {
+      transports: ["websocket"],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      auth: { userId: userInfo._id, accountType: accountType || "admin" },
+    });
     adminSocketRef.current = socket;
     socket.on("connect", () => setSocketConnected(true));
     socket.on("disconnect", () => setSocketConnected(false));
+    socket.on("connect_error", () => setSocketConnected(false));
     socket.emit("join:admin");
     return () => { socket.disconnect(); };
   }, [userInfo?._id]);

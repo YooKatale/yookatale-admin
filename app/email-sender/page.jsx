@@ -208,7 +208,7 @@ export default function EmailSender() {
         }
         setAllTimeStats(parsed);
       } catch (e) {
-        console.error('Error loading stats:', e);
+        // stats load error silently handled
       }
     } else if (storedUniqueEmails) {
       // If we have unique emails but no stats, initialize stats
@@ -493,7 +493,7 @@ export default function EmailSender() {
       });
 
     } catch (error) {
-      console.error("Error parsing CSV:", error);
+      // CSV parse error handled by toast below
       toast({
         title: "Error reading file",
         description: error.message || "Failed to read CSV file",

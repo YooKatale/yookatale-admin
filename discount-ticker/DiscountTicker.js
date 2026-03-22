@@ -15,7 +15,7 @@ const DiscountTicker = () => {
           setDiscounts(data.discounts);
         }
       } catch (error) {
-        console.error("Error fetching discounts:", error);
+        // discount fetch error silently handled
       }
     };
 
