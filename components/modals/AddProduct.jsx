@@ -49,11 +49,29 @@ const AddProduct = ({ closeModal }) => {
     loadCategories();
   }, []);
 
+  const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
   const submitHandler = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       const form = e.target;
+      const fileInput = form.elements.images;
+      if (fileInput?.files) {
+        for (const file of fileInput.files) {
+          if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+            toast({ variant: "destructive", title: "Invalid file type", description: `"${file.name}" is not an allowed image type. Use JPG, PNG, WebP, or GIF.` });
+            setLoading(false);
+            return;
+          }
+          if (file.size > MAX_FILE_SIZE) {
+            toast({ variant: "destructive", title: "File too large", description: `"${file.name}" exceeds the 5MB limit.` });
+            setLoading(false);
+            return;
+          }
+        }
+      }
       const NewFormData = new FormData(form);
 
       if (selectedCategory) {
@@ -216,7 +234,7 @@ const AddProduct = ({ closeModal }) => {
                 <Label htmlFor="images" className="text-sm font-medium text-slate-700">
                   Product Images
                 </Label>
-                <Input type="file" id="images" name="images" multiple required />
+                <Input type="file" id="images" name="images" multiple required accept="image/jpeg,image/png,image/webp,image/gif" />
               </div>
               <div className="flex items-center justify-end gap-3 pt-2">
                 <Button
