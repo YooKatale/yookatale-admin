@@ -424,9 +424,33 @@ function OrderDetailModal({
             <SimpleGrid columns={{ base: 1, md: 2 }} spacing={3}>
               <Box><Text fontSize="xs" color="gray.500">Customer</Text><Text fontWeight="600">{order.customerName || "Unknown"}</Text></Box>
               <Box><Text fontSize="xs" color="gray.500">Total</Text><Text fontWeight="700" color="green.600">UGX {(order.total || 0).toLocaleString()}</Text></Box>
-              <Box><Text fontSize="xs" color="gray.500">Address</Text><Text fontSize="sm">{order.deliveryAddress?.address1 || "N/A"}</Text></Box>
+              <Box><Text fontSize="xs" color="gray.500">Address</Text><Text fontSize="sm">{order.deliveryAddress?.address1 || order.deliveryAddress?.address || "N/A"}</Text></Box>
               <Box><Text fontSize="xs" color="gray.500">Driver</Text><Text fontSize="sm">{order.driverId?.name || tracking?.deliveryLocation?.partnerName || "Unassigned"}</Text></Box>
+              <Box><Text fontSize="xs" color="gray.500">Payment</Text><Text fontSize="sm" textTransform="capitalize">{(order.payment?.paymentMethod || order.paymentMethod || "N/A").replace(/_/g, " ")}</Text></Box>
+              <Box><Text fontSize="xs" color="gray.500">Phone</Text><Text fontSize="sm">{order.customerPhone || order.deliveryAddress?.phone || "N/A"}</Text></Box>
             </SimpleGrid>
+
+            {/* COD Status Banner */}
+            {order.status === "pending_cod_approval" && (
+              <Box p={3} bg="orange.50" borderRadius="lg" borderWidth="1px" borderColor="orange.200">
+                <HStack spacing={2} mb={2}>
+                  <Icon as={Clock} boxSize={4} color="orange.500" />
+                  <Text fontSize="sm" fontWeight="700" color="orange.700">Cash on Delivery - Pending Approval</Text>
+                </HStack>
+                <Text fontSize="xs" color="orange.600">This order requires admin approval before a driver can be assigned.</Text>
+              </Box>
+            )}
+
+            {/* Awaiting Driver Banner */}
+            {order.status === "awaiting_driver" && (
+              <Box p={3} bg="blue.50" borderRadius="lg" borderWidth="1px" borderColor="blue.200">
+                <HStack spacing={2} mb={2}>
+                  <Icon as={Truck} boxSize={4} color="blue.500" />
+                  <Text fontSize="sm" fontWeight="700" color="blue.700">No Drivers Available</Text>
+                </HStack>
+                <Text fontSize="xs" color="blue.600">No nearby drivers were found. Try manually assigning a driver below.</Text>
+              </Box>
+            )}
 
             <Box borderWidth="1px" borderColor="gray.100" rounded="lg" p={3}>
               <HStack justify="space-between" mb={2}>
@@ -447,6 +471,14 @@ function OrderDetailModal({
               )}
             </Box>
 
+            {/* Order Items */}
+            {order.productItems && (
+              <Box bg="gray.50" borderRadius="lg" p={3}>
+                <Text fontSize="xs" fontWeight="600" color="gray.600" mb={2}>Order Items</Text>
+                <Text fontSize="sm" color="gray.700">{order.productItems}</Text>
+              </Box>
+            )}
+
             {order.trackingHistory?.length > 0 && (
               <Box bg="blue.50" borderRadius="lg" p={3}>
                 <Text fontSize="xs" fontWeight="600" color="blue.600" mb={2}>Tracking History</Text>
@@ -465,7 +497,21 @@ function OrderDetailModal({
               <Button colorScheme="green" onClick={() => onApprove(order._id)} isLoading={approving}>Approve Order</Button>
             )}
 
-            {["confirmed", "preparing", "ready"].includes(order.status) && (
+            {order.status === "pending_cod_approval" && (
+              <HStack spacing={3}>
+                <Button colorScheme="orange" flex={1} onClick={() => {
+                  // Use confirmCod mutation — need to pass via props
+                  onStatusUpdate(order._id, "confirmed", "COD approved by admin");
+                }} isLoading={updating}>
+                  Approve COD
+                </Button>
+                <Button colorScheme="red" variant="outline" flex={1} onClick={() => onAdminCancel(order._id, "COD rejected by admin")} isLoading={cancelling}>
+                  Reject COD
+                </Button>
+              </HStack>
+            )}
+
+            {["confirmed", "preparing", "ready", "awaiting_driver"].includes(order.status) && (
               <Box>
                 <Text fontSize="sm" fontWeight="600" mb={2}>Assign Driver</Text>
                 <HStack>
