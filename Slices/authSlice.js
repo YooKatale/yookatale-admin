@@ -2,47 +2,28 @@
 
 import { createSlice } from "@reduxjs/toolkit";
 
-// const initialState = {
-//   userInfo:
-//     typeof window !== "undefined"
-//       ? localStorage?.getItem("yookatale-app-admin")
-//         ? JSON.parse(localStorage?.getItem("yookatale-app-admin"))
-//         : null
-//       : {},
-// };
+// Fields safe to store in localStorage (non-sensitive display info only)
+const SAFE_FIELDS = [
+  "_id", "firstname", "lastname", "username", "email", "phone",
+  "account", "accountType", "profileImage", "expires",
+];
 
-// const authSlice = createSlice({
-//   name: "auth",
-//   initialState,
-//   reducers: {
-//     setCredentials: (state, action) => {
-//       state.userInfo = action.payload;
-//       typeof window !== "undefined"
-//         ? localStorage?.setItem(
-//             "yookatale-app-admin",
-//             JSON.stringify(action.payload)
-//           )
-//         : (localStorage = null);
-//     },
-//     logout: (state, action) => {
-//       state.userInfo = null;
-//       typeof window !== "undefined"
-//         ? localStorage?.removeItem("yookatale-app-admin")
-//         : (localStorage = null);
-//     },
-//   },
-// });
-
-// export const { setCredentials, logout } = authSlice.actions;
-
-// export default authSlice.reducer;
+// Strip sensitive fields before localStorage storage
+const sanitizeForStorage = (userInfo) => {
+  if (!userInfo) return null;
+  const safe = {};
+  for (const key of SAFE_FIELDS) {
+    if (userInfo[key] !== undefined) safe[key] = userInfo[key];
+  }
+  return safe;
+};
 
 // Local storage helper functions
 const getUserInfoFromLocalStorage = () => {
   if (typeof window === "undefined") return null;
   try {
-    const userInfo = localStorage.getItem("yookatale-app-admin");
-    return userInfo ? JSON.parse(userInfo) : null;
+    const raw = localStorage.getItem("yookatale-app-admin");
+    return raw ? JSON.parse(raw) : null;
   } catch {
     localStorage.removeItem("yookatale-app-admin");
     return null;
@@ -51,7 +32,9 @@ const getUserInfoFromLocalStorage = () => {
 
 const saveUserInfoToLocalStorage = (userInfo) => {
   if (typeof window === "undefined") return;
-  localStorage.setItem("yookatale-app-admin", JSON.stringify(userInfo));
+  // Only persist safe display fields — auth tokens stay in HttpOnly cookies
+  const safe = sanitizeForStorage(userInfo);
+  localStorage.setItem("yookatale-app-admin", JSON.stringify(safe));
 };
 
 const clearUserInfoFromLocalStorage = () => {

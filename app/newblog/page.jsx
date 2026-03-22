@@ -2,20 +2,16 @@
 
 import { useNewsblogCreatePostMutation } from "@Slices/newsblogApiSlice";
 import { Box } from "@chakra-ui/react";
-import Navbar from "@components/Navbar";
-import Sidenav from "@components/Sidenav";
 import { Button } from "@components/ui/button";
 import { Input } from "@components/ui/input";
 import { Label } from "@components/ui/label";
 import { useToast } from "@components/ui/use-toast";
-import { quillFormats, quillModules } from "@constants/constant";
 import { Loader2Icon } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-// import ReactQuill from "react-quill";
-const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
-import "react-quill/dist/quill.snow.css";
+
+const SafeRichEditor = dynamic(() => import("@components/SafeRichEditor"), { ssr: false });
 
 const Newblog = () => {
   const [EditorValue, setEditorValue] = useState("");
@@ -33,7 +29,6 @@ const Newblog = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // set loading to be false
     setLoading((prevState) => (prevState ? false : true));
 
     const NewForm = new FormData(e.target);
@@ -43,7 +38,6 @@ const Newblog = () => {
     try {
       const res = await createNewsblog(NewForm).unwrap();
 
-      // set loading to be false
       setLoading((prevState) => (prevState ? false : true));
 
       if (res?.status == "Success") {
@@ -55,7 +49,6 @@ const Newblog = () => {
         router.push("/newsblogs");
       }
     } catch (err) {
-      // set loading to be false
       setLoading((prevState) => (prevState ? false : true));
       toast({
         variant: "destructive",
@@ -72,7 +65,7 @@ const Newblog = () => {
       <Box className="max-w-full" mt={12} backgroundColor={"white"} p={4}>
       <div className="px-2 py-4">
                 <div className="p-0 flex justify-between">
-                  <div>{/* <p className="text-xl">Products</p> */}</div>
+                  <div></div>
                 </div>
                 <div className="py-4 px-2" >
                 <p className="text-2xl">Create new Newsblog</p>
@@ -87,7 +80,6 @@ const Newblog = () => {
                             type="text"
                             id="author"
                             name="author"
-                            
                             value={NewsblogForm.author}
                             onChange={(e) =>
                               setNewsblogForm({
@@ -115,23 +107,21 @@ const Newblog = () => {
                           />
                         </div>
                         <div className="py-2 mx-2">
-                          <Label htmlFor="title" className="text-base mb-1">
+                          <Label htmlFor="image" className="text-base mb-1">
                             Blog Image
                           </Label>
-                          <Input type="file" id="image" name="image" />
+                          <Input type="file" id="image" name="image" accept="image/jpeg,image/png,image/webp,image/gif" />
                         </div>
                       </div>
                       <div className="py-4 px-2">
-                        <Label htmlFor="title" className="text-base mb-1">
+                        <Label htmlFor="blog" className="text-base mb-1">
                           Blog
                         </Label>
-                        <ReactQuill
-                          theme="snow"
+                        <SafeRichEditor
                           value={EditorValue}
                           onChange={setEditorValue}
-                          modules={quillModules}
-                          formats={quillFormats}
-                          
+                          placeholder="Write your blog content..."
+                          height={400}
                         />
                       </div>
                       <div className="p-2">

@@ -993,7 +993,7 @@ function MealSlotEditorModal({ isOpen, onClose, slot, onSave, saving = false }) 
                   />
                   <Button as="label" size="sm" colorScheme="green" cursor="pointer" isLoading={uploading}>
                     Upload
-                    <input type="file" accept="image/*" hidden onChange={handleImageUpload} />
+                    <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden onChange={handleImageUpload} />
                   </Button>
                 </HStack>
                 {form.imageUrl && (

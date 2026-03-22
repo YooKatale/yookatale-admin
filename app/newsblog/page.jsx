@@ -84,8 +84,8 @@ const [queryParameters, setqueryParameters]=useState()
     if (typeof window !== 'undefined') {
       const querysearch = new URLSearchParams(window.location.search);
       const idParam = querysearch.get('id');
-      
-      if (idParam) {
+
+      if (idParam && /^[a-fA-F0-9]{24}$/.test(idParam)) {
         setIdparam(idParam);
         handleDataFetch();
       }

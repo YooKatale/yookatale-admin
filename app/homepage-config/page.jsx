@@ -178,7 +178,7 @@ export default function HomepageConfigPage() {
                   <Input
                     ref={(el) => { fileRefs.current[i] = el; }}
                     type="file"
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
                     size="sm"
                     onChange={(e) => handleCardImage(i, e)}
                   />

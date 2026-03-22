@@ -15,24 +15,18 @@ import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, Suspense } from "react";
 import Link from "next/link";
-import "react-quill/dist/quill.snow.css";
 
-const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
+const SafeRichEditor = dynamic(() => import("@components/SafeRichEditor"), { ssr: false });
 
 const DEFAULT_CATEGORIES = ["Company", "Promotions", "Food & Recipes", "Agriculture", "Technology", "General"];
 
 const PRIMARY = "#185f2d";
 
-const quillModules = {
-  toolbar: [
-    [{ header: [2, 3, false] }],
-    ["bold", "italic", "underline"],
-    [{ list: "ordered" }, { list: "bullet" }],
-    ["link"],
-    ["clean"],
-  ],
-};
-const quillFormats = ["header", "bold", "italic", "underline", "list", "bullet", "link"];
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+
+// Validate MongoDB ObjectId format
+const isValidObjectId = (id) => /^[a-fA-F0-9]{24}$/.test(id);
 
 function ArticleForm() {
   const router = useRouter();
@@ -40,6 +34,14 @@ function ArticleForm() {
   const editId = searchParams.get("id");
   const toast = useToast();
   const fileRef = useRef();
+
+  // Validate editId if present
+  useEffect(() => {
+    if (editId && !isValidObjectId(editId)) {
+      toast({ title: "Invalid article ID", status: "error", duration: 3000 });
+      router.push("/newsblogs");
+    }
+  }, [editId]);
 
   const [form, setForm] = useState({
     title: "",
@@ -77,7 +79,7 @@ function ArticleForm() {
   }, []);
 
   useEffect(() => {
-    if (!editId) return;
+    if (!editId || !isValidObjectId(editId)) return;
     const load = async () => {
       try {
         const res = await fetchAllArticles().unwrap();
@@ -108,6 +110,20 @@ function ArticleForm() {
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Validate file type
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      toast({ title: "Invalid file type", description: "Please use JPG, PNG, WebP, or GIF images only.", status: "error", duration: 3000 });
+      e.target.value = "";
+      return;
+    }
+    // Validate file size
+    if (file.size > MAX_IMAGE_SIZE) {
+      toast({ title: "File too large", description: "Image must be under 5MB.", status: "error", duration: 3000 });
+      e.target.value = "";
+      return;
+    }
+
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
   };
@@ -275,12 +291,12 @@ function ArticleForm() {
                 <Flex direction="column" align="center" py={4}>
                   <Icon as={FiImage} boxSize={8} color="gray.400" mb={2} />
                   <Text fontSize="sm" color="gray.600" fontWeight="600">Click to upload cover image</Text>
-                  <Text fontSize="xs" color="gray.400">JPG, PNG, WebP — recommended 1200×630px</Text>
+                  <Text fontSize="xs" color="gray.400">JPG, PNG, WebP, GIF only — max 5MB</Text>
                 </Flex>
               )}
             </Box>
             <input
-              ref={fileRef} type="file" accept="image/*"
+              ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif"
               style={{ display: "none" }} onChange={handleImageChange}
             />
             {/* Or paste URL */}
@@ -300,24 +316,12 @@ function ArticleForm() {
           {/* Article body */}
           <FormControl isRequired>
             <FormLabel fontSize="sm" fontWeight="700" color="gray.700" mb={1}>Article Body</FormLabel>
-            <Box
-              border="1px solid" borderColor="gray.200" borderRadius="xl" overflow="hidden"
-              bg="white"
-              sx={{
-                ".ql-toolbar": { borderBottom: "1px solid", borderColor: "gray.200", bg: "gray.50", borderTop: "none", borderLeft: "none", borderRight: "none" },
-                ".ql-container": { border: "none", minHeight: "320px", fontSize: "15px" },
-                ".ql-editor": { minHeight: "320px", lineHeight: "1.8", padding: "16px" },
-              }}
-            >
-              <ReactQuill
-                theme="snow"
-                value={body}
-                onChange={setBody}
-                modules={quillModules}
-                formats={quillFormats}
-                placeholder="Write the full article content here..."
-              />
-            </Box>
+            <SafeRichEditor
+              value={body}
+              onChange={setBody}
+              placeholder="Write the full article content here..."
+              height={400}
+            />
           </FormControl>
 
           {/* Submit */}

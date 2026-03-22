@@ -1,12 +1,11 @@
 "use client";
 
 import { Button } from "@components/ui/button";
-import { quillFormats, quillModules } from "@constants/constant";
 import { X } from "lucide-react";
 import { useState } from "react";
-import ReactQuill, { Quill } from "react-quill";
-import "react-quill/dist/quill.snow.css";
-// import React from 'react'
+import dynamic from "next/dynamic";
+
+const SafeRichEditor = dynamic(() => import("@components/SafeRichEditor"), { ssr: false });
 
 const AddNewsArticle = ({ closeModal }) => {
   const [EditorValue, setEditorValue] = useState("");
@@ -27,12 +26,10 @@ const AddNewsArticle = ({ closeModal }) => {
           <div className="py-2">
             <div className="flex">
               <div className="m-auto py-2 w-4/5">
-                <ReactQuill
-                  theme="snow"
+                <SafeRichEditor
                   value={EditorValue}
                   onChange={setEditorValue}
-                  modules={quillModules}
-                  formats={quillFormats}
+                  placeholder="Write your article content..."
                 />
                 <div className="py-4">
                   <Button onClick={() => {}}>

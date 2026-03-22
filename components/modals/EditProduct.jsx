@@ -130,7 +130,7 @@ const EditProduct = ({ closeModal, product, onSuccess }) => {
           </div>
           <div className="space-y-1.5">
             <Label className="text-sm font-semibold text-slate-700">Replace Images (optional)</Label>
-            <Input type="file" name="images" multiple accept="image/*" />
+            <Input type="file" name="images" multiple accept="image/jpeg,image/png,image/webp,image/gif" />
             <p className="text-xs text-slate-400">Leave empty to keep existing images</p>
           </div>
           <div className="flex justify-end gap-3 pt-2">
