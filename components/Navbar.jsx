@@ -1,9 +1,7 @@
 "use client";
-import { IsAccountValid, IsLoggedIn } from "@middleware/middleware";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Button } from "./ui/button";
-import { Loader2, LogOut, Bell, Search, Settings } from "lucide-react";
+import { Loader2, LogOut, Settings, Bell, Search, Menu } from "lucide-react";
 import { useLogoutMutation } from "@Slices/userApiSlice";
 import { logout } from "@Slices/authSlice";
 import { useToast } from "./ui/use-toast";
@@ -14,8 +12,7 @@ import {
   HStack,
   VStack,
   Text,
-  Avatar,
-  Menu,
+  Menu as ChakraMenu,
   MenuButton,
   MenuList,
   MenuItem,
@@ -24,181 +21,200 @@ import {
   InputGroup,
   InputLeftElement,
   IconButton,
-  Badge,
 } from "@chakra-ui/react";
-import { motion } from "framer-motion";
+import Link from "next/link";
 
-const Navbar = () => {
+const Navbar = ({ onOpenMobileMenu, sidebarWidth = "220px" }) => {
   const [isLoading, setLoading] = useState({ operation: "", status: false });
   const [logoutApiCall] = useLogoutMutation();
-  const [isAuthenticated, setisAuthenticated] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
   const dispatch = useDispatch();
   const { userInfo } = useSelector((state) => state.auth);
 
   const logoutHandler = async () => {
-    setLoading({ ...isLoading, operation: "logout", status: true });
-
+    setLoading({ operation: "logout", status: true });
     try {
-      const res = await logoutApiCall().unwrap();
-      setLoading({ ...isLoading, operation: "", status: false });
+      await logoutApiCall().unwrap();
+      setLoading({ operation: "", status: false });
       dispatch(logout());
       router.push("/signin");
     } catch (err) {
-      console.log({ err });
-      setLoading({ ...isLoading, operation: "", status: false });
-
+      setLoading({ operation: "", status: false });
       toast({
         variant: "destructive",
         title: "Error occured",
-        description: err.data?.message
-          ? err.data?.message
-          : err.data || err.error,
+        description: err.data?.message ? err.data?.message : err.data || err.error,
       });
     }
   };
 
-  useEffect(() => {
-    // IsLoggedIn()
-    // IsAccountValid();
-  }, []);
+  const initials = `${(userInfo?.firstname?.charAt(0) || "A").toUpperCase()}${(userInfo?.lastname?.charAt(0) || "").toUpperCase()}`;
 
   return (
     <Box
       position="fixed"
       top={0}
-      left={{ base: 0, md: "256px" }}
+      left={{ base: 0, md: sidebarWidth }}
       right={0}
-      height="80px"
-      bg="white"
-      borderBottom="1px solid"
-      borderColor="gray.200"
+      height="56px"
+      bg="#fff"
+      borderBottom="1px solid #e5e7eb"
       zIndex={999}
-      boxShadow="0 2px 8px rgba(0, 0, 0, 0.05)"
-      px={{ base: 4, md: 6 }}
+      px={{ base: 3, md: 4 }}
+      transition="left 0.2s"
     >
-      <Flex
-        height="100%"
-        align="center"
-        justify="space-between"
-      >
-        {/* Left Section - Search */}
-        <Box flex={1} maxW="500px" display={{ base: "none", md: "block" }}>
-          <InputGroup>
-            <InputLeftElement pointerEvents="none">
-              <Search size={18} color="gray" />
-            </InputLeftElement>
-            <Input
-              placeholder="Search..."
-              borderRadius="lg"
-              borderColor="gray.300"
-              _focus={{
-                borderColor: "green.500",
-                boxShadow: "0 0 0 1px #48BB78",
-              }}
-              bg="gray.50"
-            />
-          </InputGroup>
-        </Box>
-
-        {/* Right Section - User Menu */}
-        <HStack spacing={4}>
-          {/* Notifications */}
+      <Flex height="100%" align="center" justify="space-between">
+        {/* Left side */}
+        <HStack spacing={3}>
+          {/* Mobile menu button */}
           <IconButton
-            aria-label="Notifications"
-            icon={<Bell size={20} />}
+            display={{ base: "flex", md: "none" }}
+            onClick={onOpenMobileMenu}
             variant="ghost"
-            borderRadius="lg"
-            position="relative"
-            _hover={{ bg: "gray.100" }}
-          >
-            <Badge
-              position="absolute"
-              top="8px"
-              right="8px"
-              colorScheme="red"
-              borderRadius="full"
-              w="8px"
-              h="8px"
-            />
-          </IconButton>
-
-          {/* Settings */}
-          <IconButton
-            aria-label="Settings"
-            icon={<Settings size={20} />}
-            variant="ghost"
-            borderRadius="lg"
-            _hover={{ bg: "gray.100" }}
-            as="a"
-            href="/settings"
+            aria-label="Open menu"
+            icon={<Menu size={18} />}
+            borderRadius="8px"
+            size="sm"
+            _hover={{ bg: "#f3f4f6" }}
           />
 
-          {/* User Menu */}
-          <Menu>
-            <MenuButton
-              as={Button}
-              variant="ghost"
-              borderRadius="lg"
-              _hover={{ bg: "gray.50" }}
-              _active={{ bg: "gray.100" }}
+          {/* Logo badge for mobile */}
+          <Flex display={{ base: "flex", md: "none" }} align="center" gap={2}>
+            <Box
+              w="28px" h="28px" borderRadius="7px" bg="#0d7c3b"
+              display="flex" alignItems="center" justifyContent="center"
             >
-              <HStack spacing={3}>
-                <Avatar
-                  size="sm"
-                  name={userInfo?.username || "Admin"}
-                  bg="green.500"
-                  color="white"
-                  fontWeight="bold"
-                />
+              <Text fontSize="12px" fontWeight={800} color="#fff">Y</Text>
+            </Box>
+            <Text fontSize="14px" fontWeight={800} color="#111">Yookatale</Text>
+            <Box
+              bg="#fef3c7" px="5px" py="1px" borderRadius="3px"
+              fontSize="8px" fontWeight={700} color="#92400e"
+              textTransform="uppercase" letterSpacing="0.3px"
+            >
+              Admin
+            </Box>
+          </Flex>
+
+          {/* Desktop search */}
+          <Box display={{ base: "none", md: "block" }} maxW="360px" w="100%">
+            <InputGroup size="sm">
+              <InputLeftElement pointerEvents="none">
+                <Search size={14} color="#9ca3af" />
+              </InputLeftElement>
+              <Input
+                placeholder="Search..."
+                borderRadius="8px"
+                borderColor="#e5e7eb"
+                bg="#f9fafb"
+                fontSize="13px"
+                _focus={{
+                  borderColor: "#0d7c3b",
+                  boxShadow: "0 0 0 1px #0d7c3b",
+                  bg: "#fff",
+                }}
+                _hover={{ borderColor: "#d1d5db" }}
+              />
+            </InputGroup>
+          </Box>
+        </HStack>
+
+        {/* Right side */}
+        <HStack spacing={2}>
+          {/* Notification bell */}
+          <Box
+            as="button"
+            w="36px" h="36px" borderRadius="8px" bg="#f3f4f6"
+            border="1px solid #e5e7eb" cursor="pointer"
+            display="flex" alignItems="center" justifyContent="center"
+            position="relative"
+            _hover={{ bg: "#e5e7eb" }}
+            transition="all 0.15s"
+          >
+            <Bell size={15} color="#111" />
+            <Box
+              position="absolute" top="6px" right="7px"
+              w="5px" h="5px" borderRadius="3px"
+              bg="#dc2626" border="1px solid #fff"
+            />
+          </Box>
+
+          {/* User menu */}
+          <ChakraMenu>
+            <MenuButton
+              as={Box}
+              cursor="pointer"
+              borderRadius="8px"
+              _hover={{ bg: "#f3f4f6" }}
+              transition="all 0.15s"
+              px={2}
+              py={1}
+            >
+              <HStack spacing={2}>
+                <Box
+                  w="30px" h="30px" borderRadius="15px" bg="#111"
+                  display="flex" alignItems="center" justifyContent="center"
+                  fontSize="10px" fontWeight={700} color="#fff"
+                >
+                  {initials}
+                </Box>
                 <VStack
                   display={{ base: "none", md: "flex" }}
                   align="start"
                   spacing={0}
                 >
-                  <Text fontSize="sm" fontWeight="600" color="gray.800">
-                    {userInfo?.username || "Admin"}
+                  <Text fontSize="12px" fontWeight={600} color="#111">
+                    {userInfo?.firstname || userInfo?.username || "Admin"}
                   </Text>
-                  <Text fontSize="xs" color="gray.500">
-                    {userInfo?.account?.toUpperCase() || "ADMIN"}
+                  <Text fontSize="10px" color="#9ca3af" fontWeight={500}>
+                    {(userInfo?.account || "admin").toUpperCase()}
                   </Text>
                 </VStack>
+                <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "none" }} className="md-show">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
               </HStack>
             </MenuButton>
             <MenuList
-              borderRadius="lg"
-              boxShadow="0 4px 20px rgba(0, 0, 0, 0.15)"
-              border="1px solid"
-              borderColor="gray.200"
-              minW="200px"
+              borderRadius="10px"
+              boxShadow="0 4px 20px rgba(0,0,0,0.12)"
+              border="1px solid #e5e7eb"
+              minW="180px"
+              py={1}
+              fontFamily="'Bricolage Grotesque', 'Inter', system-ui, sans-serif"
             >
               <MenuItem
-                as="a"
+                as={Link}
                 href="/settings"
-                _hover={{ bg: "gray.50" }}
-                borderRadius="md"
-                mb={1}
+                borderRadius="6px"
+                mx={1}
+                fontSize="13px"
+                fontWeight={500}
+                _hover={{ bg: "#f3f4f6" }}
               >
-                <Settings size={16} style={{ marginRight: "8px" }} />
+                <Settings size={14} style={{ marginRight: 8 }} />
                 Settings
               </MenuItem>
-              <MenuDivider />
+              <MenuDivider borderColor="#f3f4f6" />
               <MenuItem
                 onClick={logoutHandler}
-                _hover={{ bg: "red.50" }}
-                color="red.600"
-                borderRadius="md"
+                borderRadius="6px"
+                mx={1}
+                fontSize="13px"
+                fontWeight={500}
+                color="#dc2626"
+                _hover={{ bg: "#fef2f2" }}
               >
-                {isLoading && isLoading.operation == "logout" ? (
-                  <Loader2 className="animate-spin mr-2" size={16} />
+                {isLoading.operation === "logout" ? (
+                  <Loader2 className="animate-spin" size={14} style={{ marginRight: 8 }} />
                 ) : (
-                  <LogOut className="mr-2" size={16} />
+                  <LogOut size={14} style={{ marginRight: 8 }} />
                 )}
-                Logout
+                Sign Out
               </MenuItem>
             </MenuList>
-          </Menu>
+          </ChakraMenu>
         </HStack>
       </Flex>
     </Box>
