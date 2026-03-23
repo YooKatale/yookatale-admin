@@ -64,6 +64,13 @@ export const ordersDeliveryApiSlice = apiSlice.injectEndpoints({
         method: "DELETE",
       }),
     }),
+    adminBulkDeleteOrders: builder.mutation({
+      query: ({ orderIds, status }) => ({
+        url: `${BACKEND_URL}/api/orders/admin-bulk-delete`,
+        method: "POST",
+        body: { orderIds, status },
+      }),
+    }),
     getOrderDeliveryTracking: builder.query({
       query: ({ orderId }) => ({
         url: `${BACKEND_URL}/api/delivery/order/${orderId}`,
@@ -169,6 +176,7 @@ export const {
   useUpdateOrderStatusMutation,
   useAdminCancelOrderMutation,
   useAdminDeleteOrderMutation,
+  useAdminBulkDeleteOrdersMutation,
   useGetOrderDeliveryTrackingQuery,
   useOpenOrdersQuery,
   useDriversByLocationQuery,

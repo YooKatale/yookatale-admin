@@ -37,6 +37,18 @@ import {
   Textarea,
   Divider,
   Link,
+  Checkbox,
+  AlertDialog,
+  AlertDialogOverlay,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogBody,
+  AlertDialogFooter,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  Avatar,
 } from "@chakra-ui/react";
 import {
   useAdminOrdersQuery,
@@ -47,6 +59,7 @@ import {
   useAdminDriversQuery,
   useAdminCancelOrderMutation,
   useAdminDeleteOrderMutation,
+  useAdminBulkDeleteOrdersMutation,
   useGetOrderDeliveryTrackingQuery,
   useConfirmCodMutation,
 } from "@Slices/ordersDeliveryApiSlice";
@@ -64,6 +77,9 @@ import {
   RefreshCw,
   Navigation,
   Trash2,
+  ChevronDown,
+  AlertTriangle,
+  User,
 } from "lucide-react";
 import moment from "moment";
 import { useMemo, useState, useEffect, useRef } from "react";
@@ -93,6 +109,10 @@ export default function AdminOrdersPage() {
   const [activeTab, setActiveTab]       = useState("all");
   const [searchInput, setSearchInput]   = useState("");
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [selectedIds, setSelectedIds]   = useState(new Set());
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkDeleteTarget, setBulkDeleteTarget] = useState(null); // null = selected, or a status string
+  const cancelRef = useRef(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast    = useToast();
   const socketRef = useRef(null);
@@ -110,6 +130,7 @@ export default function AdminOrdersPage() {
   const [updateStatus, { isLoading: updating }]     = useUpdateOrderStatusMutation();
   const [adminCancelOrder, { isLoading: cancelling }] = useAdminCancelOrderMutation();
   const [adminDeleteOrder, { isLoading: deleting }]  = useAdminDeleteOrderMutation();
+  const [adminBulkDelete, { isLoading: bulkDeleting }] = useAdminBulkDeleteOrdersMutation();
   const [confirmCod, { isLoading: confirmingCod }]   = useConfirmCodMutation();
 
   // Real-time socket feed
@@ -139,6 +160,9 @@ export default function AdminOrdersPage() {
     const q = searchInput.toLowerCase();
     return tabFiltered.filter((o) =>
       (o?.customerName || "").toLowerCase().includes(q)
+      || (o?.user?.firstname || "").toLowerCase().includes(q)
+      || (o?.user?.lastname || "").toLowerCase().includes(q)
+      || (o?.user?.email || "").toLowerCase().includes(q)
       || (o?.deliveryAddress?.address1 || "").toLowerCase().includes(q)
       || (o?._id || "").toLowerCase().includes(q)
       || (o?.productItems || "").toLowerCase().includes(q)
@@ -146,8 +170,29 @@ export default function AdminOrdersPage() {
     );
   }, [tabFiltered, searchInput]);
 
+  // Clear selection when tab/filter changes
+  useEffect(() => { setSelectedIds(new Set()); }, [activeTab, statusFilter, searchInput]);
+
+  const toggleSelect = (id) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filtered.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filtered.map((o) => o._id)));
+    }
+  };
+
   const safeRefresh = () => {
     refetch();
+    setSelectedIds(new Set());
     if (selectedOrder?._id) {
       const next = orders.find((o) => o._id === selectedOrder._id);
       if (next) setSelectedOrder(next);
@@ -215,6 +260,38 @@ export default function AdminOrdersPage() {
     }
   };
 
+  const handleBulkDelete = async () => {
+    try {
+      let payload;
+      if (bulkDeleteTarget) {
+        // Delete all orders with a specific status
+        payload = { status: bulkDeleteTarget };
+      } else {
+        // Delete selected order IDs
+        payload = { orderIds: Array.from(selectedIds) };
+      }
+      const res = await adminBulkDelete(payload).unwrap();
+      toast({
+        title: res?.message || "Orders deleted",
+        status: "success",
+        duration: 3000,
+      });
+      setBulkDeleteOpen(false);
+      setBulkDeleteTarget(null);
+      safeRefresh();
+    } catch (e) {
+      toast({ title: "Error", description: e?.data?.message || "Bulk delete failed", status: "error", duration: 4000 });
+    }
+  };
+
+  const getCustomerDisplay = (order) => {
+    const name = order?.customerName || "Unknown";
+    const user = order?.user;
+    const phone = order?.customerPhone || order?.deliveryAddress?.phone || user?.phone || "";
+    const email = user?.email || "";
+    return { name, phone, email };
+  };
+
   if (isLoading) {
     return (
       <Center minH="50vh">
@@ -226,6 +303,10 @@ export default function AdminOrdersPage() {
     );
   }
 
+  const bulkCount = bulkDeleteTarget
+    ? orders.filter((o) => o.status === bulkDeleteTarget).length
+    : selectedIds.size;
+
   return (
     <Box>
       <VStack align="stretch" spacing={6}>
@@ -234,9 +315,40 @@ export default function AdminOrdersPage() {
             <Icon as={Package} boxSize={7} color="green.600" />
             <Heading size="lg">Order Management</Heading>
           </HStack>
-          <Button size="sm" leftIcon={<RefreshCw size={14} />} onClick={safeRefresh} variant="outline" colorScheme="green">
-            Refresh
-          </Button>
+          <HStack spacing={2}>
+            {/* Bulk delete menu */}
+            <Menu>
+              <MenuButton as={Button} size="sm" colorScheme="red" variant="outline" rightIcon={<ChevronDown size={14} />} leftIcon={<Trash2 size={14} />}>
+                Bulk Delete
+              </MenuButton>
+              <MenuList>
+                {selectedIds.size > 0 && (
+                  <MenuItem
+                    icon={<Trash2 size={14} />}
+                    color="red.600"
+                    onClick={() => { setBulkDeleteTarget(null); setBulkDeleteOpen(true); }}
+                  >
+                    Delete {selectedIds.size} selected
+                  </MenuItem>
+                )}
+                {Object.entries(STATUS_CONFIG).map(([k, v]) => {
+                  const cnt = orders.filter((o) => o.status === k).length;
+                  if (cnt === 0) return null;
+                  return (
+                    <MenuItem
+                      key={k}
+                      onClick={() => { setBulkDeleteTarget(k); setBulkDeleteOpen(true); }}
+                    >
+                      Delete all {v.label} ({cnt})
+                    </MenuItem>
+                  );
+                })}
+              </MenuList>
+            </Menu>
+            <Button size="sm" leftIcon={<RefreshCw size={14} />} onClick={safeRefresh} variant="outline" colorScheme="green">
+              Refresh
+            </Button>
+          </HStack>
         </HStack>
 
         <SimpleGrid columns={{ base: 2, md: 4, lg: 6 }} spacing={4}>
@@ -245,8 +357,8 @@ export default function AdminOrdersPage() {
             { label: "This Week", value: stats.weekOrders || 0, color: "green" },
             { label: "Week Revenue", value: `UGX ${(stats.weekRevenue || 0).toLocaleString()}`, color: "green" },
             { label: "Total Orders", value: stats.totalOrders || 0, color: "gray" },
-            { label: "Pending", value: stats.statusCounts?.pending?.count || 0, color: "yellow" },
-            { label: "Delivered", value: stats.statusCounts?.delivered?.count || 0, color: "green" },
+            { label: "Pending", value: stats.statusCounts?.pending?.count || stats.statusCounts?.pending || 0, color: "yellow" },
+            { label: "Delivered", value: stats.statusCounts?.delivered?.count || stats.statusCounts?.delivered || 0, color: "green" },
           ].map((s, i) => (
             <Card key={i} size="sm">
               <CardBody textAlign="center">
@@ -280,6 +392,33 @@ export default function AdminOrdersPage() {
           </HStack>
         </Box>
 
+        {/* Selection bar */}
+        {selectedIds.size > 0 && (
+          <Box bg="red.50" borderRadius="lg" p={3} borderWidth="1px" borderColor="red.200">
+            <HStack justify="space-between">
+              <HStack spacing={3}>
+                <Icon as={AlertTriangle} color="red.500" boxSize={4} />
+                <Text fontSize="sm" fontWeight="600" color="red.700">
+                  {selectedIds.size} order{selectedIds.size > 1 ? "s" : ""} selected
+                </Text>
+              </HStack>
+              <HStack spacing={2}>
+                <Button size="sm" variant="ghost" onClick={() => setSelectedIds(new Set())}>
+                  Clear
+                </Button>
+                <Button
+                  size="sm"
+                  colorScheme="red"
+                  leftIcon={<Trash2 size={14} />}
+                  onClick={() => { setBulkDeleteTarget(null); setBulkDeleteOpen(true); }}
+                >
+                  Delete Selected
+                </Button>
+              </HStack>
+            </HStack>
+          </Box>
+        )}
+
         <Card>
           <CardHeader>
             <HStack justify="space-between" flexWrap="wrap" gap={4}>
@@ -300,6 +439,14 @@ export default function AdminOrdersPage() {
               <Table size="sm">
                 <Thead>
                   <Tr>
+                    <Th w="40px">
+                      <Checkbox
+                        isChecked={filtered.length > 0 && selectedIds.size === filtered.length}
+                        isIndeterminate={selectedIds.size > 0 && selectedIds.size < filtered.length}
+                        onChange={toggleSelectAll}
+                        colorScheme="green"
+                      />
+                    </Th>
                     <Th>Order</Th>
                     <Th>Customer</Th>
                     <Th>Total</Th>
@@ -312,14 +459,40 @@ export default function AdminOrdersPage() {
                 <Tbody>
                   {filtered.map((order, idx) => {
                     const sc = STATUS_CONFIG[order?.status] || STATUS_CONFIG.pending;
+                    const customer = getCustomerDisplay(order);
                     return (
-                      <Tr key={order?._id || idx} _hover={{ bg: "gray.50" }} cursor="pointer" onClick={() => { setSelectedOrder(order); onOpen(); }}>
-                        <Td fontSize="xs" fontFamily="mono" color="gray.500">#{(order?._id || "").slice(-6)}</Td>
-                        <Td fontWeight="600" fontSize="sm">{order?.customerName || "Unknown"}</Td>
-                        <Td fontWeight="700" color="green.600" fontSize="sm">UGX {(order?.total || 0).toLocaleString()}</Td>
-                        <Td><Badge colorScheme={sc.color} borderRadius="full" px={2} fontSize="xs">{sc.label}</Badge></Td>
-                        <Td fontSize="xs">{order?.driverId?.name || "Unassigned"}</Td>
-                        <Td fontSize="xs" color="gray.500">{moment(order?.createdAt).fromNow()}</Td>
+                      <Tr key={order?._id || idx} _hover={{ bg: "gray.50" }} cursor="pointer" bg={selectedIds.has(order?._id) ? "green.50" : undefined}>
+                        <Td onClick={(e) => e.stopPropagation()}>
+                          <Checkbox
+                            isChecked={selectedIds.has(order?._id)}
+                            onChange={() => toggleSelect(order?._id)}
+                            colorScheme="green"
+                          />
+                        </Td>
+                        <Td fontSize="xs" fontFamily="mono" color="gray.500" onClick={() => { setSelectedOrder(order); onOpen(); }}>
+                          #{(order?._id || "").slice(-6)}
+                        </Td>
+                        <Td onClick={() => { setSelectedOrder(order); onOpen(); }}>
+                          <HStack spacing={2}>
+                            <Avatar size="xs" name={customer.name} bg="green.500" color="white" />
+                            <Box>
+                              <Text fontWeight="600" fontSize="sm" noOfLines={1}>{customer.name}</Text>
+                              {customer.phone && <Text fontSize="xs" color="gray.500">{customer.phone}</Text>}
+                            </Box>
+                          </HStack>
+                        </Td>
+                        <Td fontWeight="700" color="green.600" fontSize="sm" onClick={() => { setSelectedOrder(order); onOpen(); }}>
+                          UGX {(order?.total || 0).toLocaleString()}
+                        </Td>
+                        <Td onClick={() => { setSelectedOrder(order); onOpen(); }}>
+                          <Badge colorScheme={sc.color} borderRadius="full" px={2} fontSize="xs">{sc.label}</Badge>
+                        </Td>
+                        <Td fontSize="xs" onClick={() => { setSelectedOrder(order); onOpen(); }}>
+                          {order?.driverId?.name || "Unassigned"}
+                        </Td>
+                        <Td fontSize="xs" color="gray.500" onClick={() => { setSelectedOrder(order); onOpen(); }}>
+                          {moment(order?.createdAt).fromNow()}
+                        </Td>
                         <Td>
                           <HStack spacing={1}>
                             {order?.status === "pending" && (
@@ -349,6 +522,44 @@ export default function AdminOrdersPage() {
           </CardBody>
         </Card>
       </VStack>
+
+      {/* Bulk delete confirmation */}
+      <AlertDialog
+        isOpen={bulkDeleteOpen}
+        leastDestructiveRef={cancelRef}
+        onClose={() => { if (!bulkDeleting) { setBulkDeleteOpen(false); setBulkDeleteTarget(null); } }}
+        isCentered
+      >
+        <AlertDialogOverlay bg="blackAlpha.600" backdropFilter="blur(4px)">
+          <AlertDialogContent borderRadius="xl">
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+              <HStack spacing={2}>
+                <Icon as={AlertTriangle} color="red.500" />
+                <Text>Delete {bulkCount} Order{bulkCount !== 1 ? "s" : ""}?</Text>
+              </HStack>
+            </AlertDialogHeader>
+            <AlertDialogBody>
+              <Text mb={2}>
+                {bulkDeleteTarget
+                  ? `This will permanently delete all ${bulkCount} orders with status "${STATUS_CONFIG[bulkDeleteTarget]?.label || bulkDeleteTarget}".`
+                  : `This will permanently delete ${bulkCount} selected order${bulkCount !== 1 ? "s" : ""}.`
+                }
+              </Text>
+              <Text fontSize="sm" color="red.600" fontWeight="600">
+                This action cannot be undone. Associated deliveries will also be removed.
+              </Text>
+            </AlertDialogBody>
+            <AlertDialogFooter>
+              <Button ref={cancelRef} onClick={() => { setBulkDeleteOpen(false); setBulkDeleteTarget(null); }} isDisabled={bulkDeleting}>
+                Cancel
+              </Button>
+              <Button colorScheme="red" onClick={handleBulkDelete} ml={3} isLoading={bulkDeleting} loadingText="Deleting...">
+                Delete {bulkCount} Order{bulkCount !== 1 ? "s" : ""}
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
 
       <OrderDetailModal
         order={selectedOrder}
@@ -405,6 +616,12 @@ function OrderDetailModal({
     ? `https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.02}%2C${lat - 0.02}%2C${lng + 0.02}%2C${lat + 0.02}&layer=mapnik&marker=${lat}%2C${lng}`
     : null;
 
+  const customerName = order.customerName ||
+    [order.user?.firstname, order.user?.lastname].filter(Boolean).join(" ") ||
+    order.user?.email || "Unknown Customer";
+  const customerPhone = order.customerPhone || order.deliveryAddress?.phone || order.user?.phone || "";
+  const customerEmail = order.user?.email || "";
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="3xl" scrollBehavior="inside">
       <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
@@ -421,13 +638,25 @@ function OrderDetailModal({
         <ModalCloseButton />
         <ModalBody>
           <VStack align="stretch" spacing={4}>
+            {/* Customer card */}
+            <Box bg="green.50" borderRadius="lg" p={4} borderWidth="1px" borderColor="green.200">
+              <HStack spacing={3} mb={2}>
+                <Avatar size="sm" name={customerName} bg="green.500" color="white" />
+                <Box>
+                  <Text fontWeight="700" fontSize="md">{customerName}</Text>
+                  <HStack spacing={3} flexWrap="wrap">
+                    {customerPhone && <Text fontSize="xs" color="gray.600"><Icon as={User} boxSize={3} mr={1} />{customerPhone}</Text>}
+                    {customerEmail && <Text fontSize="xs" color="gray.600">{customerEmail}</Text>}
+                  </HStack>
+                </Box>
+              </HStack>
+            </Box>
+
             <SimpleGrid columns={{ base: 1, md: 2 }} spacing={3}>
-              <Box><Text fontSize="xs" color="gray.500">Customer</Text><Text fontWeight="600">{order.customerName || "Unknown"}</Text></Box>
               <Box><Text fontSize="xs" color="gray.500">Total</Text><Text fontWeight="700" color="green.600">UGX {(order.total || 0).toLocaleString()}</Text></Box>
               <Box><Text fontSize="xs" color="gray.500">Address</Text><Text fontSize="sm">{order.deliveryAddress?.address1 || order.deliveryAddress?.address || "N/A"}</Text></Box>
               <Box><Text fontSize="xs" color="gray.500">Driver</Text><Text fontSize="sm">{order.driverId?.name || tracking?.deliveryLocation?.partnerName || "Unassigned"}</Text></Box>
               <Box><Text fontSize="xs" color="gray.500">Payment</Text><Text fontSize="sm" textTransform="capitalize">{(order.payment?.paymentMethod || order.paymentMethod || "N/A").replace(/_/g, " ")}</Text></Box>
-              <Box><Text fontSize="xs" color="gray.500">Phone</Text><Text fontSize="sm">{order.customerPhone || order.deliveryAddress?.phone || "N/A"}</Text></Box>
             </SimpleGrid>
 
             {/* COD Status Banner */}
@@ -500,7 +729,6 @@ function OrderDetailModal({
             {order.status === "pending_cod_approval" && (
               <HStack spacing={3}>
                 <Button colorScheme="orange" flex={1} onClick={() => {
-                  // Use confirmCod mutation — need to pass via props
                   onStatusUpdate(order._id, "confirmed", "COD approved by admin");
                 }} isLoading={updating}>
                   Approve COD
