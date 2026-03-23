@@ -2,6 +2,8 @@
 
 import {
   useSubscriptionsApproveMutation,
+  useSubscriptionsRejectMutation,
+  useSubscriptionsBulkDeleteMutation,
   useSubscriptionsFetchMutation,
   useSubscriptionPackagesFetchMutation,
   useSubscriptionPackageCreateMutation,
@@ -78,11 +80,15 @@ import {
   CreditCard,
   Package,
   CheckCircle,
+  XCircle,
   Image as ImageIcon,
   Clock,
   Users,
   DollarSign,
   Star,
+  Trash2 as Trash2Icon,
+  Filter,
+  ChevronRight,
 } from "lucide-react";
 import { BACKEND_URL } from "@constants/constant";
 import moment from "moment";
@@ -116,8 +122,14 @@ export default function SubscriptionsPage() {
   const [loadingOverrides, setLoadingOverrides] = useState(false);
   const [loadingSlots, setLoadingSlots] = useState(false);
 
+  const [subFilter, setSubFilter] = useState("pending");
+  const [selectedSubs, setSelectedSubs] = useState([]);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+
   const [fetchSubscriptions] = useSubscriptionsFetchMutation();
   const [approveSubscription] = useSubscriptionsApproveMutation();
+  const [rejectSubscription] = useSubscriptionsRejectMutation();
+  const [bulkDeleteSubscriptions] = useSubscriptionsBulkDeleteMutation();
   const [fetchPackages] = useSubscriptionPackagesFetchMutation();
   const [createPackage] = useSubscriptionPackageCreateMutation();
   const [updatePackage] = useSubscriptionPackageUpdateMutation();
@@ -135,15 +147,16 @@ export default function SubscriptionsPage() {
 
   const loadSubscriptions = useCallback(async () => {
     setLoading(true);
+    setSelectedSubs([]);
     try {
-      const res = await fetchSubscriptions("pending").unwrap();
+      const res = await fetchSubscriptions(subFilter).unwrap();
       if (res?.status === "Success") setSubscriptionsData(res?.data || []);
     } catch (e) {
       toast({ title: "Error", description: e?.data?.message || "Failed to load", status: "error", duration: 4000, isClosable: true });
     } finally {
       setLoading(false);
     }
-  }, [fetchSubscriptions, toast]);
+  }, [fetchSubscriptions, toast, subFilter]);
 
   const loadPackages = useCallback(async () => {
     setLoadingPackages(true);
@@ -201,6 +214,36 @@ export default function SubscriptionsPage() {
     } catch (e) {
       toast({ title: "Error", description: e?.data?.message || "Failed", status: "error", duration: 4000, isClosable: true });
     }
+  };
+
+  const handleReject = async (id) => {
+    try {
+      await rejectSubscription(id).unwrap();
+      toast({ title: "Subscription rejected", status: "info", duration: 3000, isClosable: true });
+      loadSubscriptions();
+    } catch (e) {
+      toast({ title: "Error", description: e?.data?.message || "Failed", status: "error", duration: 4000, isClosable: true });
+    }
+  };
+
+  const handleBulkDelete = async (mode) => {
+    setBulkDeleting(true);
+    try {
+      const body = mode === "selected" ? { ids: selectedSubs } : { status: subFilter };
+      const res = await bulkDeleteSubscriptions(body).unwrap();
+      toast({ title: `${res?.deletedCount || 0} subscription(s) deleted`, status: "success", duration: 3000, isClosable: true });
+      loadSubscriptions();
+    } catch (e) {
+      toast({ title: "Bulk delete failed", description: e?.data?.message || "Failed", status: "error", duration: 4000, isClosable: true });
+    } finally {
+      setBulkDeleting(false);
+    }
+  };
+
+  const toggleSelectSub = (id) => setSelectedSubs((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
+  const toggleSelectAll = () => {
+    if (selectedSubs.length === subscriptionsData.length) setSelectedSubs([]);
+    else setSelectedSubs(subscriptionsData.map((s) => s._id));
   };
 
   const openAddPlan = () => {
@@ -363,15 +406,81 @@ export default function SubscriptionsPage() {
       {activeTab === "yoocards" && (
         <Card borderRadius="xl" boxShadow="sm">
           <CardBody>
-            <Flex justify="space-between" align="center" mb={4}>
+            <Flex justify="space-between" align="center" mb={4} flexWrap="wrap" gap={3}>
               <Box>
-                <Text fontWeight="700" fontSize="lg">Pending Approvals</Text>
-                <Text fontSize="sm" color="gray.500">Review and approve new subscription requests</Text>
+                <Text fontWeight="700" fontSize="lg">Subscriptions</Text>
+                <Text fontSize="sm" color="gray.500">Review, approve, reject, and manage subscriptions</Text>
               </Box>
-              <Badge colorScheme="green" fontSize="md" px={3} py={1} borderRadius="full">
-                {subscriptionsData.length} pending
-              </Badge>
+              <HStack spacing={2} flexWrap="wrap">
+                <Select
+                  w="150px"
+                  size="sm"
+                  borderRadius="lg"
+                  fontWeight="500"
+                  value={subFilter}
+                  onChange={(e) => setSubFilter(e.target.value)}
+                >
+                  <option value="pending">Pending</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                </Select>
+                <Badge colorScheme="green" fontSize="md" px={3} py={1} borderRadius="full">
+                  {subscriptionsData.length} {subFilter}
+                </Badge>
+              </HStack>
             </Flex>
+
+            {/* Bulk actions bar */}
+            {subscriptionsData.length > 0 && (
+              <Flex mb={3} gap={2} align="center" flexWrap="wrap" p={2} bg="gray.50" borderRadius="lg">
+                <input
+                  type="checkbox"
+                  checked={selectedSubs.length === subscriptionsData.length && subscriptionsData.length > 0}
+                  onChange={toggleSelectAll}
+                  style={{ width: 16, height: 16, cursor: "pointer", accentColor: "#38a169" }}
+                />
+                <Text fontSize="sm" color="gray.600" fontWeight="500">
+                  {selectedSubs.length > 0 ? `${selectedSubs.length} selected` : "Select all"}
+                </Text>
+                <Box flex={1} />
+                {selectedSubs.length > 0 && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button size="sm" colorScheme="red" variant="outline" borderRadius="lg" leftIcon={<Trash2 size={14} />} isLoading={bulkDeleting}>
+                        Delete Selected ({selectedSubs.length})
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete {selectedSubs.length} subscription(s)?</AlertDialogTitle>
+                        <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction className="bg-red-600 text-white" onClick={() => handleBulkDelete("selected")}>Delete</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button size="sm" colorScheme="red" borderRadius="lg" leftIcon={<Trash2 size={14} />} isLoading={bulkDeleting}>
+                      Delete All {subFilter}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete all {subFilter} subscriptions?</AlertDialogTitle>
+                      <AlertDialogDescription>This will permanently delete all {subscriptionsData.length} {subFilter} subscription(s). This action cannot be undone.</AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction className="bg-red-600 text-white" onClick={() => handleBulkDelete("status")}>Delete All</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </Flex>
+            )}
 
             {isLoading ? (
               <Center py={12}><Spinner size="lg" color="green.500" thickness="3px" /></Center>
@@ -382,10 +491,21 @@ export default function SubscriptionsPage() {
                     <CardBody py={3}>
                       <Flex justify="space-between" align="center" flexWrap="wrap" gap={3}>
                         <HStack spacing={3}>
+                          <input
+                            type="checkbox"
+                            checked={selectedSubs.includes(sub._id)}
+                            onChange={() => toggleSelectSub(sub._id)}
+                            style={{ width: 16, height: 16, cursor: "pointer", accentColor: "#38a169" }}
+                          />
                           <Avatar size="sm" name={getSubUserLabel(sub)} bg="green.500" color="white" />
                           <Box>
                             <Text fontWeight="600" fontSize="sm">{getSubUserLabel(sub)}</Text>
-                            <Text fontSize="xs" color="gray.500">{moment(sub?.createdAt).fromNow()}</Text>
+                            <HStack spacing={2}>
+                              <Text fontSize="xs" color="gray.500">{moment(sub?.createdAt).fromNow()}</Text>
+                              <Badge size="sm" colorScheme={sub?.status === "approved" ? "green" : sub?.status === "rejected" ? "red" : "yellow"} borderRadius="full" fontSize="10px">
+                                {sub?.status || "pending"}
+                              </Badge>
+                            </HStack>
                           </Box>
                         </HStack>
                         <HStack spacing={2} flexWrap="wrap">
@@ -395,27 +515,54 @@ export default function SubscriptionsPage() {
                             </Tag>
                           ))}
                         </HStack>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button size="sm" colorScheme="green" borderRadius="lg" leftIcon={<CheckCircle size={14} />}>
-                              Approve
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Approve subscription?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This will activate {getSubUserLabel(sub)}&apos;s subscription.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction className="bg-green-600 text-white" onClick={() => handleApprove(sub._id)}>
-                                Approve
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+                        <HStack spacing={2}>
+                          {subFilter === "pending" && (
+                            <>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button size="sm" colorScheme="green" borderRadius="lg" leftIcon={<CheckCircle size={14} />}>
+                                    Approve
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Approve subscription?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      This will activate {getSubUserLabel(sub)}&apos;s subscription.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction className="bg-green-600 text-white" onClick={() => handleApprove(sub._id)}>
+                                      Approve
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button size="sm" colorScheme="red" variant="outline" borderRadius="lg" leftIcon={<XCircle size={14} />}>
+                                    Reject
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Reject subscription?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      This will reject {getSubUserLabel(sub)}&apos;s subscription request.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction className="bg-red-600 text-white" onClick={() => handleReject(sub._id)}>
+                                      Reject
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </>
+                          )}
+                        </HStack>
                       </Flex>
                     </CardBody>
                   </Card>
@@ -427,7 +574,7 @@ export default function SubscriptionsPage() {
                   <Flex w={14} h={14} borderRadius="full" bg="gray.100" align="center" justify="center">
                     <CheckCircle size={28} color="var(--chakra-colors-gray-400)" />
                   </Flex>
-                  <Text color="gray.500" fontWeight="500">All caught up! No pending approvals.</Text>
+                  <Text color="gray.500" fontWeight="500">No {subFilter} subscriptions found.</Text>
                 </VStack>
               </Center>
             )}
