@@ -4,6 +4,7 @@ import Providers from "./provider";
 import SidebarWithHeader from "@components/Sidenav";
 import { Suspense } from "react";
 import { Toaster } from "@components/ui/toaster";
+import AccessRestriction from "@components/AccessRestriction";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -16,6 +17,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className} style={{ fontFamily: 'Inter, sans-serif' }} suppressHydrationWarning>
+        <AccessRestriction />
         <Providers>
           <Suspense>
             <SidebarWithHeader>
