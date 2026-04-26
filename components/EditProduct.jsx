@@ -23,8 +23,7 @@ const EditProduct = ({ product, onClose }) => {
         // Handle errors
       }
     } catch (error) {
-      console.error('Error updating product:', error);
-      // Handle errors
+      // update error silently handled
     }
   };
 

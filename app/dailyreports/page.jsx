@@ -104,7 +104,6 @@ const DepartmentModal = ({ isOpen, onClose, taskToEdit, isEditMode, onTaskUpdate
       onTaskUpdated(); // Callback to refresh task list or perform additional actions
       onClose();
     } catch (error) {
-      console.log(error)
       toast({
         title: 'Error',
         description: 'Failed to save task.',

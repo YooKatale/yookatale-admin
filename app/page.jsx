@@ -67,7 +67,7 @@ export default function Home() {
         setFilteredOrders(res?.data?.PendingOrders?.orders || []);
       }
     } catch (error) {
-      console.error("Error fetching dashboard data: ", error);
+      // fetch error silently handled
     } finally {
       setLoading(false);
     }
@@ -80,7 +80,7 @@ export default function Home() {
         setVendors(res?.data);
       }
     } catch (error) {
-      console.error("Error fetching vendor data: ", error);
+      // fetch error silently handled
     }
   };
 
@@ -91,7 +91,7 @@ export default function Home() {
         setPartners(res?.data);
       }
     } catch (error) {
-      console.error("Error fetching partner data: ", error);
+      // fetch error silently handled
     }
   };
 

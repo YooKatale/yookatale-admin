@@ -83,6 +83,19 @@ export const yoocardApiSlice = apiSlice.injectEndpoints({
         body,
       }),
     }),
+    subscriptionsReject: builder.mutation({
+      query: (data) => ({
+        url: `${BACKEND_URL}/admin/subscriptions/${data}/reject`,
+        method: "PATCH",
+      }),
+    }),
+    subscriptionsBulkDelete: builder.mutation({
+      query: (body) => ({
+        url: `${BACKEND_URL}/admin/subscriptions/bulk-delete`,
+        method: "POST",
+        body,
+      }),
+    }),
   }),
 });
 
@@ -99,4 +112,6 @@ export const {
   useMealCalendarOverrideUpsertMutation,
   useMealSlotsFetchMutation,
   useMealSlotUpsertMutation,
+  useSubscriptionsRejectMutation,
+  useSubscriptionsBulkDeleteMutation,
 } = yoocardApiSlice;

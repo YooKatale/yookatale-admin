@@ -29,7 +29,7 @@ const PartnerPage = () => {
         isClosable: true,
       });
     } catch (err) {
-      console.error("Failed to verify partner:", err);
+      // verify error handled by toast below
       toast({
         title: "Error",
         description: err?.data?.message || err?.error || "Failed to approve partner",
@@ -51,7 +51,7 @@ const PartnerPage = () => {
         isClosable: true,
       });
     } catch (err) {
-      console.error("Failed to reject partner:", err);
+      // reject error handled by toast below
       toast({
         title: "Error",
         description: err?.data?.message || err?.error || "Failed to reject partner",

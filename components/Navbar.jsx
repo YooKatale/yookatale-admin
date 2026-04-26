@@ -46,7 +46,6 @@ const Navbar = () => {
       dispatch(logout());
       router.push("/signin");
     } catch (err) {
-      console.log({ err });
       setLoading({ ...isLoading, operation: "", status: false });
 
       toast({

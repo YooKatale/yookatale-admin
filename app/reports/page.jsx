@@ -246,7 +246,7 @@ if (Dashboard?.subscriptioncounts) {
         setUserregistrations(res?.data.userregistration)
       }
     } catch (error) {
-      console.error("Error fetching dashboard data: ", error);
+      // fetch error silently handled
     }
   };
   
@@ -258,7 +258,7 @@ if (Dashboard?.subscriptioncounts) {
           setAuditLogsData(res?.logs);
         }
       } catch (error) {
-        console.error("Error fetching dashboard data: ", error);
+        // fetch error silently handled
       }
   }
   useEffect(() => {

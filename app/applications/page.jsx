@@ -34,7 +34,7 @@ export default function ApplicationsPage() {
       setApplications(data);
       setFiltered(data);
     } catch (e) {
-      console.error(e);
+      // load error handled by toast below
       toast({ title: "Failed to load applications", status: "error", duration: 3000, isClosable: true });
     } finally {
       setLoading(false);

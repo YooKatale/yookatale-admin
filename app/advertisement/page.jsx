@@ -41,7 +41,6 @@ const Advertisement = () => {
 
   const handleDataFetch = async () => {
     const res = await fetchAdvertisements("pending").unwrap();
-    console.log("res", res);
     if (res?.success === true) {
       setAdvertisementData(res?.data);
     }

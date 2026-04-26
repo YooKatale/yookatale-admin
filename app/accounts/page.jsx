@@ -110,7 +110,7 @@ const handledeleteUserAccountQuery = async (id) => {
     openSubmitReviewConfirm()
     
   } catch (error) {
-    console.error("Error in deleting user account:", error);
+    // delete error silently handled
   }
 };
 

@@ -20,9 +20,8 @@ const Product = () => {
       if (response.status === 200) {
         setProducts(response.data);
       }
-      console.log(response.data.data);
     } catch (error) {
-      console.error('Error fetching products:', error);
+      // fetch error silently handled
     }
   };
 
@@ -40,7 +39,6 @@ const Product = () => {
 
   const handleSaveEdit = async () => {
     if (editingProduct) {
-      console.log(editingProduct);
       const data = {
         _id: editingProduct._id,
         product: {
@@ -57,7 +55,7 @@ const Product = () => {
         } else {
         }
       } catch (error) {
-        console.error('Error updating product:', error);
+        // update error silently handled
       }
     }
   };

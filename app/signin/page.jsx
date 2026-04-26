@@ -35,6 +35,8 @@ const Signin = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setLoading] = useState(false);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [lockUntil, setLockUntil] = useState(null);
 
   const router = useRouter();
   const dispatch = useDispatch();
@@ -54,13 +56,37 @@ const Signin = () => {
   const submitHandler = async (e) => {
     e.preventDefault();
 
+    // Client-side rate limiting
+    if (lockUntil && Date.now() < lockUntil) {
+      const seconds = Math.ceil((lockUntil - Date.now()) / 1000);
+      toast({
+        variant: "destructive",
+        title: "Too many attempts",
+        description: `Please wait ${seconds}s before trying again.`,
+      });
+      return;
+    }
+
+    // Input validation
+    const trimmedUsername = username.trim();
+    if (!trimmedUsername || !password) {
+      toast({
+        variant: "destructive",
+        title: "Validation error",
+        description: "Username and password are required.",
+      });
+      return;
+    }
+
     try {
       setLoading(true);
       const data = {
-        username: username,
+        username: trimmedUsername,
         password: password
       }
       const res = await login(data).unwrap();
+      setLoginAttempts(0);
+      setLockUntil(null);
       dispatch(setCredentials({ ...res }));
       setLoading(false);
       if (typeof window !== 'undefined') {
@@ -72,12 +98,16 @@ const Signin = () => {
       });
     } catch (err) {
       setLoading(false);
+      const attempts = loginAttempts + 1;
+      setLoginAttempts(attempts);
+      if (attempts >= 5) {
+        setLockUntil(Date.now() + 30000);
+        setLoginAttempts(0);
+      }
       toast({
         variant: "destructive",
-        title: "Error occured",
-        description: err.data?.message
-          ? err.data?.message
-          : err.data || err.error,
+        title: "Login failed",
+        description: err.data?.message || "Invalid credentials. Please try again.",
       });
     }
   };

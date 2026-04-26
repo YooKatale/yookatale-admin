@@ -2,6 +2,8 @@
 
 import {
   useSubscriptionsApproveMutation,
+  useSubscriptionsRejectMutation,
+  useSubscriptionsBulkDeleteMutation,
   useSubscriptionsFetchMutation,
   useSubscriptionPackagesFetchMutation,
   useSubscriptionPackageCreateMutation,
@@ -29,7 +31,6 @@ import {
   Select,
   SimpleGrid,
   Table,
-  TableCaption,
   Tbody,
   Td,
   Text,
@@ -39,12 +40,6 @@ import {
   useDisclosure,
   useToast,
   VStack,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
-  useColorModeValue,
   Card,
   CardBody,
   IconButton,
@@ -54,6 +49,13 @@ import {
   Badge,
   Spinner,
   Center,
+  Avatar,
+  Stat,
+  StatLabel,
+  StatNumber,
+  Tooltip,
+  Tag,
+  TagLabel,
 } from "@chakra-ui/react";
 import {
   AlertDialog,
@@ -66,7 +68,28 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@components/ui/alert-dialog";
-import { Loader2, Plus, Pencil, Trash2, Calendar, UtensilsCrossed, ChevronUp, ChevronDown } from "lucide-react";
+import {
+  Loader2,
+  Plus,
+  Pencil,
+  Trash2,
+  Calendar,
+  UtensilsCrossed,
+  ChevronUp,
+  ChevronDown,
+  CreditCard,
+  Package,
+  CheckCircle,
+  XCircle,
+  Image as ImageIcon,
+  Clock,
+  Users,
+  DollarSign,
+  Star,
+  Trash2 as Trash2Icon,
+  Filter,
+  ChevronRight,
+} from "lucide-react";
 import { BACKEND_URL } from "@constants/constant";
 import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
@@ -82,8 +105,14 @@ const getSubUserLabel = (sub) => {
   return fullName || user?.email || "Unknown User";
 };
 
+const TAB_CONFIG = [
+  { key: "yoocards", label: "YooCards", icon: CreditCard, color: "green", desc: "Pending subscription approvals" },
+  { key: "plans", label: "Meal Plans", icon: Package, color: "purple", desc: "Manage subscription packages" },
+  { key: "calendar", label: "Meal Calendar", icon: Calendar, color: "orange", desc: "Weekly meal slots & images" },
+];
+
 export default function SubscriptionsPage() {
-  const bg = useColorModeValue("white", "gray.900");
+  const [activeTab, setActiveTab] = useState("yoocards");
   const [subscriptionsData, setSubscriptionsData] = useState([]);
   const [packages, setPackages] = useState([]);
   const [overrides, setOverrides] = useState([]);
@@ -93,8 +122,14 @@ export default function SubscriptionsPage() {
   const [loadingOverrides, setLoadingOverrides] = useState(false);
   const [loadingSlots, setLoadingSlots] = useState(false);
 
+  const [subFilter, setSubFilter] = useState("pending");
+  const [selectedSubs, setSelectedSubs] = useState([]);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+
   const [fetchSubscriptions] = useSubscriptionsFetchMutation();
   const [approveSubscription] = useSubscriptionsApproveMutation();
+  const [rejectSubscription] = useSubscriptionsRejectMutation();
+  const [bulkDeleteSubscriptions] = useSubscriptionsBulkDeleteMutation();
   const [fetchPackages] = useSubscriptionPackagesFetchMutation();
   const [createPackage] = useSubscriptionPackageCreateMutation();
   const [updatePackage] = useSubscriptionPackageUpdateMutation();
@@ -104,20 +139,24 @@ export default function SubscriptionsPage() {
   const [fetchSlots] = useMealSlotsFetchMutation();
   const [upsertSlot] = useMealSlotUpsertMutation();
 
-  const { toast } = useToast();
+  const toast = useToast();
   const { isOpen: isPlanOpen, onOpen: onPlanOpen, onClose: onPlanClose } = useDisclosure();
   const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure();
   const [editingPlan, setEditingPlan] = useState(null);
   const [planForm, setPlanForm] = useState({ type: "", price: "", name: "", details: "", previousPrice: "" });
 
   const loadSubscriptions = useCallback(async () => {
+    setLoading(true);
+    setSelectedSubs([]);
     try {
-      const res = await fetchSubscriptions("pending").unwrap();
+      const res = await fetchSubscriptions(subFilter).unwrap();
       if (res?.status === "Success") setSubscriptionsData(res?.data || []);
     } catch (e) {
-      toast({ variant: "destructive", title: "Error", description: e?.data?.message || "Failed to load" });
+      toast({ title: "Error", description: e?.data?.message || "Failed to load", status: "error", duration: 4000, isClosable: true });
+    } finally {
+      setLoading(false);
     }
-  }, [fetchSubscriptions, toast]);
+  }, [fetchSubscriptions, toast, subFilter]);
 
   const loadPackages = useCallback(async () => {
     setLoadingPackages(true);
@@ -125,7 +164,7 @@ export default function SubscriptionsPage() {
       const res = await fetchPackages().unwrap();
       if (res?.status === "Success") setPackages(res?.data || []);
     } catch (e) {
-      toast({ variant: "destructive", title: "Error", description: e?.data?.message || "Failed to load packages" });
+      toast({ title: "Error", description: e?.data?.message || "Failed to load packages", status: "error", duration: 4000, isClosable: true });
     } finally {
       setLoadingPackages(false);
     }
@@ -137,7 +176,7 @@ export default function SubscriptionsPage() {
       const res = await fetchOverrides().unwrap();
       if (res?.status === "Success") setOverrides(res?.data || []);
     } catch (e) {
-      toast({ variant: "destructive", title: "Error", description: e?.data?.message || "Failed to load overrides" });
+      toast({ title: "Error", description: e?.data?.message || "Failed to load overrides", status: "error", duration: 4000, isClosable: true });
     } finally {
       setLoadingOverrides(false);
     }
@@ -149,7 +188,7 @@ export default function SubscriptionsPage() {
       const res = await fetchSlots().unwrap();
       if (res?.status === "Success") setSlots(res?.data || []);
     } catch (e) {
-      toast({ variant: "destructive", title: "Error", description: e?.data?.message || "Failed to load slots" });
+      toast({ title: "Error", description: e?.data?.message || "Failed to load slots", status: "error", duration: 4000, isClosable: true });
     } finally {
       setLoadingSlots(false);
     }
@@ -159,17 +198,52 @@ export default function SubscriptionsPage() {
     loadSubscriptions();
   }, [loadSubscriptions]);
 
+  useEffect(() => {
+    if (activeTab === "plans" && packages.length === 0) loadPackages();
+    if (activeTab === "calendar" && slots.length === 0) {
+      loadOverrides();
+      loadSlots();
+    }
+  }, [activeTab]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleApprove = async (id) => {
-    setLoading(true);
     try {
       await approveSubscription(id).unwrap();
-      setLoading(false);
-      toast({ title: "Success", description: "Subscription approved" });
+      toast({ title: "Subscription approved", status: "success", duration: 3000, isClosable: true });
       loadSubscriptions();
     } catch (e) {
-      setLoading(false);
-      toast({ variant: "destructive", title: "Error", description: e?.data?.message });
+      toast({ title: "Error", description: e?.data?.message || "Failed", status: "error", duration: 4000, isClosable: true });
     }
+  };
+
+  const handleReject = async (id) => {
+    try {
+      await rejectSubscription(id).unwrap();
+      toast({ title: "Subscription rejected", status: "info", duration: 3000, isClosable: true });
+      loadSubscriptions();
+    } catch (e) {
+      toast({ title: "Error", description: e?.data?.message || "Failed", status: "error", duration: 4000, isClosable: true });
+    }
+  };
+
+  const handleBulkDelete = async (mode) => {
+    setBulkDeleting(true);
+    try {
+      const body = mode === "selected" ? { ids: selectedSubs } : { status: subFilter };
+      const res = await bulkDeleteSubscriptions(body).unwrap();
+      toast({ title: `${res?.deletedCount || 0} subscription(s) deleted`, status: "success", duration: 3000, isClosable: true });
+      loadSubscriptions();
+    } catch (e) {
+      toast({ title: "Bulk delete failed", description: e?.data?.message || "Failed", status: "error", duration: 4000, isClosable: true });
+    } finally {
+      setBulkDeleting(false);
+    }
+  };
+
+  const toggleSelectSub = (id) => setSelectedSubs((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
+  const toggleSelectAll = () => {
+    if (selectedSubs.length === subscriptionsData.length) setSelectedSubs([]);
+    else setSelectedSubs(subscriptionsData.map((s) => s._id));
   };
 
   const openAddPlan = () => {
@@ -207,41 +281,15 @@ export default function SubscriptionsPage() {
       if (editingPlan) {
         await updatePackage({ id: editingPlan._id, ...payload }).unwrap();
         onEditClose();
-        loadPackages();
-        toast({
-          title: "Plan updated",
-          description: "Your changes are now live on the subscription page. Users will see the updated plan details.",
-          status: "success",
-          duration: 6000,
-          isClosable: true,
-          position: "top-right",
-          containerStyle: { maxWidth: "420px" },
-        });
+        toast({ title: "Plan updated", status: "success", duration: 3000, isClosable: true });
       } else {
         await createPackage(payload).unwrap();
         onPlanClose();
-        loadPackages();
-        toast({
-          title: "Plan created",
-          description: "The new plan has been added and is now visible on the subscription page.",
-          status: "success",
-          duration: 6000,
-          isClosable: true,
-          position: "top-right",
-          containerStyle: { maxWidth: "420px" },
-        });
+        toast({ title: "Plan created", status: "success", duration: 3000, isClosable: true });
       }
+      loadPackages();
     } catch (e) {
-      const msg = e?.data?.message || e?.message || "Failed to save. Please check your connection and try again.";
-      toast({
-        title: "Update failed",
-        description: msg,
-        status: "error",
-        duration: 8000,
-        isClosable: true,
-        position: "top-right",
-        containerStyle: { maxWidth: "420px" },
-      });
+      toast({ title: "Save failed", description: e?.data?.message || "Failed to save", status: "error", duration: 4000, isClosable: true });
     } finally {
       setSaving(false);
     }
@@ -251,87 +299,228 @@ export default function SubscriptionsPage() {
     try {
       await deletePackage(id).unwrap();
       loadPackages();
-      toast({
-        title: "Plan deleted",
-        description: "The plan has been removed from the subscription page.",
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-        position: "top-right",
-      });
+      toast({ title: "Plan deleted", status: "success", duration: 3000, isClosable: true });
     } catch (e) {
-      toast({
-        title: "Delete failed",
-        description: e?.data?.message || "Failed to delete the plan.",
-        status: "error",
-        duration: 6000,
-        isClosable: true,
-        position: "top-right",
-      });
+      toast({ title: "Delete failed", description: e?.data?.message || "Failed", status: "error", duration: 4000, isClosable: true });
     }
   };
 
   return (
-    <Box className="max-w-full" bg={bg} p={8} mt="3">
-      <Heading size="lg" mb={6}>Subscription Management</Heading>
+    <Box maxW="full" px={{ base: 4, md: 8 }} py={6}>
+      {/* Header */}
+      <Flex justify="space-between" align="center" mb={6} flexWrap="wrap" gap={4}>
+        <Box>
+          <Heading size="lg" mb={1}>Subscription Management</Heading>
+          <Text color="gray.500" fontSize="sm">Manage YooCards, meal plans, and weekly meal calendars</Text>
+        </Box>
+        <HStack spacing={2}>
+          {activeTab === "plans" && (
+            <Button leftIcon={<Plus size={16} />} colorScheme="green" size="sm" onClick={openAddPlan} borderRadius="lg">
+              Add Plan
+            </Button>
+          )}
+        </HStack>
+      </Flex>
 
-      <Tabs variant="enclosed" colorScheme="green">
-        <TabList flexWrap="wrap" gap={2}>
-          <Tab fontWeight="600">
-            <HStack><UtensilsCrossed size={18} />YooCards</HStack>
-          </Tab>
-          <Tab fontWeight="600" onClick={loadPackages}>
-            <HStack><UtensilsCrossed size={18} />Meal Plans</HStack>
-          </Tab>
-          <Tab fontWeight="600" onClick={() => { loadOverrides(); loadSlots(); }}>
-            <HStack><Calendar size={18} />Meal Calendars</HStack>
-          </Tab>
-        </TabList>
+      {/* Stats cards */}
+      <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4} mb={6}>
+        <Card borderRadius="xl" borderWidth="1px" borderColor="green.100" bg="green.50">
+          <CardBody py={4}>
+            <HStack spacing={3}>
+              <Flex w={10} h={10} borderRadius="xl" bg="green.100" align="center" justify="center">
+                <Clock size={20} color="var(--chakra-colors-green-600)" />
+              </Flex>
+              <Stat size="sm">
+                <StatLabel color="green.600" fontSize="xs" fontWeight="600">Pending Approvals</StatLabel>
+                <StatNumber color="green.800" fontSize="2xl">{subscriptionsData.length}</StatNumber>
+              </Stat>
+            </HStack>
+          </CardBody>
+        </Card>
+        <Card borderRadius="xl" borderWidth="1px" borderColor="purple.100" bg="purple.50">
+          <CardBody py={4}>
+            <HStack spacing={3}>
+              <Flex w={10} h={10} borderRadius="xl" bg="purple.100" align="center" justify="center">
+                <Package size={20} color="var(--chakra-colors-purple-600)" />
+              </Flex>
+              <Stat size="sm">
+                <StatLabel color="purple.600" fontSize="xs" fontWeight="600">Active Plans</StatLabel>
+                <StatNumber color="purple.800" fontSize="2xl">{packages.length}</StatNumber>
+              </Stat>
+            </HStack>
+          </CardBody>
+        </Card>
+        <Card borderRadius="xl" borderWidth="1px" borderColor="orange.100" bg="orange.50">
+          <CardBody py={4}>
+            <HStack spacing={3}>
+              <Flex w={10} h={10} borderRadius="xl" bg="orange.100" align="center" justify="center">
+                <UtensilsCrossed size={20} color="var(--chakra-colors-orange-600)" />
+              </Flex>
+              <Stat size="sm">
+                <StatLabel color="orange.600" fontSize="xs" fontWeight="600">Meal Slots</StatLabel>
+                <StatNumber color="orange.800" fontSize="2xl">{slots.length}</StatNumber>
+              </Stat>
+            </HStack>
+          </CardBody>
+        </Card>
+        <Card borderRadius="xl" borderWidth="1px" borderColor="blue.100" bg="blue.50">
+          <CardBody py={4}>
+            <HStack spacing={3}>
+              <Flex w={10} h={10} borderRadius="xl" bg="blue.100" align="center" justify="center">
+                <ImageIcon size={20} color="var(--chakra-colors-blue-600)" />
+              </Flex>
+              <Stat size="sm">
+                <StatLabel color="blue.600" fontSize="xs" fontWeight="600">Overrides</StatLabel>
+                <StatNumber color="blue.800" fontSize="2xl">{overrides.length}</StatNumber>
+              </Stat>
+            </HStack>
+          </CardBody>
+        </Card>
+      </SimpleGrid>
 
-        <TabPanels>
-          {/* YooCards — pending approvals */}
-          <TabPanel px={0}>
-            <Card>
-              <CardBody>
-                <Text fontWeight="600" mb={4}>Subscriptions pending approval</Text>
-                {subscriptionsData.length > 0 ? (
-                  <Box overflowX="auto">
-                    <Table size="sm">
-                      <TableCaption>New Orders</TableCaption>
-                      <Thead>
-                        <Tr>
-                          <Th>Client</Th>
-                          <Th>Cards</Th>
-                          <Th>Date</Th>
-                          <Th></Th>
-                        </Tr>
-                      </Thead>
-                      <Tbody>
-                        {subscriptionsData.map((sub) => (
-                          <Tr key={sub._id}>
-                            <Td>{getSubUserLabel(sub)}</Td>
-                            <Td>
-                              {sub?.cards?.length > 0 ? (
-                                sub.cards.map((c, i) => (
-                                  <Box key={i} p={1} borderWidth="1px" borderRadius="md" mb={1}>
-                                    <Text fontWeight="bold" fontSize="sm" textTransform="capitalize">{c.card}</Text>
-                                    <Text fontSize="xs">{String(c.cardNumber || "").slice(0, 3)}xxxxxxxxx</Text>
-                                  </Box>
-                                ))
-                              ) : (
-                                <Text fontSize="sm">No cards</Text>
-                              )}
-                            </Td>
-                            <Td>{moment(sub?.createdAt).fromNow()}</Td>
-                            <Td>
+      {/* Tab navigation */}
+      <HStack spacing={3} mb={6} overflowX="auto" pb={1}>
+        {TAB_CONFIG.map((tab) => {
+          const isActive = activeTab === tab.key;
+          return (
+            <Button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              variant={isActive ? "solid" : "outline"}
+              colorScheme={isActive ? tab.color : "gray"}
+              size="md"
+              borderRadius="xl"
+              px={6}
+              leftIcon={<tab.icon size={18} />}
+              fontWeight={isActive ? "700" : "500"}
+              _hover={{ transform: "translateY(-1px)", boxShadow: "md" }}
+              transition="all 0.2s"
+            >
+              {tab.label}
+            </Button>
+          );
+        })}
+      </HStack>
+
+      {/* YooCards Tab */}
+      {activeTab === "yoocards" && (
+        <Card borderRadius="xl" boxShadow="sm">
+          <CardBody>
+            <Flex justify="space-between" align="center" mb={4} flexWrap="wrap" gap={3}>
+              <Box>
+                <Text fontWeight="700" fontSize="lg">Subscriptions</Text>
+                <Text fontSize="sm" color="gray.500">Review, approve, reject, and manage subscriptions</Text>
+              </Box>
+              <HStack spacing={2} flexWrap="wrap">
+                <Select
+                  w="150px"
+                  size="sm"
+                  borderRadius="lg"
+                  fontWeight="500"
+                  value={subFilter}
+                  onChange={(e) => setSubFilter(e.target.value)}
+                >
+                  <option value="pending">Pending</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                </Select>
+                <Badge colorScheme="green" fontSize="md" px={3} py={1} borderRadius="full">
+                  {subscriptionsData.length} {subFilter}
+                </Badge>
+              </HStack>
+            </Flex>
+
+            {/* Bulk actions bar */}
+            {subscriptionsData.length > 0 && (
+              <Flex mb={3} gap={2} align="center" flexWrap="wrap" p={2} bg="gray.50" borderRadius="lg">
+                <input
+                  type="checkbox"
+                  checked={selectedSubs.length === subscriptionsData.length && subscriptionsData.length > 0}
+                  onChange={toggleSelectAll}
+                  style={{ width: 16, height: 16, cursor: "pointer", accentColor: "#38a169" }}
+                />
+                <Text fontSize="sm" color="gray.600" fontWeight="500">
+                  {selectedSubs.length > 0 ? `${selectedSubs.length} selected` : "Select all"}
+                </Text>
+                <Box flex={1} />
+                {selectedSubs.length > 0 && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button size="sm" colorScheme="red" variant="outline" borderRadius="lg" leftIcon={<Trash2 size={14} />} isLoading={bulkDeleting}>
+                        Delete Selected ({selectedSubs.length})
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete {selectedSubs.length} subscription(s)?</AlertDialogTitle>
+                        <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction className="bg-red-600 text-white" onClick={() => handleBulkDelete("selected")}>Delete</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button size="sm" colorScheme="red" borderRadius="lg" leftIcon={<Trash2 size={14} />} isLoading={bulkDeleting}>
+                      Delete All {subFilter}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete all {subFilter} subscriptions?</AlertDialogTitle>
+                      <AlertDialogDescription>This will permanently delete all {subscriptionsData.length} {subFilter} subscription(s). This action cannot be undone.</AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction className="bg-red-600 text-white" onClick={() => handleBulkDelete("status")}>Delete All</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </Flex>
+            )}
+
+            {isLoading ? (
+              <Center py={12}><Spinner size="lg" color="green.500" thickness="3px" /></Center>
+            ) : subscriptionsData.length > 0 ? (
+              <VStack spacing={3} align="stretch">
+                {subscriptionsData.map((sub) => (
+                  <Card key={sub._id} variant="outline" borderRadius="lg" _hover={{ borderColor: "green.300", boxShadow: "sm" }} transition="all 0.2s">
+                    <CardBody py={3}>
+                      <Flex justify="space-between" align="center" flexWrap="wrap" gap={3}>
+                        <HStack spacing={3}>
+                          <input
+                            type="checkbox"
+                            checked={selectedSubs.includes(sub._id)}
+                            onChange={() => toggleSelectSub(sub._id)}
+                            style={{ width: 16, height: 16, cursor: "pointer", accentColor: "#38a169" }}
+                          />
+                          <Avatar size="sm" name={getSubUserLabel(sub)} bg="green.500" color="white" />
+                          <Box>
+                            <Text fontWeight="600" fontSize="sm">{getSubUserLabel(sub)}</Text>
+                            <HStack spacing={2}>
+                              <Text fontSize="xs" color="gray.500">{moment(sub?.createdAt).fromNow()}</Text>
+                              <Badge size="sm" colorScheme={sub?.status === "approved" ? "green" : sub?.status === "rejected" ? "red" : "yellow"} borderRadius="full" fontSize="10px">
+                                {sub?.status || "pending"}
+                              </Badge>
+                            </HStack>
+                          </Box>
+                        </HStack>
+                        <HStack spacing={2} flexWrap="wrap">
+                          {sub?.cards?.map((c, i) => (
+                            <Tag key={i} size="sm" colorScheme="green" borderRadius="full">
+                              <TagLabel>{c.card} {String(c.cardNumber || "").slice(0, 3)}***</TagLabel>
+                            </Tag>
+                          ))}
+                        </HStack>
+                        <HStack spacing={2}>
+                          {subFilter === "pending" && (
+                            <>
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                  <Button
-                                    size="sm"
-                                    colorScheme="green"
-                                    leftIcon={isLoading ? <Loader2 className="animate-spin" /> : null}
-                                    onClick={() => setLoading(true)}
-                                  >
+                                  <Button size="sm" colorScheme="green" borderRadius="lg" leftIcon={<CheckCircle size={14} />}>
                                     Approve
                                   </Button>
                                 </AlertDialogTrigger>
@@ -339,234 +528,289 @@ export default function SubscriptionsPage() {
                                   <AlertDialogHeader>
                                     <AlertDialogTitle>Approve subscription?</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                      This will activate {`${getSubUserLabel(sub)}'s`} subscription.
+                                      This will activate {getSubUserLabel(sub)}&apos;s subscription.
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
-                                    <AlertDialogCancel onClick={() => setLoading(false)}>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction
-                                      className="bg-green-600 text-white"
-                                      onClick={() => handleApprove(sub._id)}
-                                    >
-                                      Continue
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction className="bg-green-600 text-white" onClick={() => handleApprove(sub._id)}>
+                                      Approve
                                     </AlertDialogAction>
                                   </AlertDialogFooter>
                                 </AlertDialogContent>
                               </AlertDialog>
-                            </Td>
-                          </Tr>
-                        ))}
-                      </Tbody>
-                    </Table>
-                  </Box>
-                ) : (
-                  <Text color="gray.500">No subscriptions pending approval</Text>
-                )}
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button size="sm" colorScheme="red" variant="outline" borderRadius="lg" leftIcon={<XCircle size={14} />}>
+                                    Reject
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Reject subscription?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      This will reject {getSubUserLabel(sub)}&apos;s subscription request.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction className="bg-red-600 text-white" onClick={() => handleReject(sub._id)}>
+                                      Reject
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </>
+                          )}
+                        </HStack>
+                      </Flex>
+                    </CardBody>
+                  </Card>
+                ))}
+              </VStack>
+            ) : (
+              <Center py={12}>
+                <VStack spacing={3}>
+                  <Flex w={14} h={14} borderRadius="full" bg="gray.100" align="center" justify="center">
+                    <CheckCircle size={28} color="var(--chakra-colors-gray-400)" />
+                  </Flex>
+                  <Text color="gray.500" fontWeight="500">No {subFilter} subscriptions found.</Text>
+                </VStack>
+              </Center>
+            )}
+          </CardBody>
+        </Card>
+      )}
+
+      {/* Meal Plans Tab */}
+      {activeTab === "plans" && (
+        <Box>
+          {loadingPackages ? (
+            <Center py={12}><Spinner size="lg" color="purple.500" thickness="3px" /></Center>
+          ) : packages.length > 0 ? (
+            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
+              {packages.map((p) => {
+                const details = Array.isArray(p.details) ? p.details : [];
+                const typeColors = { standard: "green", premium: "purple", family: "blue", business: "orange" };
+                const colorScheme = typeColors[p.type] || "green";
+                return (
+                  <Card key={p._id} borderRadius="xl" boxShadow="sm" _hover={{ boxShadow: "md", transform: "translateY(-2px)" }} transition="all 0.2s" overflow="hidden">
+                    <Box h="4px" bg={`${colorScheme}.400`} />
+                    <CardBody>
+                      <Flex justify="space-between" align="start" mb={3}>
+                        <Box>
+                          <Badge colorScheme={colorScheme} borderRadius="full" mb={1} textTransform="capitalize">{p.type}</Badge>
+                          <Heading size="md">{p.name || p.type}</Heading>
+                        </Box>
+                        <HStack spacing={1}>
+                          <Tooltip label="Edit plan">
+                            <IconButton
+                              aria-label="Edit"
+                              icon={<Pencil size={14} />}
+                              size="sm"
+                              variant="ghost"
+                              colorScheme={colorScheme}
+                              onClick={() => openEditPlan(p)}
+                            />
+                          </Tooltip>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <IconButton
+                                aria-label="Delete"
+                                icon={<Trash2 size={14} />}
+                                size="sm"
+                                variant="ghost"
+                                colorScheme="red"
+                              />
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete plan?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Remove &quot;{p.name}&quot;. This cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction className="bg-red-600 text-white" onClick={() => handleDeletePlan(p._id)}>
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </HStack>
+                      </Flex>
+
+                      <Box mb={4}>
+                        <HStack spacing={2} align="baseline">
+                          <Text fontSize="2xl" fontWeight="800" color={`${colorScheme}.600`}>
+                            UGX {Number(p.price || 0).toLocaleString()}
+                          </Text>
+                          {p.previousPrice && (
+                            <Text fontSize="sm" color="gray.400" textDecoration="line-through">
+                              {Number(p.previousPrice).toLocaleString()}
+                            </Text>
+                          )}
+                        </HStack>
+                        <Text fontSize="xs" color="gray.500">per period</Text>
+                      </Box>
+
+                      {details.length > 0 && (
+                        <VStack align="stretch" spacing={1.5}>
+                          {details.slice(0, 5).map((d, i) => (
+                            <HStack key={i} spacing={2} align="start">
+                              <CheckCircle size={14} color="var(--chakra-colors-green-500)" style={{ marginTop: 2, flexShrink: 0 }} />
+                              <Text fontSize="sm" color="gray.600">{d}</Text>
+                            </HStack>
+                          ))}
+                          {details.length > 5 && (
+                            <Text fontSize="xs" color="gray.400">+{details.length - 5} more benefits</Text>
+                          )}
+                        </VStack>
+                      )}
+                    </CardBody>
+                  </Card>
+                );
+              })}
+
+              {/* Add plan card */}
+              <Card
+                borderRadius="xl"
+                borderWidth="2px"
+                borderStyle="dashed"
+                borderColor="gray.200"
+                cursor="pointer"
+                onClick={openAddPlan}
+                _hover={{ borderColor: "green.300", bg: "green.50" }}
+                transition="all 0.2s"
+              >
+                <CardBody>
+                  <Center h="full" minH="200px">
+                    <VStack spacing={3}>
+                      <Flex w={12} h={12} borderRadius="xl" bg="green.100" align="center" justify="center">
+                        <Plus size={24} color="var(--chakra-colors-green-600)" />
+                      </Flex>
+                      <Text fontWeight="600" color="green.600">Add New Plan</Text>
+                    </VStack>
+                  </Center>
+                </CardBody>
+              </Card>
+            </SimpleGrid>
+          ) : (
+            <Card borderRadius="xl">
+              <CardBody>
+                <Center py={12}>
+                  <VStack spacing={4}>
+                    <Flex w={16} h={16} borderRadius="full" bg="purple.50" align="center" justify="center">
+                      <Package size={32} color="var(--chakra-colors-purple-400)" />
+                    </Flex>
+                    <Text color="gray.500" fontWeight="500">No plans yet</Text>
+                    <Button leftIcon={<Plus size={16} />} colorScheme="green" onClick={openAddPlan} borderRadius="lg">
+                      Create Your First Plan
+                    </Button>
+                  </VStack>
+                </Center>
               </CardBody>
             </Card>
-          </TabPanel>
+          )}
+        </Box>
+      )}
 
-          {/* Meal Plans — subscription packages CRUD */}
-          <TabPanel px={0}>
-            <Card>
-              <CardBody>
-                <Flex justify="space-between" align="center" mb={4}>
-                  <Text fontWeight="600">Manage subscription plans (test plans)</Text>
-                  <Button
-                    leftIcon={<Plus size={18} />}
-                    colorScheme="green"
-                    size="sm"
-                    onClick={openAddPlan}
-                  >
-                    Add Plan
-                  </Button>
-                </Flex>
-                {loadingPackages ? (
-                  <Center py={8}><Spinner size="lg" /></Center>
-                ) : packages.length > 0 ? (
-                  <Box overflowX="auto">
-                    <Table size="sm">
-                      <Thead>
-                        <Tr>
-                          <Th>Type</Th>
-                          <Th>Name</Th>
-                          <Th>Price (UGX)</Th>
-                          <Th>Previous</Th>
-                          <Th></Th>
-                        </Tr>
-                      </Thead>
-                      <Tbody>
-                        {packages.map((p) => (
-                          <Tr key={p._id}>
-                            <Td><Badge colorScheme="green">{p.type}</Badge></Td>
-                            <Td>{p.name}</Td>
-                            <Td>{Number(p.price || 0).toLocaleString()}</Td>
-                            <Td>{p.previousPrice ? Number(p.previousPrice).toLocaleString() : "—"}</Td>
-                            <Td>
-                              <HStack>
-                                <IconButton
-                                  aria-label="Edit"
-                                  icon={<Pencil size={14} />}
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => openEditPlan(p)}
-                                />
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <IconButton
-                                      aria-label="Delete"
-                                      icon={<Trash2 size={14} />}
-                                      size="sm"
-                                      variant="ghost"
-                                      colorScheme="red"
-                                    />
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>Delete plan?</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        Remove &quot;{p.name}&quot;. This cannot be undone.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                      <AlertDialogAction
-                                        className="bg-red-600 text-white"
-                                        onClick={() => handleDeletePlan(p._id)}
-                                      >
-                                        Delete
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              </HStack>
-                            </Td>
-                          </Tr>
-                        ))}
-                      </Tbody>
-                    </Table>
-                  </Box>
-                ) : (
-                  <Text color="gray.500">No plans yet. Add one to manage meal plans.</Text>
-                )}
-              </CardBody>
-            </Card>
-          </TabPanel>
-
-          {/* Meal Calendars — full meal slot CRUD */}
-          <TabPanel px={0}>
-            <Card>
-              <CardBody>
-                <Text fontWeight="600" mb={2}>Meal calendar — add, edit meals, prices & images</Text>
-                <Text fontSize="sm" color="gray.600" mb={4}>
-                  Edit meal name, description, quantity, weekly/monthly prices, and upload images per slot. Syncs for low & middle income.
+      {/* Meal Calendar Tab */}
+      {activeTab === "calendar" && (
+        <Card borderRadius="xl" boxShadow="sm">
+          <CardBody>
+            <Flex justify="space-between" align="start" mb={4} flexWrap="wrap" gap={3}>
+              <Box>
+                <Text fontWeight="700" fontSize="lg">Meal Calendar</Text>
+                <Text fontSize="sm" color="gray.500">
+                  Edit meal name, description, quantity, prices, and images per slot
                 </Text>
-                {loadingSlots ? (
-                  <Center py={8}><Spinner size="lg" /></Center>
-                ) : (
-                  <MealSlotGrid
-                    slots={slots}
-                    overrides={overrides}
-                    upsertSlot={upsertSlot}
-                    upsertOverride={upsertOverride}
-                    toast={toast}
-                    loadSlots={loadSlots}
-                    loadOverrides={loadOverrides}
-                  />
-                )}
-              </CardBody>
-            </Card>
-          </TabPanel>
-        </TabPanels>
-      </Tabs>
+              </Box>
+            </Flex>
+            {loadingSlots ? (
+              <Center py={12}><Spinner size="lg" color="orange.500" thickness="3px" /></Center>
+            ) : (
+              <MealSlotGrid
+                slots={slots}
+                overrides={overrides}
+                upsertSlot={upsertSlot}
+                upsertOverride={upsertOverride}
+                toast={toast}
+                loadSlots={loadSlots}
+                loadOverrides={loadOverrides}
+              />
+            )}
+          </CardBody>
+        </Card>
+      )}
 
       {/* Add plan modal */}
-      <Modal isOpen={isPlanOpen} onClose={onPlanClose} size="xl" isCentered scrollBehavior="inside">
-        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
-        <ModalContent maxH="90vh" borderRadius="xl" boxShadow="2xl">
-          <ModalHeader fontSize="xl" fontWeight="bold" color="gray.800" borderBottomWidth="1px" py={5}>
-            Add subscription plan
-          </ModalHeader>
-          <ModalCloseButton top={4} right={4} size="lg" />
-          <ModalBody py={6} overflowY="auto">
-            <PlanForm form={planForm} setForm={setPlanForm} />
-          </ModalBody>
-          <ModalFooter borderTopWidth="1px" py={4} gap={3}>
-            <Button variant="outline" onClick={onPlanClose}>Cancel</Button>
-            <Button colorScheme="green" size="md" onClick={handleSavePlan}>Save Plan</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <PlanModal
+        isOpen={isPlanOpen}
+        onClose={onPlanClose}
+        title="Add Subscription Plan"
+        form={planForm}
+        setForm={setPlanForm}
+        onSave={handleSavePlan}
+        saving={saving}
+        saveLabel="Create Plan"
+      />
 
       {/* Edit plan modal */}
-      <Modal isOpen={isEditOpen} onClose={onEditClose} size="xl" isCentered scrollBehavior="inside">
-        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
-        <ModalContent maxH="90vh" borderRadius="xl" boxShadow="2xl">
-          <ModalHeader fontSize="xl" fontWeight="bold" color="gray.800" borderBottomWidth="1px" py={5}>
-            Edit plan
-          </ModalHeader>
-          <ModalCloseButton top={4} right={4} size="lg" />
-          <ModalBody py={6} overflowY="auto">
-            <PlanForm form={planForm} setForm={setPlanForm} />
-          </ModalBody>
-          <ModalFooter borderTopWidth="1px" py={4} gap={3}>
-            <Button variant="outline" onClick={onEditClose} isDisabled={saving}>Cancel</Button>
-            <Button colorScheme="green" size="md" onClick={handleSavePlan} isLoading={saving} loadingText="Updating...">Update Plan</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <PlanModal
+        isOpen={isEditOpen}
+        onClose={onEditClose}
+        title="Edit Plan"
+        form={planForm}
+        setForm={setPlanForm}
+        onSave={handleSavePlan}
+        saving={saving}
+        saveLabel="Update Plan"
+      />
     </Box>
+  );
+}
+
+function PlanModal({ isOpen, onClose, title, form, setForm, onSave, saving, saveLabel }) {
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered scrollBehavior="inside">
+      <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
+      <ModalContent maxH="90vh" borderRadius="xl" boxShadow="2xl">
+        <ModalHeader fontSize="lg" fontWeight="bold" borderBottomWidth="1px" py={4}>
+          {title}
+        </ModalHeader>
+        <ModalCloseButton top={4} right={4} />
+        <ModalBody py={5} overflowY="auto">
+          <PlanForm form={form} setForm={setForm} />
+        </ModalBody>
+        <ModalFooter borderTopWidth="1px" py={4} gap={3}>
+          <Button variant="outline" onClick={onClose} isDisabled={saving} borderRadius="lg">Cancel</Button>
+          <Button colorScheme="green" onClick={onSave} isLoading={saving} loadingText="Saving..." borderRadius="lg">
+            {saveLabel}
+          </Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
   );
 }
 
 function PlanForm({ form, setForm }) {
   const benefits = Array.isArray(form.details) ? form.details : (form.details ? String(form.details).split("\n").filter(Boolean) : []);
 
-  const setBenefits = (arr) => {
-    setForm((f) => ({ ...f, details: arr }));
-  };
-
-  const addBenefit = () => {
-    setBenefits([...benefits, ""]);
-  };
-
-  const updateBenefit = (index, value) => {
-    const next = [...benefits];
-    next[index] = value;
-    setBenefits(next);
-  };
-
-  const removeBenefit = (index) => {
-    setBenefits(benefits.filter((_, i) => i !== index));
-  };
-
-  const moveUp = (index) => {
-    if (index <= 0) return;
-    const next = [...benefits];
-    [next[index - 1], next[index]] = [next[index], next[index - 1]];
-    setBenefits(next);
-  };
-
-  const moveDown = (index) => {
-    if (index >= benefits.length - 1) return;
-    const next = [...benefits];
-    [next[index], next[index + 1]] = [next[index + 1], next[index]];
-    setBenefits(next);
-  };
+  const setBenefits = (arr) => setForm((f) => ({ ...f, details: arr }));
+  const addBenefit = () => setBenefits([...benefits, ""]);
+  const updateBenefit = (index, value) => { const next = [...benefits]; next[index] = value; setBenefits(next); };
+  const removeBenefit = (index) => setBenefits(benefits.filter((_, i) => i !== index));
+  const moveUp = (index) => { if (index <= 0) return; const next = [...benefits]; [next[index - 1], next[index]] = [next[index], next[index - 1]]; setBenefits(next); };
+  const moveDown = (index) => { if (index >= benefits.length - 1) return; const next = [...benefits]; [next[index], next[index + 1]] = [next[index + 1], next[index]]; setBenefits(next); };
 
   return (
-    <VStack spacing={6} align="stretch">
-      <SimpleGrid columns={{ base: 1, md: 2 }} spacing={5}>
+    <VStack spacing={5} align="stretch">
+      <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
         <FormControl isRequired>
-          <FormLabel fontWeight="600" color="gray.700">Plan Type</FormLabel>
-          <Select
-            value={form.type}
-            onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}
-            size="md"
-            borderRadius="lg"
-            borderColor="gray.300"
-            _focus={{ borderColor: "green.500", boxShadow: "0 0 0 1px var(--chakra-colors-green-500)" }}
-          >
+          <FormLabel fontWeight="600" fontSize="sm">Plan Type</FormLabel>
+          <Select value={form.type} onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))} borderRadius="lg">
             <option value="standard">Standard</option>
             <option value="premium">Premium</option>
             <option value="family">Family</option>
@@ -574,125 +818,44 @@ function PlanForm({ form, setForm }) {
           </Select>
         </FormControl>
         <FormControl isRequired>
-          <FormLabel fontWeight="600" color="gray.700">Display Name</FormLabel>
-          <Input
-            value={form.name}
-            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-            placeholder="e.g. Premium"
-            size="md"
-            borderRadius="lg"
-            borderColor="gray.300"
-          />
+          <FormLabel fontWeight="600" fontSize="sm">Display Name</FormLabel>
+          <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="e.g. Premium" borderRadius="lg" />
         </FormControl>
       </SimpleGrid>
 
-      <SimpleGrid columns={{ base: 1, md: 2 }} spacing={5}>
+      <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
         <FormControl isRequired>
-          <FormLabel fontWeight="600" color="gray.700">Price (UGX)</FormLabel>
-          <Input
-            type="number"
-            min={0}
-            value={form.price}
-            onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
-            placeholder="e.g. 30000"
-            size="md"
-            borderRadius="lg"
-            borderColor="gray.300"
-          />
+          <FormLabel fontWeight="600" fontSize="sm">Price (UGX)</FormLabel>
+          <Input type="number" min={0} value={form.price} onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))} placeholder="e.g. 30000" borderRadius="lg" />
         </FormControl>
         <FormControl>
-          <FormLabel fontWeight="600" color="gray.700">Previous Price (UGX, optional)</FormLabel>
-          <Input
-            type="number"
-            min={0}
-            value={form.previousPrice}
-            onChange={(e) => setForm((f) => ({ ...f, previousPrice: e.target.value }))}
-            placeholder="e.g. 40000"
-            size="md"
-            borderRadius="lg"
-            borderColor="gray.300"
-          />
-          <Text fontSize="xs" color="gray.500" mt={1}>Shown as strike-through on the subscription page</Text>
+          <FormLabel fontWeight="600" fontSize="sm">Previous Price (UGX)</FormLabel>
+          <Input type="number" min={0} value={form.previousPrice} onChange={(e) => setForm((f) => ({ ...f, previousPrice: e.target.value }))} placeholder="e.g. 40000" borderRadius="lg" />
+          <Text fontSize="xs" color="gray.500" mt={1}>Shown as strike-through</Text>
         </FormControl>
       </SimpleGrid>
 
       <Box>
         <Flex justify="space-between" align="center" mb={3}>
-          <FormLabel fontWeight="600" color="gray.700" mb={0}>Plan Benefits</FormLabel>
-          <Button
-            leftIcon={<Plus size={16} />}
-            size="sm"
-            colorScheme="green"
-            variant="outline"
-            onClick={addBenefit}
-          >
-            Add Benefit
+          <FormLabel fontWeight="600" fontSize="sm" mb={0}>Plan Benefits</FormLabel>
+          <Button leftIcon={<Plus size={14} />} size="sm" colorScheme="green" variant="outline" onClick={addBenefit} borderRadius="lg">
+            Add
           </Button>
         </Flex>
-        <Text fontSize="sm" color="gray.500" mb={3}>
-          Reorder benefits using the arrows. Top items appear first on the subscription page.
-        </Text>
         <VStack spacing={2} align="stretch">
           {benefits.map((benefit, index) => (
-            <Flex
-              key={index}
-              gap={2}
-              align="center"
-              p={3}
-              bg="gray.50"
-              borderRadius="lg"
-              borderWidth="1px"
-              borderColor="gray.200"
-              _hover={{ borderColor: "gray.300" }}
-            >
-              <HStack spacing={1} flexShrink={0}>
-                <IconButton
-                  aria-label="Move up"
-                  icon={<ChevronUp size={16} />}
-                  size="xs"
-                  variant="ghost"
-                  onClick={() => moveUp(index)}
-                  isDisabled={index === 0}
-                />
-                <IconButton
-                  aria-label="Move down"
-                  icon={<ChevronDown size={16} />}
-                  size="xs"
-                  variant="ghost"
-                  onClick={() => moveDown(index)}
-                  isDisabled={index === benefits.length - 1}
-                />
-              </HStack>
-              <Input
-                flex={1}
-                value={benefit}
-                onChange={(e) => updateBenefit(index, e.target.value)}
-                placeholder={`Benefit ${index + 1}`}
-                size="sm"
-                borderRadius="md"
-                borderColor="gray.300"
-              />
-              <IconButton
-                aria-label="Remove"
-                icon={<Trash2 size={14} />}
-                size="sm"
-                variant="ghost"
-                colorScheme="red"
-                onClick={() => removeBenefit(index)}
-              />
+            <Flex key={index} gap={2} align="center" p={2} bg="gray.50" borderRadius="lg" borderWidth="1px" borderColor="gray.200">
+              <VStack spacing={0} flexShrink={0}>
+                <IconButton aria-label="Up" icon={<ChevronUp size={14} />} size="xs" variant="ghost" onClick={() => moveUp(index)} isDisabled={index === 0} />
+                <IconButton aria-label="Down" icon={<ChevronDown size={14} />} size="xs" variant="ghost" onClick={() => moveDown(index)} isDisabled={index === benefits.length - 1} />
+              </VStack>
+              <Input flex={1} value={benefit} onChange={(e) => updateBenefit(index, e.target.value)} placeholder={`Benefit ${index + 1}`} size="sm" borderRadius="md" />
+              <IconButton aria-label="Remove" icon={<Trash2 size={14} />} size="sm" variant="ghost" colorScheme="red" onClick={() => removeBenefit(index)} />
             </Flex>
           ))}
           {benefits.length === 0 && (
-            <Box
-              p={6}
-              textAlign="center"
-              borderWidth="2px"
-              borderStyle="dashed"
-              borderColor="gray.200"
-              borderRadius="lg"
-              bg="gray.50"
-            >
-              <Text color="gray.500" fontSize="sm">No benefits yet. Click &quot;Add Benefit&quot; to add plan features.</Text>
+            <Box p={6} textAlign="center" borderWidth="2px" borderStyle="dashed" borderColor="gray.200" borderRadius="lg">
+              <Text color="gray.400" fontSize="sm">No benefits yet. Click &quot;Add&quot; to add plan features.</Text>
             </Box>
           )}
         </VStack>
@@ -708,32 +871,14 @@ function MealSlotGrid({ slots, overrides, upsertSlot, upsertOverride, toast, loa
   const [saving, setSaving] = useState(false);
   const { isOpen: isSlotModalOpen, onOpen: onSlotModalOpen, onClose: onSlotModalClose } = useDisclosure();
 
-  const getSlot = (day, mealType) =>
-    slots.find(
-      (s) =>
-        s.incomeLevel === incomeLevel &&
-        s.prepType === prepType &&
-        s.day === day &&
-        s.mealType === mealType
-    );
-
-  const getOverride = (day, mealType) =>
-    overrides.find(
-      (o) =>
-        o.incomeLevel === incomeLevel &&
-        o.prepType === prepType &&
-        o.day === day &&
-        o.mealType === mealType
-    );
+  const getSlot = (day, mealType) => slots.find((s) => s.incomeLevel === incomeLevel && s.prepType === prepType && s.day === day && s.mealType === mealType);
+  const getOverride = (day, mealType) => overrides.find((o) => o.incomeLevel === incomeLevel && o.prepType === prepType && o.day === day && o.mealType === mealType);
 
   const openEditor = (day, mealType) => {
     const slot = getSlot(day, mealType);
     const override = getOverride(day, mealType);
     setEditingSlot({
-      day,
-      mealType,
-      incomeLevel,
-      prepType,
+      day, mealType, incomeLevel, prepType,
       mealName: slot?.mealName || "",
       description: slot?.description || "",
       quantity: slot?.quantity || "",
@@ -745,99 +890,115 @@ function MealSlotGrid({ slots, overrides, upsertSlot, upsertOverride, toast, loa
   };
 
   const handleSaveSlot = async (form) => {
-    if (!form.mealName || !form.mealName.trim()) {
-      toast({ title: "Meal name required", description: "Please enter a meal name before saving.", status: "warning", duration: 6000, isClosable: true, position: "top-right" });
-      return;
-    }
-    if (!form.priceWeekly && !form.priceMonthly) {
-      toast({ title: "Add at least one price", description: "Set either a weekly or monthly price so the plan can be billed correctly.", status: "warning", duration: 6000, isClosable: true, position: "top-right" });
+    if (!form.mealName?.trim()) {
+      toast({ title: "Meal name required", status: "warning", duration: 4000, isClosable: true });
       return;
     }
     setSaving(true);
     try {
       await upsertSlot({
-        incomeLevel: form.incomeLevel,
-        prepType: form.prepType,
-        day: form.day,
-        mealType: form.mealType,
-        mealName: form.mealName,
-        description: form.description,
-        quantity: form.quantity,
-        priceWeekly: Number(form.priceWeekly) || 0,
-        priceMonthly: Number(form.priceMonthly) || 0,
+        incomeLevel: form.incomeLevel, prepType: form.prepType, day: form.day, mealType: form.mealType,
+        mealName: form.mealName, description: form.description, quantity: form.quantity,
+        priceWeekly: Number(form.priceWeekly) || 0, priceMonthly: Number(form.priceMonthly) || 0,
         imageUrl: form.imageUrl || "",
       }).unwrap();
       await upsertOverride({
-        incomeLevel: form.incomeLevel,
-        prepType: form.prepType,
-        day: form.day,
-        mealType: form.mealType,
+        incomeLevel: form.incomeLevel, prepType: form.prepType, day: form.day, mealType: form.mealType,
         imageUrl: form.imageUrl || "",
       }).unwrap();
       loadSlots();
       loadOverrides();
-      toast({ title: "Meal saved", description: "Meal details have been updated on the calendar.", status: "success", duration: 5000, isClosable: true, position: "top-right" });
+      toast({ title: "Meal saved", status: "success", duration: 3000, isClosable: true });
       onSlotModalClose();
       setEditingSlot(null);
     } catch (e) {
-      const msg = e?.data?.message || e?.message || "Failed to save this meal. Please check your connection and try again.";
-      toast({ title: "Save failed", description: msg, status: "error", duration: 8000, isClosable: true, position: "top-right" });
+      toast({ title: "Save failed", description: e?.data?.message || "Failed", status: "error", duration: 4000, isClosable: true });
     } finally {
       setSaving(false);
     }
   };
 
+  const filledCount = DAYS.reduce((acc, day) => acc + MEAL_TYPES.filter((mt) => getSlot(day, mt)).length, 0);
+
   return (
     <>
       <VStack align="stretch" spacing={4}>
-        <HStack flexWrap="wrap" gap={2}>
-          <Select
-            w="140px"
-            value={incomeLevel}
-            onChange={(e) => setIncomeLevel(e.target.value)}
-            size="sm"
-          >
-            <option value="middle">Middle income</option>
-            <option value="low">Low income</option>
-            <option value="high">High budget</option>
-          </Select>
-          <Select
-            w="160px"
-            value={prepType}
-            onChange={(e) => setPrepType(e.target.value)}
-            size="sm"
-          >
-            <option value="ready-to-eat">Ready to eat</option>
-            <option value="ready-to-cook">Ready to cook</option>
-          </Select>
-        </HStack>
-        <Box overflowX="auto" minW="0" sx={{ WebkitOverflowScrolling: "touch" }}>
-          <Table size="sm" minW="600px">
-            <Thead>
+        <Flex gap={3} flexWrap="wrap" align="center">
+          <HStack spacing={2}>
+            <Text fontSize="sm" fontWeight="600" color="gray.600">Income:</Text>
+            <Select w="150px" value={incomeLevel} onChange={(e) => setIncomeLevel(e.target.value)} size="sm" borderRadius="lg" fontWeight="500">
+              <option value="middle">Middle</option>
+              <option value="low">Low</option>
+              <option value="high">High</option>
+            </Select>
+          </HStack>
+          <HStack spacing={2}>
+            <Text fontSize="sm" fontWeight="600" color="gray.600">Type:</Text>
+            <Select w="160px" value={prepType} onChange={(e) => setPrepType(e.target.value)} size="sm" borderRadius="lg" fontWeight="500">
+              <option value="ready-to-eat">Ready to eat</option>
+              <option value="ready-to-cook">Ready to cook</option>
+            </Select>
+          </HStack>
+          <Badge colorScheme="orange" borderRadius="full" px={2}>
+            {filledCount}/{DAYS.length * MEAL_TYPES.length} slots filled
+          </Badge>
+        </Flex>
+
+        <Box overflowX="auto" borderRadius="xl" borderWidth="1px" borderColor="gray.200">
+          <Table size="sm">
+            <Thead bg="gray.50">
               <Tr>
-                <Th>Day</Th>
-                <Th>Breakfast</Th>
-                <Th>Lunch</Th>
-                <Th>Supper</Th>
+                <Th borderTopLeftRadius="xl" fontWeight="700">Day</Th>
+                {MEAL_TYPES.map((mt) => (
+                  <Th key={mt} textTransform="capitalize" fontWeight="700">{mt}</Th>
+                ))}
               </Tr>
             </Thead>
             <Tbody>
               {DAYS.map((day) => (
-                <Tr key={day}>
-                  <Td fontWeight="600" textTransform="capitalize">{day}</Td>
+                <Tr key={day} _hover={{ bg: "gray.25" }}>
+                  <Td fontWeight="600" textTransform="capitalize" color="gray.700">{day}</Td>
                   {MEAL_TYPES.map((mealType) => {
                     const slot = getSlot(day, mealType);
                     const override = getOverride(day, mealType);
                     const imgUrl = slot?.imageUrl || override?.imageUrl;
                     return (
-                      <Td key={mealType}>
-                        <MealSlotCell
-                          slot={slot}
-                          imgUrl={imgUrl}
-                          day={day}
-                          mealType={mealType}
-                          onEdit={() => openEditor(day, mealType)}
-                        />
+                      <Td key={mealType} p={2}>
+                        <Box
+                          borderRadius="lg"
+                          borderWidth="1px"
+                          borderColor={slot ? "green.200" : "gray.200"}
+                          bg={slot ? "green.50" : "white"}
+                          p={2}
+                          cursor="pointer"
+                          onClick={() => openEditor(day, mealType)}
+                          _hover={{ borderColor: "green.400", boxShadow: "sm" }}
+                          transition="all 0.15s"
+                          minW="120px"
+                        >
+                          {imgUrl && (
+                            <Box w="full" h="12" borderRadius="md" overflow="hidden" bg="gray.100" mb={1}>
+                              <Box as="img" src={imgUrl} alt="" w="full" h="full" objectFit="cover" onError={(e) => { e.target.style.display = "none"; }} />
+                            </Box>
+                          )}
+                          {slot?.mealName ? (
+                            <>
+                              <Text fontSize="xs" fontWeight="600" noOfLines={1} color="gray.800">{slot.mealName}</Text>
+                              {(slot.priceWeekly > 0 || slot.priceMonthly > 0) && (
+                                <Text fontSize="10px" color="gray.500">
+                                  {slot.priceWeekly > 0 && `W: ${Number(slot.priceWeekly).toLocaleString()}`}
+                                  {slot.priceWeekly > 0 && slot.priceMonthly > 0 && " / "}
+                                  {slot.priceMonthly > 0 && `M: ${Number(slot.priceMonthly).toLocaleString()}`}
+                                </Text>
+                              )}
+                            </>
+                          ) : (
+                            <HStack spacing={1} justify="center" py={1}>
+                              <Plus size={12} color="var(--chakra-colors-gray-400)" />
+                              <Text fontSize="xs" color="gray.400">Add</Text>
+                            </HStack>
+                          )}
+                        </Box>
                       </Td>
                     );
                   })}
@@ -856,22 +1017,6 @@ function MealSlotGrid({ slots, overrides, upsertSlot, upsertOverride, toast, loa
         saving={saving}
       />
     </>
-  );
-}
-
-function MealSlotCell({ slot, imgUrl, day, mealType, onEdit }) {
-  return (
-    <VStack align="stretch" spacing={1}>
-      {imgUrl && (
-        <Box pos="relative" w="full" h="16" borderRadius="md" overflow="hidden" bg="gray.100">
-          <Box as="img" src={imgUrl} alt="" w="full" h="full" objectFit="cover" onError={(e) => { e.target.style.display = "none"; }} />
-        </Box>
-      )}
-      {slot?.mealName && <Text fontSize="xs" fontWeight="600" noOfLines={2}>{slot.mealName}</Text>}
-      <Button size="xs" variant="outline" colorScheme="green" onClick={onEdit} leftIcon={<Pencil size={12} />}>
-        Edit
-      </Button>
-    </VStack>
   );
 }
 
@@ -894,14 +1039,7 @@ function MealSlotEditorModal({ isOpen, onClose, slot, onSave, saving = false }) 
     const file = e?.target?.files?.[0];
     if (!file) return;
     if (!file.type?.startsWith("image/")) {
-      toast({
-        title: "Invalid file",
-        description: "Please upload an image file (JPG, PNG, WEBP, etc).",
-        status: "warning",
-        duration: 6000,
-        isClosable: true,
-        position: "top-right",
-      });
+      toast({ title: "Invalid file", description: "Please upload an image file", status: "warning", duration: 4000, isClosable: true });
       return;
     }
     setUploading(true);
@@ -912,13 +1050,12 @@ function MealSlotEditorModal({ isOpen, onClose, slot, onSave, saving = false }) 
       const data = await res.json().catch(() => ({}));
       if (data?.status === "Success" && data?.data?.imageUrl) {
         setForm((f) => ({ ...f, imageUrl: data.data.imageUrl }));
-        toast({ title: "Image uploaded", description: "The image has been uploaded. Click Save to apply it to this meal slot.", status: "success", duration: 6000, isClosable: true, position: "top-right" });
+        toast({ title: "Image uploaded", status: "success", duration: 3000, isClosable: true });
       } else {
         throw new Error(data?.message || "Upload failed");
       }
     } catch (err) {
-      const msg = err?.message || "Image upload failed. You can paste an image URL instead.";
-      toast({ title: "Upload failed", description: msg, status: "error", duration: 8000, isClosable: true, position: "top-right" });
+      toast({ title: "Upload failed", description: err?.message || "Failed", status: "error", duration: 4000, isClosable: true });
     } finally {
       setUploading(false);
       e.target.value = "";
@@ -929,84 +1066,60 @@ function MealSlotEditorModal({ isOpen, onClose, slot, onSave, saving = false }) 
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size={{ base: "full", md: "lg" }} isCentered scrollBehavior="inside" closeOnOverlayClick={!saving}>
-      <ModalOverlay />
+      <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
       <ModalContent maxH="90vh" borderRadius="xl">
-        <ModalHeader>Edit meal — {slot.day} {slot.mealType}</ModalHeader>
+        <ModalHeader borderBottomWidth="1px" py={4}>
+          <HStack spacing={2}>
+            <UtensilsCrossed size={18} />
+            <Text textTransform="capitalize">{slot.day} — {slot.mealType}</Text>
+          </HStack>
+        </ModalHeader>
         <ModalCloseButton />
         <form onSubmit={handleSubmit}>
           <ModalBody py={4}>
             <VStack spacing={4} align="stretch">
               <FormControl>
-                <FormLabel>Meal name</FormLabel>
-                <Input
-                  value={form.mealName || ""}
-                  onChange={(e) => setForm((f) => ({ ...f, mealName: e.target.value }))}
-                  placeholder="e.g. Rice with Bean Stew"
-                />
+                <FormLabel fontWeight="600" fontSize="sm">Meal Name</FormLabel>
+                <Input value={form.mealName || ""} onChange={(e) => setForm((f) => ({ ...f, mealName: e.target.value }))} placeholder="e.g. Rice with Bean Stew" borderRadius="lg" />
               </FormControl>
               <FormControl>
-                <FormLabel>Description</FormLabel>
-                <Textarea
-                  value={form.description || ""}
-                  onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-                  placeholder="e.g. 200g rice, 100g bean stew..."
-                  rows={2}
-                />
+                <FormLabel fontWeight="600" fontSize="sm">Description</FormLabel>
+                <Textarea value={form.description || ""} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} placeholder="e.g. 200g rice, 100g bean stew..." rows={2} borderRadius="lg" />
               </FormControl>
               <FormControl>
-                <FormLabel>Quantity</FormLabel>
-                <Input
-                  value={form.quantity || ""}
-                  onChange={(e) => setForm((f) => ({ ...f, quantity: e.target.value }))}
-                  placeholder="e.g. ~550g"
-                />
+                <FormLabel fontWeight="600" fontSize="sm">Quantity</FormLabel>
+                <Input value={form.quantity || ""} onChange={(e) => setForm((f) => ({ ...f, quantity: e.target.value }))} placeholder="e.g. ~550g" borderRadius="lg" />
               </FormControl>
               <SimpleGrid columns={2} spacing={4}>
                 <FormControl>
-                  <FormLabel>Price weekly (UGX)</FormLabel>
-                  <Input
-                    type="number"
-                    min={0}
-                    value={form.priceWeekly ?? ""}
-                    onChange={(e) => setForm((f) => ({ ...f, priceWeekly: e.target.value }))}
-                    placeholder="e.g. 87500"
-                  />
+                  <FormLabel fontWeight="600" fontSize="sm">Weekly (UGX)</FormLabel>
+                  <Input type="number" min={0} value={form.priceWeekly ?? ""} onChange={(e) => setForm((f) => ({ ...f, priceWeekly: e.target.value }))} placeholder="87500" borderRadius="lg" />
                 </FormControl>
                 <FormControl>
-                  <FormLabel>Price monthly (UGX)</FormLabel>
-                  <Input
-                    type="number"
-                    min={0}
-                    value={form.priceMonthly ?? ""}
-                    onChange={(e) => setForm((f) => ({ ...f, priceMonthly: e.target.value }))}
-                    placeholder="e.g. 350000"
-                  />
+                  <FormLabel fontWeight="600" fontSize="sm">Monthly (UGX)</FormLabel>
+                  <Input type="number" min={0} value={form.priceMonthly ?? ""} onChange={(e) => setForm((f) => ({ ...f, priceMonthly: e.target.value }))} placeholder="350000" borderRadius="lg" />
                 </FormControl>
               </SimpleGrid>
               <FormControl>
-                <FormLabel>Image (URL or upload)</FormLabel>
+                <FormLabel fontWeight="600" fontSize="sm">Image</FormLabel>
                 <HStack spacing={2}>
-                  <Input
-                    value={form.imageUrl || ""}
-                    onChange={(e) => setForm((f) => ({ ...f, imageUrl: e.target.value }))}
-                    placeholder="https://... or upload below"
-                  />
-                  <Button as="label" size="sm" colorScheme="green" cursor="pointer" isLoading={uploading}>
+                  <Input value={form.imageUrl || ""} onChange={(e) => setForm((f) => ({ ...f, imageUrl: e.target.value }))} placeholder="URL or upload" borderRadius="lg" />
+                  <Button as="label" size="sm" colorScheme="green" cursor="pointer" isLoading={uploading} borderRadius="lg">
                     Upload
-                    <input type="file" accept="image/*" hidden onChange={handleImageUpload} />
+                    <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden onChange={handleImageUpload} />
                   </Button>
                 </HStack>
                 {form.imageUrl && (
-                  <Box mt={2} w="full" h="24" borderRadius="md" overflow="hidden" bg="gray.100">
+                  <Box mt={2} w="full" h="32" borderRadius="lg" overflow="hidden" bg="gray.100">
                     <Box as="img" src={form.imageUrl} alt="" w="full" h="full" objectFit="cover" onError={(e) => { e.target.style.display = "none"; }} />
                   </Box>
                 )}
               </FormControl>
             </VStack>
           </ModalBody>
-          <ModalFooter>
-            <Button variant="outline" onClick={onClose} isDisabled={saving}>Cancel</Button>
-            <Button colorScheme="green" type="submit" isLoading={saving} loadingText="Saving...">Save</Button>
+          <ModalFooter borderTopWidth="1px" gap={3}>
+            <Button variant="outline" onClick={onClose} isDisabled={saving} borderRadius="lg">Cancel</Button>
+            <Button colorScheme="green" type="submit" isLoading={saving} loadingText="Saving..." borderRadius="lg">Save Meal</Button>
           </ModalFooter>
         </form>
       </ModalContent>

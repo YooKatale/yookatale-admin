@@ -38,3 +38,6 @@ workspace.json
 packgbaxk.txt
 
 *.md
+
+# TinyMCE self-hosted (copied from node_modules via postinstall)
+/public/tinymce
