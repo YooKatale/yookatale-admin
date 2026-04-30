@@ -34,7 +34,6 @@ import {
   FiChevronRight,
 } from 'react-icons/fi'
 import { ChevronDown } from 'lucide-react'
-import { IsAccountValid, IsLoggedIn } from "@middleware/middleware";
 import { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 import { BACKEND_URL } from "@constants/constant";
@@ -305,7 +304,6 @@ const SidebarWithHeader = ({ children, ...rest }) => {
     if (!userInfo?._id) {
       router.push("/signin");
     }
-    IsAccountValid();
   }, [userInfo, router]);
 
   useEffect(() => {
