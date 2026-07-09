@@ -9,6 +9,7 @@ import {
   TableHead,
   TableRow,
 } from '@components/ui/table';
+import { DB_URL } from '@config/config';
 
 const Product = () => {
   const [products, setProducts] = useState([]);
@@ -16,7 +17,7 @@ const Product = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get("https://yookatale-server.onrender.com/admin/product/get");
+      const response = await axios.get(`${DB_URL}/admin/product/get`);
       if (response.status === 200) {
         setProducts(response.data);
       }
@@ -46,7 +47,7 @@ const Product = () => {
         },
       };
       try {
-        const res = await axios.put(`https://yookatale-server.onrender.com/admin/product/edit/${editingProduct._id}`, data);
+        const res = await axios.put(`${DB_URL}/admin/product/edit/${editingProduct._id}`, data);
         if (res.status === 200) {
           setProducts((prevProducts) =>
             prevProducts.map((p) => (p._id === editingProduct._id ? editingProduct : p))

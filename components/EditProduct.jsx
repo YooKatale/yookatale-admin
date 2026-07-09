@@ -16,7 +16,7 @@ const EditProduct = ({ product, onClose }) => {
 
   const handleUpdate = async () => {
     try {
-      const res = await axios.put(`https://yookatale-server.onrender.com/admin/product/edit/${product._id}`, formData);
+      const res = await axios.put(`${DB_URL}/admin/product/edit/${product._id}`, formData);
       if (res.status === 200) {
         onClose(); // Close the editing form or modal
       } else {

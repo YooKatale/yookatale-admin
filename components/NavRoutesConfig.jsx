@@ -93,7 +93,9 @@ export const SideNavGroups = [
   },
   {
     groupLabel: null,
-    items: [{ name: "Team Tasks", icon: ClipboardCheck, path: "/hrreports", editorCanAccess: true }],
+    items: [
+      { name: "Team Tasks", icon: ClipboardCheck, path: "/hrreports", editorCanAccess: true }
+    ],
   },
   {
     groupLabel: null,
@@ -109,7 +111,10 @@ export const SideNavGroups = [
   },
   {
     groupLabel: null,
-    items: [{ name: "Settings", icon: Settings2, path: "/settings", editorCanAccess: true }],
+    items: [
+      { name: "Settings", icon: Settings2, path: "/settings", editorCanAccess: true },
+      { name: "Users", icon: Users2Icon, path: "/users", editorCanAccess: false },
+    ],
   },
 ];
 
