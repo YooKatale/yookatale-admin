@@ -42,6 +42,7 @@ const ResetPassword = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
+  const id = searchParams.get("id");
 
   const [resetPassword] = useResetPasswordMutation();
   const { toast } = useToast();
@@ -94,7 +95,7 @@ const ResetPassword = () => {
 
     try {
       setLoading(true);
-      await resetPassword({ token, password }).unwrap();
+      await resetPassword({ id, token, password }).unwrap();
       setSubmitAttempts(0);
       setLockUntil(null);
       setSuccess(true);
