@@ -1,25 +1,19 @@
 "use client";
 
-import Navbar from "@/components/Navbar";
-import Sidenav from "@/components/Sidenav";
-import { useDashboardDataMutation } from "@Slices/userApiSlice";
+import { useLazyGetDashboardDataQuery } from "@Slices/userApiSlice";
 import { useVendorGetMutation } from "@Slices/vendorApiSlice";
 import { usePartnerGetMutation } from "@Slices/partnersApiSlice";
-import { Button } from "@components/ui/button";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@components/ui/table";
 import moment from "moment/moment";
-import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Box, Input, InputGroup, InputLeftElement, useColorModeValue, Flex, Text, Heading, Grid, GridItem, Card, CardBody, CardHeader, HStack, VStack, Badge, Spinner, Center } from "@chakra-ui/react";
+import { Box, Input, InputGroup, InputLeftElement, Flex, Text, Heading, Grid, Card, CardBody, CardHeader, HStack, VStack, Badge, Spinner, Center } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { motion } from "framer-motion";
@@ -42,7 +36,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [visitStats, setVisitStats] = useState({ daily: [], total: 0, today: 0 });
 
-  const [fetchDashboardData] = useDashboardDataMutation();
+  const [fetchDashboardData] = useLazyGetDashboardDataQuery();
   const [fetchVisitStats] = useGetVisitStatsMutation();
   const [vendorGet] = useVendorGetMutation();
   const [partnerGet] = usePartnerGetMutation();
@@ -100,7 +94,7 @@ export default function Home() {
     handleVendorFetch();
     handlePartnerFetch();
     if (!isEditor) {
-      fetchVisitStats(30).unwrap().then((r) => { if (r?.status === "Success") setVisitStats(r.data); }).catch(() => {});
+      fetchVisitStats(30).unwrap().then((r) => { if (r?.status === "Success") setVisitStats(r.data); }).catch(() => { });
     }
   }, []);
 
@@ -131,12 +125,12 @@ export default function Home() {
         count: item.count || 0
       }));
     }
-    
+
     // Fallback: process from orders array
     const orders = Dashboard?.PendingOrders?.orders || [];
     const last7Days = [];
     const today = new Date();
-    
+
     for (let i = 6; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
@@ -147,7 +141,7 @@ export default function Home() {
       }).length;
       last7Days.push({ date: dateStr, count });
     }
-    
+
     return last7Days;
   };
 
@@ -446,99 +440,99 @@ export default function Home() {
 
         {/* Recent Orders - Admin only; hidden for editors */}
         {!isEditor && (
-        <motion.div variants={itemVariants}>
-          <Card
-            bg="white"
-            borderRadius="xl"
-            boxShadow="0 4px 20px rgba(0, 0, 0, 0.08)"
-            border="1px solid"
-            borderColor="gray.100"
-          >
-            <CardHeader pb={4}>
-              <HStack justify="space-between" flexWrap="wrap" gap={4}>
-                <VStack align="start" spacing={1}>
-                  <Heading size="md" color="gray.800" fontFamily="Inter, sans-serif">
-                    Recent Orders
-                  </Heading>
-                  <Text fontSize="sm" color="gray.600">
-                    Latest customer orders
-                  </Text>
-                </VStack>
-                <InputGroup maxW="300px">
-                  <InputLeftElement pointerEvents="none">
-                    <Search size={18} color="gray" />
-                  </InputLeftElement>
-                  <Input
-                    placeholder="Search by location..."
-                    value={searchInput}
-                    onChange={(e) => {
-                      setSearchInput(e.target.value);
-                      filterOrdersByLocation();
-                    }}
-                    borderRadius="lg"
-                    borderColor="gray.300"
-                    _focus={{ borderColor: "green.500", boxShadow: "0 0 0 1px #48BB78" }}
-                  />
-                </InputGroup>
-              </HStack>
-            </CardHeader>
-            <CardBody pt={0}>
-              {Dashboard?.PendingOrders && Dashboard?.PendingOrders?.orders && filteredOrders.length > 0 ? (
-                <Box overflowX="auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead fontWeight="600">Customer</TableHead>
-                        <TableHead fontWeight="600">Items</TableHead>
-                        <TableHead fontWeight="600">Payment</TableHead>
-                        <TableHead fontWeight="600">Total</TableHead>
-                        <TableHead fontWeight="600">Date</TableHead>
-                        <TableHead fontWeight="600">Address</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredOrders.slice(0, 10).map((order, index) => (
-                        <TableRow key={index} _hover={{ bg: "gray.50" }}>
-                          <TableCell fontWeight="600">
-                            {order?.user?.firstname} {order?.user?.lastname}
-                          </TableCell>
-                          <TableCell>{order?.productItems}</TableCell>
-                          <TableCell>
-                            <Badge
-                              colorScheme={
-                                order?.paymentMethod === "card" ? "blue" :
-                                order?.paymentMethod === "mobileMoney" ? "green" : "orange"
-                              }
-                              borderRadius="full"
-                              px={3}
-                              py={1}
-                            >
-                              {order?.paymentMethod || order?.payment?.paymentMethod || "N/A"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell fontWeight="600" color="green.600">
-                            UGX {order?.total?.toLocaleString()}
-                          </TableCell>
-                          <TableCell fontSize="sm" color="gray.600">
-                            {moment(order?.createdAt).fromNow()}
-                          </TableCell>
-                          <TableCell fontSize="sm" color="gray.600">
-                            {order?.deliveryAddress?.address1}
-                          </TableCell>
+          <motion.div variants={itemVariants}>
+            <Card
+              bg="white"
+              borderRadius="xl"
+              boxShadow="0 4px 20px rgba(0, 0, 0, 0.08)"
+              border="1px solid"
+              borderColor="gray.100"
+            >
+              <CardHeader pb={4}>
+                <HStack justify="space-between" flexWrap="wrap" gap={4}>
+                  <VStack align="start" spacing={1}>
+                    <Heading size="md" color="gray.800" fontFamily="Inter, sans-serif">
+                      Recent Orders
+                    </Heading>
+                    <Text fontSize="sm" color="gray.600">
+                      Latest customer orders
+                    </Text>
+                  </VStack>
+                  <InputGroup maxW="300px">
+                    <InputLeftElement pointerEvents="none">
+                      <Search size={18} color="gray" />
+                    </InputLeftElement>
+                    <Input
+                      placeholder="Search by location..."
+                      value={searchInput}
+                      onChange={(e) => {
+                        setSearchInput(e.target.value);
+                        filterOrdersByLocation();
+                      }}
+                      borderRadius="lg"
+                      borderColor="gray.300"
+                      _focus={{ borderColor: "green.500", boxShadow: "0 0 0 1px #48BB78" }}
+                    />
+                  </InputGroup>
+                </HStack>
+              </CardHeader>
+              <CardBody pt={0}>
+                {Dashboard?.PendingOrders && Dashboard?.PendingOrders?.orders && filteredOrders.length > 0 ? (
+                  <Box overflowX="auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead fontWeight="600">Customer</TableHead>
+                          <TableHead fontWeight="600">Items</TableHead>
+                          <TableHead fontWeight="600">Payment</TableHead>
+                          <TableHead fontWeight="600">Total</TableHead>
+                          <TableHead fontWeight="600">Date</TableHead>
+                          <TableHead fontWeight="600">Address</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </Box>
-              ) : (
-                <Box textAlign="center" py={12}>
-                  <ShoppingCart size={48} color="#CBD5E0" style={{ margin: "0 auto 16px" }} />
-                  <Text color="gray.500" fontWeight="500">No orders found</Text>
-                </Box>
-              )}
-            </CardBody>
-          </Card>
-        </motion.div>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredOrders.slice(0, 10).map((order, index) => (
+                          <TableRow key={index} _hover={{ bg: "gray.50" }}>
+                            <TableCell fontWeight="600">
+                              {order?.user?.firstname} {order?.user?.lastname}
+                            </TableCell>
+                            <TableCell>{order?.productItems}</TableCell>
+                            <TableCell>
+                              <Badge
+                                colorScheme={
+                                  order?.paymentMethod === "card" ? "blue" :
+                                    order?.paymentMethod === "mobileMoney" ? "green" : "orange"
+                                }
+                                borderRadius="full"
+                                px={3}
+                                py={1}
+                              >
+                                {order?.paymentMethod || order?.payment?.paymentMethod || "N/A"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell fontWeight="600" color="green.600">
+                              UGX {order?.total?.toLocaleString()}
+                            </TableCell>
+                            <TableCell fontSize="sm" color="gray.600">
+                              {moment(order?.createdAt).fromNow()}
+                            </TableCell>
+                            <TableCell fontSize="sm" color="gray.600">
+                              {order?.deliveryAddress?.address1}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </Box>
+                ) : (
+                  <Box textAlign="center" py={12}>
+                    <ShoppingCart size={48} color="#CBD5E0" style={{ margin: "0 auto 16px" }} />
+                    <Text color="gray.500" fontWeight="500">No orders found</Text>
+                  </Box>
+                )}
+              </CardBody>
+            </Card>
+          </motion.div>
         )}
 
         {/* Trends row — visitor stats + side-by-side charts, admin only */}

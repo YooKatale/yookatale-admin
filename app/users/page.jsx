@@ -11,11 +11,12 @@ import {
 import {
   FiUser, FiMail, FiPhone,
   FiSearch, FiBriefcase, FiCalendar,
-  FiRefreshCw, FiTrash2, FiX, FiEdit2
+  FiRefreshCw, FiTrash2, FiX, FiEdit2, FiLock
 } from "react-icons/fi";
 import { UserPlus, Users2 } from "lucide-react";
 import { useSelector } from "react-redux";
-import { useAccountsGetMutation, useDeleteUserAccountMutation } from "@Slices/userApiSlice";
+
+import { useLazyGetAccountsQuery, useDeleteUserAccountMutation, useForgotPasswordMutation } from "@Slices/userApiSlice";
 import AddAccount from "@components/modals/AddAccount";
 
 // Stats Card
@@ -36,11 +37,14 @@ function StatCard({ label, value, color, icon }) {
 }
 
 // Account Card
-function AccountCard({ app, formatDate, onDeleted, onEdit }) {
+function AccountCard({ app, formatDate, onDeleted, onEdit, canManage }) {
   const [deleting, setDeleting] = useState(false);
+  const [sendingResetPasswordRequest, setSendingResetPasswordRequest] = useState(false);
+
   const { isOpen: isAlertOpen, onOpen: onAlertOpen, onClose: onAlertClose } = useDisclosure();
   const cancelRef = useRef();
   const [deleteAccount] = useDeleteUserAccountMutation();
+  const [forgotPassword] = useForgotPasswordMutation();
   const toast = useToast();
 
   const handleDelete = async () => {
@@ -60,6 +64,31 @@ function AccountCard({ app, formatDate, onDeleted, onEdit }) {
     } finally {
       setDeleting(false);
       onAlertClose();
+    }
+  };
+
+  // Triggers the reset-email mutation.
+  const handleForgotPassword = async (id, email) => {
+    setSendingResetPasswordRequest(true);
+    try {
+      await forgotPassword({ id, email }).unwrap();
+      toast({
+        title: "Password reset email sent",
+        description: `A reset link was sent to ${email}`,
+        status: "success",
+        duration: 6000,
+        isClosable: true,
+      });
+    } catch (e) {
+      toast({
+        title: "Failed to send reset email",
+        description: e?.data?.message || "Please try again",
+        status: "error",
+        duration: 6000,
+        isClosable: true,
+      });
+    } finally {
+      setSendingResetPasswordRequest(false);
     }
   };
 
@@ -112,20 +141,32 @@ function AccountCard({ app, formatDate, onDeleted, onEdit }) {
 
             {/* Action buttons */}
             <HStack spacing="2" flexShrink={0} wrap="wrap">
-              <Button
-                size="xs" leftIcon={<FiEdit2 />}
-                variant="outline" colorScheme="blue" borderRadius="md"
-                onClick={(e) => { e.stopPropagation(); onEdit(app); }}
-              >
-                Edit
-              </Button>
-              <Button
-                size="xs" leftIcon={<FiTrash2 />}
-                variant="outline" colorScheme="red" borderRadius="md"
-                onClick={(e) => { e.stopPropagation(); onAlertOpen(); }}
-              >
-                Delete
-              </Button>
+              {canManage &&
+                <>
+                  <Button
+                    size="xs" leftIcon={<FiEdit2 />}
+                    variant="outline" colorScheme="blue" borderRadius="md"
+                    onClick={(e) => { e.stopPropagation(); onEdit(app); }}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    size="xs" leftIcon={<FiLock />}
+                    variant="outline" colorScheme="gray" borderRadius="md"
+                    isLoading={sendingResetPasswordRequest}
+                    onClick={(e) => { e.stopPropagation(); handleForgotPassword(app._id, app.email); }}
+                  >
+                    Reset password
+                  </Button>
+                  <Button
+                    size="xs" leftIcon={<FiTrash2 />}
+                    variant="outline" colorScheme="red" borderRadius="md"
+                    onClick={(e) => { e.stopPropagation(); onAlertOpen(); }}
+                  >
+                    Delete
+                  </Button>
+                </>
+              }
             </HStack>
           </Flex>
         </Box>
@@ -168,7 +209,7 @@ export default function UsersPage() {
   const [editMode, setEditMode] = useState(false);
 
   const toast = useToast();
-  const [getAccounts] = useAccountsGetMutation();
+  const [getAccounts] = useLazyGetAccountsQuery();
   const { userInfo } = useSelector((state) => state.auth);
 
   // Get all accounts when page loads
@@ -181,14 +222,16 @@ export default function UsersPage() {
     const q = search.toLowerCase();
     setFiltered(
       accounts.filter((a) =>
-        a.name?.toLowerCase().includes(q) ||
+        a.firstname?.toLowerCase().includes(q) ||
+        a.lastname?.toLowerCase().includes(q) ||
+        `${a.firstname ?? ""} ${a.lastname ?? ""}`.toLowerCase().includes(q) ||
         a.email?.toLowerCase().includes(q) ||
         a.phone?.includes(q)
       )
     );
   }, [search, accounts]);
 
-  // Open the add/edit modal
+  // Open the add account modal
   const handleModal = (modalName) => {
     setModalState(true);
     setModal(modalName);
@@ -197,7 +240,7 @@ export default function UsersPage() {
 
   // Open edit modal for a specific account
   const openEditMode = (data) => {
-    if (data.accountType === "admin" && userInfo?.account === "editor") {
+    if (data.accountType === "admin" && userInfo?.accountType === "editor") {
       toast({
         title: "Permission denied",
         description: "You cannot edit this account",
@@ -237,6 +280,17 @@ export default function UsersPage() {
   const formatDate = (d) => d
     ? new Date(d).toLocaleDateString("en-UG", { day: "numeric", month: "short", year: "numeric" })
     : "—";
+
+  // FIX: this used to be computed per-card as
+  //   (app.accountType === "admin" || userInfo._id === app._id)
+  // which shows management buttons based on the *target* card's role, not
+  // the *viewer's* role — meaning an editor viewing any admin card would see
+  // Edit/Reset/Delete buttons for that admin. It also crashed if userInfo
+  // was momentarily null (`userInfo._id`). Permission should be a function
+  // of who's logged in, computed once here, and passed down.
+  const canManageAccount = (app) => {
+    return (userInfo?.account === "admin" || userInfo?._id === app._id);
+  }
 
   return (
     <Box minH="100vh" bg="gray.50" p={{ base: 4, md: 8 }}>
@@ -281,7 +335,7 @@ export default function UsersPage() {
       </Flex>
 
       {/* Stats */}
-      <Grid templateColumns={{ base: "repeat(2,1fr)", md: "repeat(2,1fr)" }} gap="4" mb="8">
+      <Grid templateColumns={{ base: "repeat(2,1fr)", md: "repeat(4,1fr)" }} gap="4" mb="8">
         <StatCard
           label="Administrators"
           value={accounts.filter((a) => a.accountType === "admin").length}
@@ -344,6 +398,7 @@ export default function UsersPage() {
               formatDate={formatDate}
               onDeleted={handleDeleted}
               onEdit={openEditMode}
+              canManage={canManageAccount(app)}
             />
           ))}
         </VStack>
