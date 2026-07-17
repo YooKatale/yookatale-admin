@@ -47,6 +47,8 @@ import Signin from '@app/signin/page';
 import { motion } from "framer-motion";
 import Navbar from "./Navbar";
 
+const PUBLIC_ROUTES = ["/reset-password", "/signin"];
+
 const NavItem = ({ icon: IconComponent, path, children, index, size, onClose, ...rest }) => {
   const [isActive, setisActive] = useState(false)
   const router = useRouter()
@@ -292,6 +294,8 @@ const SidebarContent = ({ onClose, socketConnected = false, ...rest }) => {
 const SidebarWithHeader = ({ children, ...rest }) => {
   const router = useRouter();
   const pathname = usePathname();
+  const isPublicRoute = PUBLIC_ROUTES.some((route) => pathname?.startsWith(route));
+
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { userInfo } = useSelector((state) => state.auth);
   const isAuthenticated = !!(userInfo?._id);
@@ -301,12 +305,14 @@ const SidebarWithHeader = ({ children, ...rest }) => {
   const adminSocketRef = useRef(null);
 
   useEffect(() => {
+    if (isPublicRoute) return;          // <-- add this guard
     if (!userInfo?._id) {
       router.push("/signin");
     }
-  }, [userInfo, router]);
+  }, [userInfo, router, isPublicRoute]); // <-- add isPublicRoute to deps
 
   useEffect(() => {
+    if (isPublicRoute) return;          // <-- add this guard too, no socket on public pages
     if (!userInfo?._id) return;
     const socket = io(BACKEND_URL, {
       transports: ["websocket"],
@@ -315,20 +321,21 @@ const SidebarWithHeader = ({ children, ...rest }) => {
       auth: { userId: userInfo._id, accountType: accountType || "admin" },
     });
     adminSocketRef.current = socket;
-    socket.on("connect",    () => setSocketConnected(true));
+    socket.on("connect", () => setSocketConnected(true));
     socket.on("disconnect", () => setSocketConnected(false));
     socket.on("connect_error", () => setSocketConnected(false));
     socket.emit("join:admin");
     return () => { socket.disconnect(); };
-  }, [userInfo?._id]);  // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userInfo?._id, isPublicRoute]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   // Restrict editors to allowed paths only
   useEffect(() => {
+    if (isPublicRoute) return;          // <-- add this guard
     if (!isAuthenticated || !userInfo) return;
     if (isEditor && !isPathAllowedForEditor(pathname)) {
       router.replace("/");
     }
-  }, [isAuthenticated, userInfo, isEditor, pathname, router]);
+  }, [isAuthenticated, userInfo, isEditor, pathname, router, isPublicRoute]);
 
   const MobileNav = ({ onOpen, userInfo, ...rest }) => {
     const [isLoading, setLoading] = useState({ operation: "", status: false });
@@ -463,6 +470,10 @@ const SidebarWithHeader = ({ children, ...rest }) => {
         </Flex>
       </Box>
     )
+  }
+
+  if (isPublicRoute) {
+    return <>{children}</>;
   }
 
   return (

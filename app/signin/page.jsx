@@ -44,15 +44,6 @@ const Signin = () => {
   const { toast } = useToast();
   const { userInfo } = useSelector((state) => state.auth);
 
-  useEffect(() => {
-    router.prefetch('/')
-    if (userInfo) {
-      //return router.replace("/")
-    } else {
-      return router.replace("/signin")
-    }
-  }, []);
-
   const submitHandler = async (e) => {
     e.preventDefault();
 

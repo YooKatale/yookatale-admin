@@ -1,4 +1,4 @@
-// "use client";
+"use client";
 
 import { BACKEND_URL } from "@constants/constant";
 import { apiSlice } from "./apiSlice";
@@ -12,56 +12,88 @@ export const usersApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+
     register: builder.mutation({
       query: (data) => ({
         url: `${BACKEND_URL}/admin/register`,
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["Accounts"],
     }),
+
     logout: builder.mutation({
       query: () => ({
+        // TO DO: "/api/auth/logout" — fix to match the /admin prefix used everywhere else
         url: `${BACKEND_URL}/api/auth/logout`,
         method: "POST",
       }),
     }),
-    accountsGet: builder.mutation({
+
+    forgotPassword: builder.mutation({
+      query: (data) => ({
+        url: `${BACKEND_URL}/admin/forgot-password`,
+        method: "POST",
+        body: data,
+      }),
+    }),
+
+    resetPassword: builder.mutation({
+      query: (data) => ({
+        url: `${BACKEND_URL}/admin/reset-password`,
+        method: "POST",
+        body: data,
+      }),
+    }),
+
+    // GET requests converted from mutation -> query for caching/auto-refetch
+    getAccounts: builder.query({
       query: () => ({
         url: `${BACKEND_URL}/admin/accounts`,
         method: "GET",
       }),
+      providesTags: ["Accounts"],
     }),
+
     accountUpdate: builder.mutation({
       query: (data) => ({
         url: `${BACKEND_URL}/admin/account`,
         method: "PUT",
         body: data,
       }),
+      invalidatesTags: ["Accounts"],
     }),
-    dashboardData: builder.mutation({
+
+    getDashboardData: builder.query({
       query: () => ({
         url: `${BACKEND_URL}/admin/dashboard`,
         method: "GET",
       }),
     }),
-    auditlogsget: builder.mutation({
+
+    getAuditLogs: builder.query({
       query: () => ({
         url: `${BACKEND_URL}/admin/auditlogs`,
         method: "GET",
       }),
+      providesTags: ["AuditLogs"],
     }),
+
     updateAdminUserAccount: builder.mutation({
-      query: (data)=>({
+      query: (data) => ({
         url: `${BACKEND_URL}/admin/updateAdminUserAccount`,
         method: "PUT",
         body: data,
-      })
+      }),
+      invalidatesTags: ["Accounts"],
     }),
+
     deleteUserAccount: builder.mutation({
-      query: (data) => ({
-        url: `${BACKEND_URL}/admin/deleteAdminUserAccount/${data}`,
+      query: (id) => ({
+        url: `${BACKEND_URL}/admin/deleteAdminUserAccount/${id}`,
         method: "DELETE",
       }),
+      invalidatesTags: ["Accounts"],
     }),
   }),
 });
@@ -69,11 +101,16 @@ export const usersApiSlice = apiSlice.injectEndpoints({
 export const {
   useLoginMutation,
   useLogoutMutation,
-  useAccountsGetMutation,
+  useForgotPasswordMutation,
+  useResetPasswordMutation,
+  useGetAccountsQuery,
+  useLazyGetAccountsQuery,
   useRegisterMutation,
   useAccountUpdateMutation,
-  useDashboardDataMutation,
-  useAuditlogsgetMutation,
+  useGetDashboardDataQuery,
+  useLazyGetDashboardDataQuery,
+  useGetAuditLogsQuery,
+  useLazyGetAuditLogsQuery,
   useUpdateAdminUserAccountMutation,
   useDeleteUserAccountMutation,
 } = usersApiSlice;
