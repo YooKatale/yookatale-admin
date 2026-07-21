@@ -73,18 +73,20 @@ function AccountCard({ app, formatDate, onDeleted, onEdit, canManage }) {
     try {
       await forgotPassword({ id, email }).unwrap();
       toast({
+        id: "reset-password-toast-success",
         title: "Password reset email sent",
         description: `A reset link was sent to ${email}`,
         status: "success",
-        duration: 6000,
+        duration: null,
         isClosable: true,
       });
     } catch (e) {
       toast({
+        id: "reset-password-toast-failed",
         title: "Failed to send reset email",
         description: e?.data?.message || "Please try again",
         status: "error",
-        duration: 6000,
+        duration: null,
         isClosable: true,
       });
     } finally {
@@ -281,13 +283,7 @@ export default function UsersPage() {
     ? new Date(d).toLocaleDateString("en-UG", { day: "numeric", month: "short", year: "numeric" })
     : "—";
 
-  // FIX: this used to be computed per-card as
-  //   (app.accountType === "admin" || userInfo._id === app._id)
-  // which shows management buttons based on the *target* card's role, not
-  // the *viewer's* role — meaning an editor viewing any admin card would see
-  // Edit/Reset/Delete buttons for that admin. It also crashed if userInfo
-  // was momentarily null (`userInfo._id`). Permission should be a function
-  // of who's logged in, computed once here, and passed down.
+  // Action buttons permissions
   const canManageAccount = (app) => {
     return (userInfo?.account === "admin" || userInfo?._id === app._id);
   }
