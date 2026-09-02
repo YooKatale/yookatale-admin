@@ -19,6 +19,12 @@ const EditProduct = ({ closeModal, product, onSuccess }) => {
   const [isLoading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(product?.category || "");
+
+  const normalizeCategoryValue = (value) => {
+    if (!value) return "";
+    const text = String(value).trim();
+    return text;
+  };
   const [form, setForm] = useState({
     name: product?.name || "",
     subCategory: product?.subCategory || "",
@@ -49,7 +55,8 @@ const EditProduct = ({ closeModal, product, onSuccess }) => {
     setLoading(true);
     try {
       const fd = new FormData(e.target);
-      fd.set("category", selectedCategory || form.name);
+      const nextCategory = normalizeCategoryValue(selectedCategory || product?.category || form.name);
+      fd.set("category", nextCategory);
       // include all controlled fields explicitly
       Object.entries(form).forEach(([k, v]) => fd.set(k, v));
 
@@ -97,7 +104,7 @@ const EditProduct = ({ closeModal, product, onSuccess }) => {
                   <SelectGroup>
                     <SelectLabel>Categories</SelectLabel>
                     {categories.map((c) => (
-                      <SelectItem key={c._id} value={c.name.toLowerCase().split(/[\s-]+/)[0]}>{c.name}</SelectItem>
+                      <SelectItem key={c._id} value={c.name}>{c.name}</SelectItem>
                     ))}
                   </SelectGroup>
                 </SelectContent>

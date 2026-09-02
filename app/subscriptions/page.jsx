@@ -93,6 +93,7 @@ import {
 import { BACKEND_URL } from "@constants/constant";
 import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
+import { io } from "socket.io-client";
 
 const DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 const MEAL_TYPES = ["breakfast", "lunch", "supper"];
@@ -197,6 +198,36 @@ export default function SubscriptionsPage() {
   useEffect(() => {
     loadSubscriptions();
   }, [loadSubscriptions]);
+
+  useEffect(() => {
+    const socket = io(BACKEND_URL, {
+      transports: ["websocket"],
+      reconnection: true,
+      reconnectionAttempts: 5,
+    });
+
+    socket.emit("join:admin");
+    socket.on("subscription:update", () => {
+      toast({ title: "Subscription updated", status: "info", duration: 3000, isClosable: true });
+      loadSubscriptions();
+    });
+    socket.on("meal:calendar:update", () => {
+      toast({ title: "Meal calendar updated", status: "info", duration: 3000, isClosable: true });
+      loadOverrides();
+      loadSlots();
+    });
+    socket.on("admin:subscription_update", () => {
+      toast({ title: "Subscription notification", status: "info", duration: 3000, isClosable: true });
+      loadSubscriptions();
+    });
+    socket.on("admin:meal_update", () => {
+      toast({ title: "Meal notification", status: "info", duration: 3000, isClosable: true });
+      loadOverrides();
+      loadSlots();
+    });
+
+    return () => socket.disconnect();
+  }, [loadOverrides, loadSlots, loadSubscriptions, toast]);
 
   useEffect(() => {
     if (activeTab === "plans" && packages.length === 0) loadPackages();

@@ -21,6 +21,7 @@ const ChangePassword = ({ closeModal }) => {
     currPassword: "",
     password: "",
     confirmPassword: "",
+    reason: "",
   });
 
   const router = useRouter();
@@ -30,12 +31,14 @@ const ChangePassword = ({ closeModal }) => {
   const submitHandler = async (e) => {
     e.preventDefault();
 
+    const trimmedReason = passwords.reason.trim();
+
     // Validation
     if (!passwords.currPassword) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Please enter your current password",
+        title: "Password change required",
+        description: "Please enter your current password.",
       });
       return;
     }
@@ -43,8 +46,8 @@ const ChangePassword = ({ closeModal }) => {
     if (!passwords.password) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Please enter a new password",
+        title: "Password change required",
+        description: "Please enter a new password.",
       });
       return;
     }
@@ -52,8 +55,8 @@ const ChangePassword = ({ closeModal }) => {
     if (passwords.password.length < 6) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "New password must be at least 6 characters long",
+        title: "Password change failed",
+        description: "New password must be at least 6 characters long.",
       });
       return;
     }
@@ -61,8 +64,8 @@ const ChangePassword = ({ closeModal }) => {
     if (passwords.password !== passwords.confirmPassword) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "New passwords do not match",
+        title: "Password change failed",
+        description: "New passwords do not match.",
       });
       return;
     }
@@ -70,8 +73,17 @@ const ChangePassword = ({ closeModal }) => {
     if (passwords.password === passwords.currPassword) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "New password must be different from current password",
+        title: "Password change failed",
+        description: "New password must be different from your current password.",
+      });
+      return;
+    }
+
+    if (!trimmedReason) {
+      toast({
+        variant: "destructive",
+        title: "Reason required",
+        description: "Please tell us why you are changing your password.",
       });
       return;
     }
@@ -89,14 +101,16 @@ const ChangePassword = ({ closeModal }) => {
         gender: userInfo?.gender,
         currPassword: passwords.currPassword,
         password: passwords.password,
+        passwordChangeReason: trimmedReason,
+        passwordChangeRequestedAt: new Date().toISOString(),
       }).unwrap();
 
       setLoading(false);
 
       if (res?.status === "Success") {
         toast({
-          title: "Success",
-          description: "Password changed successfully. Please log in again with your new password.",
+          title: "Password updated",
+          description: "Your password was changed successfully. Please sign in again with your new password.",
         });
 
         // Clear form
@@ -104,6 +118,7 @@ const ChangePassword = ({ closeModal }) => {
           currPassword: "",
           password: "",
           confirmPassword: "",
+          reason: "",
         });
 
         closeModal(false);
@@ -120,8 +135,8 @@ const ChangePassword = ({ closeModal }) => {
 
       toast({
         variant: "destructive",
-        title: "Error occurred",
-        description: err.data?.message || err.data || err.error || "Failed to change password",
+        title: "Password change failed",
+        description: err?.data?.message || err?.data || err?.error || "Could not update your password. Please try again.",
       });
     }
   };
@@ -221,6 +236,21 @@ const ChangePassword = ({ closeModal }) => {
                   {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
+            </div>
+
+            <div>
+              <Label htmlFor="reason" className="text-sm font-medium text-gray-700">
+                Reason for password change *
+              </Label>
+              <textarea
+                id="reason"
+                rows={3}
+                placeholder="Tell us why you need to change your password"
+                value={passwords.reason}
+                onChange={(e) => setPasswords({ ...passwords, reason: e.target.value })}
+                className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                required
+              />
             </div>
 
             <div className="pt-4 flex gap-3">
