@@ -55,6 +55,13 @@ export const usersApiSlice = apiSlice.injectEndpoints({
       providesTags: ["Accounts"],
     }),
 
+    accountsGet: builder.mutation({
+      query: () => ({
+        url: `${BACKEND_URL}/admin/accounts`,
+        method: "GET",
+      }),
+    }),
+
     accountUpdate: builder.mutation({
       query: (data) => ({
         url: `${BACKEND_URL}/admin/account`,
@@ -71,12 +78,26 @@ export const usersApiSlice = apiSlice.injectEndpoints({
       }),
     }),
 
+    dashboardData: builder.mutation({
+      query: () => ({
+        url: `${BACKEND_URL}/admin/dashboard`,
+        method: "GET",
+      }),
+    }),
+
     getAuditLogs: builder.query({
       query: () => ({
         url: `${BACKEND_URL}/admin/auditlogs`,
         method: "GET",
       }),
       providesTags: ["AuditLogs"],
+    }),
+
+    auditlogsget: builder.mutation({
+      query: () => ({
+        url: `${BACKEND_URL}/admin/auditlogs`,
+        method: "GET",
+      }),
     }),
 
     updateAdminUserAccount: builder.mutation({
@@ -105,12 +126,15 @@ export const {
   useResetPasswordMutation,
   useGetAccountsQuery,
   useLazyGetAccountsQuery,
+  useAccountsGetMutation,
   useRegisterMutation,
   useAccountUpdateMutation,
   useGetDashboardDataQuery,
   useLazyGetDashboardDataQuery,
+  useDashboardDataMutation,
   useGetAuditLogsQuery,
   useLazyGetAuditLogsQuery,
+  useAuditlogsgetMutation,
   useUpdateAdminUserAccountMutation,
   useDeleteUserAccountMutation,
 } = usersApiSlice;

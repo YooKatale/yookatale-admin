@@ -19,13 +19,44 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@components/ui/select";
-import { useProductCreateMutation } from "@Slices/productApiSlice";
+import { useProductCreateMutation, useProductsGetMutation } from "@Slices/productApiSlice";
 import { useCategoriesGetMutation } from "@Slices/categoryApiSlice";
 
 const AddProduct = ({ closeModal }) => {
+  const DEFAULT_CATEGORY_LIST = [
+    "Fruits",
+    "Vegetables",
+    "Meats",
+    "Dairy",
+    "Grains & Flour",
+    "Juice",
+    "Breakfast",
+    "Lunch Meals",
+    "Supper Meals",
+    "Popular Products",
+    "Recommended Products",
+    "Featured Products",
+    "Promotional Products",
+    "Root Tubers",
+    "Herbs & Spices",
+    "Fats & Oils",
+    "Roughages",
+  ];
+
   const [isLoading, setLoading] = useState(false);
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState(
+    DEFAULT_CATEGORY_LIST.map((name, index) => ({ _id: `fallback-${index}`, name }))
+  );
+  const [subCategories, setSubCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedSubCategory, setSelectedSubCategory] = useState("");
+
+  const normalizeCategoryValue = (value) => {
+    if (!value) return "";
+    const text = String(value).trim();
+    if (!text) return "";
+    return text;
+  };
 
   const router = useRouter();
   const { toast } = useToast();
@@ -33,21 +64,84 @@ const AddProduct = ({ closeModal }) => {
 
   const [createProduct] = useProductCreateMutation();
   const [fetchCategories] = useCategoriesGetMutation();
+  const [fetchProducts] = useProductsGetMutation();
 
-  // Fetch categories on component mount
+  const buildSubCategoryOptions = (categoryName, products) => {
+    const values = products
+      .filter((product) => {
+        const productCategory = String(product?.category || "").trim();
+        return !categoryName || productCategory.toLowerCase() === String(categoryName).trim().toLowerCase();
+      })
+      .map((product) => product?.subCategory)
+      .filter(Boolean)
+      .map((item) => String(item).trim())
+      .filter((item, index, arr) => arr.indexOf(item) === index && item.length > 0);
+
+    if (values.length > 0) return values;
+
+    const categoryDefaults = {
+      fruits: ["Citrus", "Bananas", "Apples", "Berries", "Pineapples"],
+      vegetables: ["Leafy Greens", "Tomatoes", "Onions", "Cabbage", "Peppers"],
+      meats: ["Beef", "Chicken", "Goat", "Fish", "Pork"],
+      dairy: ["Milk", "Yogurt", "Cheese", "Butter", "Cream"],
+      grains: ["Rice", "Maize", "Flour", "Wheat", "Pasta"],
+      breakfast: ["Quick Meals", "Smoothies", "Baked Items", "Porridge"],
+      lunch: ["Main Meals", "Wraps", "Rice Bowls", "Soup"],
+      supper: ["Dinner Sets", "Staples", "Grilled Meals", "Stews"],
+      juices: ["Fresh", "Blended", "Fruit Mix", "Vegetable Mix"],
+    };
+
+    const normalized = String(categoryName || "").trim().toLowerCase();
+    return categoryDefaults[normalized] || ["Featured", "Popular", "Recommended", "New" ];
+  };
+
   useEffect(() => {
-    const loadCategories = async () => {
+    const loadData = async () => {
       try {
-        const res = await fetchCategories().unwrap();
-        if (res?.success && res?.categories) {
-          setCategories(res.categories);
+        const [categoryRes, productRes] = await Promise.all([
+          fetchCategories().unwrap(),
+          fetchProducts().unwrap(),
+        ]);
+
+        const serverCategories = Array.isArray(categoryRes?.categories)
+          ? categoryRes.categories
+          : Array.isArray(categoryRes?.data)
+            ? categoryRes.data
+            : [];
+
+        if (serverCategories.length > 0) {
+          setCategories(serverCategories);
+        } else {
+          setCategories(DEFAULT_CATEGORY_LIST.map((name, index) => ({ _id: `fallback-${index}`, name })));
         }
+
+        const productList = Array.isArray(productRes?.data) ? productRes.data : [];
+        const allSubCategories = [...new Set(
+          productList
+            .map((product) => product?.subCategory)
+            .filter((value) => typeof value === "string" && value.trim().length > 0)
+            .map((value) => value.trim())
+        )];
+
+        setSubCategories(allSubCategories);
       } catch (err) {
-        // category fetch error silently handled
+        // fallback to empty state gracefully
       }
     };
-    loadCategories();
+    loadData();
   }, []);
+
+  useEffect(() => {
+    if (!selectedCategory) {
+      setSelectedSubCategory("");
+      return;
+    }
+
+    const options = buildSubCategoryOptions(selectedCategory, []);
+    if (!options.includes(selectedSubCategory) && options.length > 0) {
+      setSelectedSubCategory(options[0]);
+    }
+  }, [selectedCategory]);
 
   const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -73,9 +167,14 @@ const AddProduct = ({ closeModal }) => {
         }
       }
       const NewFormData = new FormData(form);
+      const activeCategory = normalizeCategoryValue(selectedCategory);
+      const activeSubCategory = normalizeCategoryValue(selectedSubCategory) || normalizeCategoryValue(form.elements.subCategory?.value);
 
-      if (selectedCategory) {
-        NewFormData.set("category", selectedCategory);
+      if (activeCategory) {
+        NewFormData.set("category", activeCategory);
+      }
+      if (activeSubCategory) {
+        NewFormData.set("subCategory", activeSubCategory);
       }
 
       const res = await createProduct(NewFormData).unwrap();
@@ -142,10 +241,7 @@ const AddProduct = ({ closeModal }) => {
                         <SelectLabel>Available Categories</SelectLabel>
                         {categories.length > 0 ? (
                           categories.map((category) => (
-                            <SelectItem
-                              key={category._id}
-                              value={category.name.toLowerCase().split(/[\s-]+/)[0]}
-                            >
+                            <SelectItem key={category._id} value={category.name}>
                               {category.name}
                             </SelectItem>
                           ))
@@ -162,12 +258,26 @@ const AddProduct = ({ closeModal }) => {
                   <Label htmlFor="subCategory" className="text-sm font-medium text-slate-700">
                     Product Sub-Category
                   </Label>
-                  <Input
-                    type="text"
-                    id="subCategory"
-                    placeholder="eg. featured, recommended, popular..."
-                    name="subCategory"
-                  />
+                  <Select value={selectedSubCategory} onValueChange={setSelectedSubCategory}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={subCategories.length > 0 ? "Select sub-category" : "No sub-categories available"} />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-80 overflow-y-auto">
+                      <SelectGroup>
+                        <SelectLabel>Available Sub-Categories</SelectLabel>
+                        {subCategories.length > 0 ? (
+                          subCategories.map((subCategory) => (
+                            <SelectItem key={subCategory} value={subCategory}>
+                              {subCategory}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="featured">Featured</SelectItem>
+                        )}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <input type="hidden" name="subCategory" value={selectedSubCategory} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="price" className="text-sm font-medium text-slate-700">
