@@ -1,5 +1,4 @@
-// const DEV_BACKEND_URL = "http://localhost:8000";
-const DEV_BACKEND_URL = "https://yookatale-server.onrender.com";
+const DEV_BACKEND_URL = "http://localhost:4400";
 const PROD_BACKEND_URL = "https://yookatale-server.onrender.com";
 
 export const BACKEND_URL =

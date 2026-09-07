@@ -24,23 +24,28 @@ import { useCategoriesGetMutation } from "@Slices/categoryApiSlice";
 
 const AddProduct = ({ closeModal }) => {
   const DEFAULT_CATEGORY_LIST = [
+    "Bulk Products",
+    "Popular Products",
+    "Discover Products",
+    "Promotional Products",
+    "Recommended Products",
     "Fruits",
-    "Vegetables",
     "Meats",
     "Dairy",
+    "Vegetables",
+    "Fats & Oils",
+    "Roughages",
+    "Root Tubers",
     "Grains & Flour",
+    "Spices & Herbs",
     "Juice",
+    "Cuisines",
     "Breakfast",
     "Lunch Meals",
     "Supper Meals",
-    "Popular Products",
-    "Recommended Products",
-    "Featured Products",
-    "Promotional Products",
-    "Root Tubers",
-    "Herbs & Spices",
-    "Fats & Oils",
-    "Roughages",
+    "Supplements",
+    "Rice",
+    "Flour",
   ];
 
   const [isLoading, setLoading] = useState(false);
@@ -80,19 +85,32 @@ const AddProduct = ({ closeModal }) => {
     if (values.length > 0) return values;
 
     const categoryDefaults = {
-      fruits: ["Citrus", "Bananas", "Apples", "Berries", "Pineapples"],
-      vegetables: ["Leafy Greens", "Tomatoes", "Onions", "Cabbage", "Peppers"],
-      meats: ["Beef", "Chicken", "Goat", "Fish", "Pork"],
-      dairy: ["Milk", "Yogurt", "Cheese", "Butter", "Cream"],
-      grains: ["Rice", "Maize", "Flour", "Wheat", "Pasta"],
-      breakfast: ["Quick Meals", "Smoothies", "Baked Items", "Porridge"],
-      lunch: ["Main Meals", "Wraps", "Rice Bowls", "Soup"],
-      supper: ["Dinner Sets", "Staples", "Grilled Meals", "Stews"],
-      juices: ["Fresh", "Blended", "Fruit Mix", "Vegetable Mix"],
+      rice: ["White rice", "Brown rice", "Jasmine rice", "Basmati rice", "Swt rice", "Super rice", "Kaiso rice", "Pakistan rice"],
+      flour: ["Wheat flour", "Sorghum flour", "Millet flour", "Maize flour"],
+      fruits: ["Citrus", "Bananas", "Apples", "Berries", "Pineapples", "Mangoes", "Avocados"],
+      vegetables: ["Leafy Greens", "Tomatoes", "Onions", "Cabbage", "Peppers", "Carrots", "Cucumbers"],
+      meats: ["Beef", "Chicken", "Goat", "Fish", "Pork", "Turkey", "Lamb"],
+      dairy: ["Milk", "Yogurt", "Cheese", "Butter", "Cream", "Ghee"],
+      grains: ["Rice", "Maize", "Flour", "Wheat", "Pasta", "Millet"],
+      breakfast: ["Quick Meals", "Smoothies", "Baked Items", "Porridge", "Cereal"],
+      lunch: ["Main Meals", "Wraps", "Rice Bowls", "Soup", "Salads"],
+      supper: ["Dinner Sets", "Staples", "Grilled Meals", "Stews", "Curries"],
+      juice: ["Fresh", "Blended", "Fruit Mix", "Vegetable Mix", "Orange Juice"],
+      cuisines: ["Local Cuisine", "Intercontinental", "Fast Foods", "Traditional Dishes"],
+      "fats & oils": ["Cooking Oil", "Olive Oil", "Sunflower Oil", "Butter Oil"],
+      roughages: ["Hay", "Fodder", "Green Feed", "Forage"],
+      "root tubers": ["Cassava", "Sweet Potatoes", "Yams", "Irish Potatoes"],
+      "spices & herbs": ["Ginger", "Garlic", "Onions", "Coriander", "Pepper"],
+      supplements: ["Protein Supplements", "Vitamins", "Energy Boosters", "Minerals"],
+      "bulk products": ["Family Pack", "Wholesale Pack", "Bulk Saver", "Store Pack"],
+      "popular products": ["Best Seller", "Trending", "Customer Favorite"],
+      "discover products": ["New Arrival", "Seasonal Deal", "Editor Pick"],
+      "promotional products": ["Flash Sale", "Combo Offer", "Promo Pack"],
+      "recommended products": ["Recommended", "Healthy Pick", "Top Rated"],
     };
 
     const normalized = String(categoryName || "").trim().toLowerCase();
-    return categoryDefaults[normalized] || ["Featured", "Popular", "Recommended", "New" ];
+    return categoryDefaults[normalized] || ["Featured", "Popular", "Recommended", "New"];
   };
 
   useEffect(() => {
@@ -109,10 +127,22 @@ const AddProduct = ({ closeModal }) => {
             ? categoryRes.data
             : [];
 
-        if (serverCategories.length > 0) {
-          setCategories(serverCategories);
+        const fixedCategoryList = DEFAULT_CATEGORY_LIST.map((name, index) => ({
+          _id: `fixed-${index}`,
+          name,
+        }));
+
+        if (serverCategories.length > 0 && serverCategories.some((category) => category?.name)) {
+          setCategories(
+            serverCategories
+              .map((category, index) => ({
+                _id: category?._id || `server-${index}`,
+                name: category?.name,
+              }))
+              .filter((category) => category.name)
+          );
         } else {
-          setCategories(DEFAULT_CATEGORY_LIST.map((name, index) => ({ _id: `fallback-${index}`, name })));
+          setCategories(fixedCategoryList);
         }
 
         const productList = Array.isArray(productRes?.data) ? productRes.data : [];

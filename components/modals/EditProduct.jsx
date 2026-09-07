@@ -15,9 +15,36 @@ import { useProductEditMutation } from "@Slices/productApiSlice";
 import { useCategoriesGetMutation } from "@Slices/categoryApiSlice";
 
 const EditProduct = ({ closeModal, product, onSuccess }) => {
+  const APPROVED_CATEGORY_LIST = [
+    "Bulk Products",
+    "Popular Products",
+    "Discover Products",
+    "Promotional Products",
+    "Recommended Products",
+    "Fruits",
+    "Meats",
+    "Dairy",
+    "Vegetables",
+    "Fats & Oils",
+    "Roughages",
+    "Root Tubers",
+    "Grains & Flour",
+    "Spices & Herbs",
+    "Juice",
+    "Cuisines",
+    "Breakfast",
+    "Lunch Meals",
+    "Supper Meals",
+    "Supplements",
+    "Rice",
+    "Flour",
+  ];
+
   const { toast } = useToast();
   const [isLoading, setLoading] = useState(false);
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState(
+    APPROVED_CATEGORY_LIST.map((name, index) => ({ _id: `approved-${index}`, name }))
+  );
   const [selectedCategory, setSelectedCategory] = useState(product?.category || "");
 
   const normalizeCategoryValue = (value) => {
@@ -38,17 +65,74 @@ const EditProduct = ({ closeModal, product, onSuccess }) => {
   const [editProduct] = useProductEditMutation();
   const [fetchCategories] = useCategoriesGetMutation();
 
+  const categoryDefaults = {
+    rice: ["White rice", "Brown rice", "Jasmine rice", "Basmati rice", "Swt rice", "Super rice", "Kaiso rice", "Pakistan rice"],
+    flour: ["Wheat flour", "Sorghum flour", "Millet flour", "Maize flour"],
+    fruits: ["Citrus", "Bananas", "Apples", "Berries", "Pineapples", "Mangoes", "Avocados"],
+    vegetables: ["Leafy Greens", "Tomatoes", "Onions", "Cabbage", "Peppers", "Carrots", "Cucumbers"],
+    meats: ["Beef", "Chicken", "Goat", "Fish", "Pork", "Turkey", "Lamb"],
+    dairy: ["Milk", "Yogurt", "Cheese", "Butter", "Cream", "Ghee"],
+    grains: ["Rice", "Maize", "Flour", "Wheat", "Pasta", "Millet"],
+    breakfast: ["Quick Meals", "Smoothies", "Baked Items", "Porridge", "Cereal"],
+    lunch: ["Main Meals", "Wraps", "Rice Bowls", "Soup", "Salads"],
+    supper: ["Dinner Sets", "Staples", "Grilled Meals", "Stews", "Curries"],
+    juice: ["Fresh", "Blended", "Fruit Mix", "Vegetable Mix", "Orange Juice"],
+    cuisines: ["Local Cuisine", "Intercontinental", "Fast Foods", "Traditional Dishes"],
+    "fats & oils": ["Cooking Oil", "Olive Oil", "Sunflower Oil", "Butter Oil"],
+    roughages: ["Hay", "Fodder", "Green Feed", "Forage"],
+    "root tubers": ["Cassava", "Sweet Potatoes", "Yams", "Irish Potatoes"],
+    "spices & herbs": ["Ginger", "Garlic", "Onions", "Coriander", "Pepper"],
+    supplements: ["Protein Supplements", "Vitamins", "Energy Boosters", "Minerals"],
+    "bulk products": ["Family Pack", "Wholesale Pack", "Bulk Saver", "Store Pack"],
+    "popular products": ["Best Seller", "Trending", "Customer Favorite"],
+    "discover products": ["New Arrival", "Seasonal Deal", "Editor Pick"],
+    "promotional products": ["Flash Sale", "Combo Offer", "Promo Pack"],
+    "recommended products": ["Recommended", "Healthy Pick", "Top Rated"],
+  };
+
   useEffect(() => {
     const load = async () => {
       try {
         const res = await fetchCategories().unwrap();
-        if (res?.success && res?.categories) setCategories(res.categories);
-      } catch {}
+        const serverCategories = Array.isArray(res?.categories)
+          ? res.categories
+          : Array.isArray(res?.data)
+            ? res.data
+            : [];
+
+        if (serverCategories.length > 0 && serverCategories.some((category) => category?.name)) {
+          setCategories(
+            serverCategories
+              .map((category, index) => ({
+                _id: category?._id || `server-${index}`,
+                name: category?.name,
+              }))
+              .filter((category) => category.name)
+          );
+        } else {
+          setCategories(
+            APPROVED_CATEGORY_LIST.map((name, index) => ({ _id: `approved-${index}`, name }))
+          );
+        }
+      } catch {
+        setCategories(
+          APPROVED_CATEGORY_LIST.map((name, index) => ({ _id: `approved-${index}`, name }))
+        );
+      }
     };
     load();
   }, []);
 
   const handleChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+
+  useEffect(() => {
+    if (!selectedCategory) return;
+    const normalized = String(selectedCategory).trim().toLowerCase();
+    const defaults = categoryDefaults[normalized];
+    if (defaults && !defaults.includes(String(form.subCategory || ""))) {
+      setForm((previous) => ({ ...previous, subCategory: defaults[0] }));
+    }
+  }, [selectedCategory]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
