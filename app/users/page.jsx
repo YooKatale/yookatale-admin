@@ -16,8 +16,9 @@ import {
 import { UserPlus, Users2 } from "lucide-react";
 import { useSelector } from "react-redux";
 
-import { useLazyGetAccountsQuery, useDeleteUserAccountMutation, useForgotPasswordMutation } from "@Slices/userApiSlice";
+import { useLazyGetAccountsQuery, useDeleteUserAccountMutation } from "@Slices/userApiSlice";
 import AddAccount from "@components/modals/AddAccount";
+import PasswordChangePermission from "@components/modals/PasswordChangePermission";
 
 // Stats Card
 function StatCard({ label, value, color, icon }) {
@@ -37,14 +38,12 @@ function StatCard({ label, value, color, icon }) {
 }
 
 // Account Card
-function AccountCard({ app, formatDate, onDeleted, onEdit, canManage }) {
+function AccountCard({ app, formatDate, onDeleted, onEdit, onAllowPasswordChange, canManage }) {
   const [deleting, setDeleting] = useState(false);
-  const [sendingResetPasswordRequest, setSendingResetPasswordRequest] = useState(false);
 
   const { isOpen: isAlertOpen, onOpen: onAlertOpen, onClose: onAlertClose } = useDisclosure();
   const cancelRef = useRef();
   const [deleteAccount] = useDeleteUserAccountMutation();
-  const [forgotPassword] = useForgotPasswordMutation();
   const toast = useToast();
 
   const handleDelete = async () => {
@@ -64,33 +63,6 @@ function AccountCard({ app, formatDate, onDeleted, onEdit, canManage }) {
     } finally {
       setDeleting(false);
       onAlertClose();
-    }
-  };
-
-  // Triggers the reset-email mutation.
-  const handleForgotPassword = async (id, email) => {
-    setSendingResetPasswordRequest(true);
-    try {
-      await forgotPassword({ id, email }).unwrap();
-      toast({
-        id: "reset-password-toast-success",
-        title: "Password reset email sent",
-        description: `A reset link was sent to ${email}`,
-        status: "success",
-        duration: null,
-        isClosable: true,
-      });
-    } catch (e) {
-      toast({
-        id: "reset-password-toast-failed",
-        title: "Failed to send reset email",
-        description: e?.data?.message || "Please try again",
-        status: "error",
-        duration: null,
-        isClosable: true,
-      });
-    } finally {
-      setSendingResetPasswordRequest(false);
     }
   };
 
@@ -154,11 +126,10 @@ function AccountCard({ app, formatDate, onDeleted, onEdit, canManage }) {
                   </Button>
                   <Button
                     size="xs" leftIcon={<FiLock />}
-                    variant="outline" colorScheme="gray" borderRadius="md"
-                    isLoading={sendingResetPasswordRequest}
-                    onClick={(e) => { e.stopPropagation(); handleForgotPassword(app._id, app.email); }}
+                    variant="outline" colorScheme="green" borderRadius="md"
+                    onClick={(e) => { e.stopPropagation(); onAllowPasswordChange(app); }}
                   >
-                    Reset password
+                    {app.passwordChangeAllowed ? "Permission enabled" : "Allow password change"}
                   </Button>
                   <Button
                     size="xs" leftIcon={<FiTrash2 />}
@@ -209,6 +180,7 @@ export default function UsersPage() {
   const [modal, setModal] = useState("");
   const [accountData, setAccountData] = useState({});
   const [editMode, setEditMode] = useState(false);
+  const [permissionAccount, setPermissionAccount] = useState(null);
 
   const toast = useToast();
   const [getAccounts] = useLazyGetAccountsQuery();
@@ -242,7 +214,8 @@ export default function UsersPage() {
 
   // Open edit modal for a specific account
   const openEditMode = (data) => {
-    if (data.accountType === "admin" && userInfo?.accountType === "editor") {
+    const currentRole = userInfo?.accountType ?? userInfo?.account ?? "";
+    if (data.accountType === "admin" && currentRole === "editor") {
       toast({
         title: "Permission denied",
         description: "You cannot edit this account",
@@ -261,6 +234,12 @@ export default function UsersPage() {
   // Delete user account
   const handleDeleted = (id) => {
     setAccounts((prev) => prev.filter((a) => a._id !== id));
+  };
+
+  const handlePermissionSaved = (updatedAccount) => {
+    setAccounts((prev) => prev.map((account) => (
+      account._id === updatedAccount._id ? updatedAccount : account
+    )));
   };
 
   // Get all user accounts
@@ -284,8 +263,10 @@ export default function UsersPage() {
     : "—";
 
   // Action buttons permissions
+  const accountRole = userInfo?.accountType ?? userInfo?.account ?? "";
+
   const canManageAccount = (app) => {
-    return (userInfo?.account === "admin" || userInfo?._id === app._id);
+    return (accountRole === "admin" || userInfo?._id === app._id);
   }
 
   return (
@@ -298,6 +279,13 @@ export default function UsersPage() {
           reloadAccounts={load}
         />
       }
+      {permissionAccount && (
+        <PasswordChangePermission
+          account={permissionAccount}
+          closeModal={() => setPermissionAccount(null)}
+          onSaved={handlePermissionSaved}
+        />
+      )}
 
       {/* Header */}
       <Flex justify="space-between" align="flex-start" wrap="wrap" gap="4" mb="8">
@@ -394,6 +382,7 @@ export default function UsersPage() {
               formatDate={formatDate}
               onDeleted={handleDeleted}
               onEdit={openEditMode}
+              onAllowPasswordChange={setPermissionAccount}
               canManage={canManageAccount(app)}
             />
           ))}

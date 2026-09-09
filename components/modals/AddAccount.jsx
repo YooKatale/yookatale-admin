@@ -16,7 +16,9 @@ import { Select } from "@chakra-ui/react";
 const INITIAL_USER_STATE = {
   firstname: "",
   lastname: "",
+  username: "",
   email: "",
+  password: "",
   phone: "",
   gender: "",
   accountType: "",
@@ -54,6 +56,17 @@ const AddAccount = ({ closeModal, accountData, editmode, reloadAccounts }) => {
     return `Something went wrong while ${editmode ? "updating" : "saving"} the account.`;
   };
 
+  const getSuccessMessage = (res) => {
+    const message = res?.message || res?.data?.message || "";
+    if (typeof message === "string" && message.toLowerCase().includes("email")) {
+      return `${editmode ? "Account updated" : "Account created"} successfully. Email delivery may have failed, so the user may need a manual password reset.`;
+    }
+    if (typeof res?.data === "string" && res.data.toLowerCase().includes("email")) {
+      return `${editmode ? "Account updated" : "Account created"} successfully. Email delivery may have failed, so the user may need a manual password reset.`;
+    }
+    return res?.message || `Account ${editmode ? "updated" : "created"} successfully.`;
+  };
+
   const submitHandler = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -61,23 +74,21 @@ const AddAccount = ({ closeModal, accountData, editmode, reloadAccounts }) => {
     try {
       // Only include _id when editing an existing account
       const payload = editmode
-        ? { ...User, _id: accountData._id }
+        ? { ...User, _id: accountData._id, ...(User.password ? {} : { password: undefined }) }
         : { ...User };
 
       const res = await (editmode
         ? updateUser(payload).unwrap()
         : registerUser(payload).unwrap());
 
-      if (res?.status === "Success") {
-        const message =
-          res?.message ||
-          `Account ${editmode ? "updated" : "created"} successfully.${editmode ? "" : ` Credentials emailed to ${res?.data}.`
-          }`;
+      const success = res?.status === "Success" || res?.success === true || res?.status === "success";
+      if (success) {
+        const message = getSuccessMessage(res);
 
         toast({
           title: "Success",
           description: message,
-          variant: res?.message?.includes("email failed") ? "warning" : "default",
+          variant: /email/i.test(message) ? "warning" : "default",
         });
 
         resetForm();
@@ -100,7 +111,9 @@ const AddAccount = ({ closeModal, accountData, editmode, reloadAccounts }) => {
       setUser({
         firstname: accountData.firstname || "",
         lastname: accountData.lastname || "",
+        username: accountData.username || "",
         email: accountData.email || "",
+        password: "",
         phone: accountData.phone || "",
         gender: accountData.gender || "",
         accountType: accountData.accountType || "",
@@ -178,6 +191,20 @@ const AddAccount = ({ closeModal, accountData, editmode, reloadAccounts }) => {
                 />
               </div>
               <div className="space-y-2">
+                <Label htmlFor="username" className="text-sm font-medium text-slate-700">
+                  Username
+                </Label>
+                <Input
+                  type="text"
+                  id="username"
+                  placeholder="Username is required"
+                  name="username"
+                  value={User.username}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium text-slate-700">
                   Email
                 </Label>
@@ -191,6 +218,24 @@ const AddAccount = ({ closeModal, accountData, editmode, reloadAccounts }) => {
                   required
                 />
               </div>
+              {!editmode && (
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-sm font-medium text-slate-700">
+                    Initial Password
+                  </Label>
+                  <Input
+                    type="password"
+                    id="password"
+                    placeholder="Password is required"
+                    name="password"
+                    value={User.password}
+                    onChange={handleChange}
+                    minLength={8}
+                    autoComplete="new-password"
+                    required
+                  />
+                </div>
+              )}
               <div className="space-y-2">
                 <Label htmlFor="phone" className="text-sm font-medium text-slate-700">
                   Phone
