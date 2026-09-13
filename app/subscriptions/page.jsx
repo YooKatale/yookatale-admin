@@ -106,6 +106,14 @@ const getSubUserLabel = (sub) => {
   return fullName || user?.email || "Unknown User";
 };
 
+const getPackageErrorMessage = (error, fallback) =>
+  error?.data?.message || error?.data?.error || fallback;
+
+const normalizePackageDetails = (details) =>
+  (Array.isArray(details) ? details : [])
+    .map((detail) => String(detail ?? "").trim())
+    .filter(Boolean);
+
 const TAB_CONFIG = [
   { key: "yoocards", label: "YooCards", icon: CreditCard, color: "green", desc: "Pending subscription approvals" },
   { key: "plans", label: "Meal Plans", icon: Package, color: "purple", desc: "Manage subscription packages" },
@@ -120,6 +128,7 @@ export default function SubscriptionsPage() {
   const [slots, setSlots] = useState([]);
   const [isLoading, setLoading] = useState(false);
   const [loadingPackages, setLoadingPackages] = useState(false);
+  const [packageError, setPackageError] = useState("");
   const [loadingOverrides, setLoadingOverrides] = useState(false);
   const [loadingSlots, setLoadingSlots] = useState(false);
 
@@ -161,11 +170,13 @@ export default function SubscriptionsPage() {
 
   const loadPackages = useCallback(async () => {
     setLoadingPackages(true);
+    setPackageError("");
     try {
       const res = await fetchPackages().unwrap();
       if (res?.status === "Success") setPackages(res?.data || []);
+      else setPackageError(getPackageErrorMessage({ data: res }, "Failed to load subscription packages."));
     } catch (e) {
-      toast({ title: "Error", description: e?.data?.message || "Failed to load packages", status: "error", duration: 4000, isClosable: true });
+      setPackageError(getPackageErrorMessage(e, "Failed to load subscription packages."));
     } finally {
       setLoadingPackages(false);
     }
@@ -200,8 +211,12 @@ export default function SubscriptionsPage() {
   }, [loadSubscriptions]);
 
   useEffect(() => {
+    loadPackages();
+  }, [loadPackages]);
+
+  useEffect(() => {
     const socket = io(BACKEND_URL, {
-      transports: ["websocket"],
+      transports: ["polling"],
       reconnection: true,
       reconnectionAttempts: 5,
     });
@@ -230,7 +245,6 @@ export default function SubscriptionsPage() {
   }, [loadOverrides, loadSlots, loadSubscriptions, toast]);
 
   useEffect(() => {
-    if (activeTab === "plans" && packages.length === 0) loadPackages();
     if (activeTab === "calendar" && slots.length === 0) {
       loadOverrides();
       loadSlots();
@@ -279,13 +293,13 @@ export default function SubscriptionsPage() {
 
   const openAddPlan = () => {
     setEditingPlan(null);
-    setPlanForm({ type: "standard", price: "", name: "", details: [], previousPrice: "" });
+    setPlanForm({ type: "monthly", price: "", name: "", details: [], previousPrice: "" });
     onPlanOpen();
   };
 
   const openEditPlan = (p) => {
     setEditingPlan(p);
-    const detailsArray = Array.isArray(p?.details) ? p.details : (p?.details ? String(p.details).split("\n").filter(Boolean) : []);
+    const detailsArray = normalizePackageDetails(p?.details);
     setPlanForm({
       type: p?.type || "",
       price: p?.price ?? "",
@@ -297,42 +311,85 @@ export default function SubscriptionsPage() {
   };
 
   const [saving, setSaving] = useState(false);
+  const [deletingPackageId, setDeletingPackageId] = useState(null);
 
   const handleSavePlan = async () => {
-    const details = Array.isArray(planForm.details) ? planForm.details.filter(Boolean) : (planForm.details ? String(planForm.details).split("\n").filter(Boolean) : []);
-    const payload = {
-      type: planForm.type,
-      price: Number(planForm.price),
-      name: planForm.name,
-      details,
-      previousPrice: planForm.previousPrice ? Number(planForm.previousPrice) : null,
-    };
+    const type = String(planForm.type || "").trim();
+    const name = String(planForm.name || "").trim();
+    const details = normalizePackageDetails(planForm.details);
+    const price = Number(planForm.price);
+    const previousPrice = String(planForm.previousPrice ?? "").trim() === ""
+      ? null
+      : Number(planForm.previousPrice);
+
+    if (!type || !name) {
+      toast({ title: "Required fields missing", description: "Enter a package name and type.", status: "warning", duration: 4000, isClosable: true });
+      return;
+    }
+    if (String(planForm.price || "").trim() === "" || !Number.isFinite(price) || price < 0) {
+      toast({ title: "Invalid price", description: "Enter a valid package price.", status: "warning", duration: 4000, isClosable: true });
+      return;
+    }
+    if (previousPrice !== null && (!Number.isFinite(previousPrice) || previousPrice < 0)) {
+      toast({ title: "Invalid previous price", description: "Enter a valid previous price or leave it blank.", status: "warning", duration: 4000, isClosable: true });
+      return;
+    }
+
+    const payload = { type, price, name, details, previousPrice };
+    let requestPayload = payload;
+    if (editingPlan) {
+      const originalPreviousPrice = editingPlan.previousPrice === null || editingPlan.previousPrice === undefined || editingPlan.previousPrice === ""
+        ? null
+        : Number(editingPlan.previousPrice);
+      const originalDetails = normalizePackageDetails(editingPlan.details);
+      requestPayload = {};
+      if (type !== String(editingPlan.type || "").trim()) requestPayload.type = type;
+      if (name !== String(editingPlan.name || "").trim()) requestPayload.name = name;
+      if (price !== Number(editingPlan.price)) requestPayload.price = price;
+      if (previousPrice !== originalPreviousPrice) requestPayload.previousPrice = previousPrice;
+      if (JSON.stringify(details) !== JSON.stringify(originalDetails)) requestPayload.details = details;
+      if (Object.keys(requestPayload).length === 0) {
+        toast({ title: "No changes to save", status: "info", duration: 3000, isClosable: true });
+        return;
+      }
+    }
+
     setSaving(true);
     try {
       if (editingPlan) {
-        await updatePackage({ id: editingPlan._id, ...payload }).unwrap();
+        await updatePackage({ id: editingPlan._id, ...requestPayload }).unwrap();
         onEditClose();
-        toast({ title: "Plan updated", status: "success", duration: 3000, isClosable: true });
+        toast({ title: "Package updated", status: "success", duration: 3000, isClosable: true });
       } else {
         await createPackage(payload).unwrap();
         onPlanClose();
-        toast({ title: "Plan created", status: "success", duration: 3000, isClosable: true });
+        toast({ title: "Package created", status: "success", duration: 3000, isClosable: true });
       }
-      loadPackages();
+      await loadPackages();
     } catch (e) {
-      toast({ title: "Save failed", description: e?.data?.message || "Failed to save", status: "error", duration: 4000, isClosable: true });
+      toast({ title: "Could not save package", description: getPackageErrorMessage(e, "The package could not be saved."), status: "error", duration: 5000, isClosable: true });
     } finally {
       setSaving(false);
     }
   };
 
   const handleDeletePlan = async (id) => {
+    setDeletingPackageId(id);
     try {
       await deletePackage(id).unwrap();
-      loadPackages();
-      toast({ title: "Plan deleted", status: "success", duration: 3000, isClosable: true });
+      await loadPackages();
+      toast({ title: "Package deleted", status: "success", duration: 3000, isClosable: true });
     } catch (e) {
-      toast({ title: "Delete failed", description: e?.data?.message || "Failed", status: "error", duration: 4000, isClosable: true });
+      const blocked = e?.status === 409 || e?.originalStatus === 409;
+      toast({
+        title: blocked ? "Package cannot be deleted" : "Delete failed",
+        description: getPackageErrorMessage(e, "The package could not be deleted."),
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setDeletingPackageId(null);
     }
   };
 
@@ -341,13 +398,13 @@ export default function SubscriptionsPage() {
       {/* Header */}
       <Flex justify="space-between" align="center" mb={6} flexWrap="wrap" gap={4}>
         <Box>
-          <Heading size="lg" mb={1}>Subscription Management</Heading>
-          <Text color="gray.500" fontSize="sm">Manage YooCards, meal plans, and weekly meal calendars</Text>
+          <Heading size="lg" mb={1}>{activeTab === "plans" ? "Subscription Packages" : "Subscription Management"}</Heading>
+          <Text color="gray.500" fontSize="sm">{activeTab === "plans" ? "Create and manage subscription packages" : "Manage YooCards, meal plans, and weekly meal calendars"}</Text>
         </Box>
         <HStack spacing={2}>
           {activeTab === "plans" && (
             <Button leftIcon={<Plus size={16} />} colorScheme="green" size="sm" onClick={openAddPlan} borderRadius="lg">
-              Add Plan
+              Add Package
             </Button>
           )}
         </HStack>
@@ -618,6 +675,18 @@ export default function SubscriptionsPage() {
         <Box>
           {loadingPackages ? (
             <Center py={12}><Spinner size="lg" color="purple.500" thickness="3px" /></Center>
+          ) : packageError ? (
+            <Card borderRadius="xl" borderWidth="1px" borderColor="red.200">
+              <CardBody>
+                <Center py={10}>
+                  <VStack spacing={4} textAlign="center">
+                    <XCircle size={32} color="var(--chakra-colors-red-500)" />
+                    <Text color="red.600" fontWeight="600">{packageError}</Text>
+                    <Button size="sm" variant="outline" colorScheme="red" onClick={loadPackages}>Try again</Button>
+                  </VStack>
+                </Center>
+              </CardBody>
+            </Card>
           ) : packages.length > 0 ? (
             <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
               {packages.map((p) => {
@@ -642,6 +711,7 @@ export default function SubscriptionsPage() {
                               variant="ghost"
                               colorScheme={colorScheme}
                               onClick={() => openEditPlan(p)}
+                              isDisabled={saving || Boolean(deletingPackageId)}
                             />
                           </Tooltip>
                           <AlertDialog>
@@ -652,6 +722,7 @@ export default function SubscriptionsPage() {
                                 size="sm"
                                 variant="ghost"
                                 colorScheme="red"
+                                isDisabled={saving || Boolean(deletingPackageId)}
                               />
                             </AlertDialogTrigger>
                             <AlertDialogContent>
@@ -663,8 +734,8 @@ export default function SubscriptionsPage() {
                               </AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction className="bg-red-600 text-white" onClick={() => handleDeletePlan(p._id)}>
-                                  Delete
+                                <AlertDialogAction className="bg-red-600 text-white" onClick={() => handleDeletePlan(p._id)} disabled={saving || Boolean(deletingPackageId)}>
+                                  {deletingPackageId === p._id ? "Deleting..." : "Delete"}
                                 </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
@@ -677,13 +748,13 @@ export default function SubscriptionsPage() {
                           <Text fontSize="2xl" fontWeight="800" color={`${colorScheme}.600`}>
                             UGX {Number(p.price || 0).toLocaleString()}
                           </Text>
-                          {p.previousPrice && (
+                          {p.previousPrice !== null && p.previousPrice !== undefined && (
                             <Text fontSize="sm" color="gray.400" textDecoration="line-through">
                               {Number(p.previousPrice).toLocaleString()}
                             </Text>
                           )}
                         </HStack>
-                        <Text fontSize="xs" color="gray.500">per period</Text>
+                        <Text fontSize="xs" color="gray.500">per {p.type || "period"}</Text>
                       </Box>
 
                       {details.length > 0 && (
@@ -698,6 +769,11 @@ export default function SubscriptionsPage() {
                             <Text fontSize="xs" color="gray.400">+{details.length - 5} more benefits</Text>
                           )}
                         </VStack>
+                      )}
+                      {p.createdAt && (
+                        <Text mt={4} fontSize="xs" color="gray.400">
+                          Created {moment(p.createdAt).format("DD MMM YYYY")}
+                        </Text>
                       )}
                     </CardBody>
                   </Card>
@@ -721,7 +797,7 @@ export default function SubscriptionsPage() {
                       <Flex w={12} h={12} borderRadius="xl" bg="green.100" align="center" justify="center">
                         <Plus size={24} color="var(--chakra-colors-green-600)" />
                       </Flex>
-                      <Text fontWeight="600" color="green.600">Add New Plan</Text>
+                      <Text fontWeight="600" color="green.600">Add New Package</Text>
                     </VStack>
                   </Center>
                 </CardBody>
@@ -735,9 +811,9 @@ export default function SubscriptionsPage() {
                     <Flex w={16} h={16} borderRadius="full" bg="purple.50" align="center" justify="center">
                       <Package size={32} color="var(--chakra-colors-purple-400)" />
                     </Flex>
-                    <Text color="gray.500" fontWeight="500">No plans yet</Text>
+                    <Text color="gray.500" fontWeight="500">No subscription packages yet</Text>
                     <Button leftIcon={<Plus size={16} />} colorScheme="green" onClick={openAddPlan} borderRadius="lg">
-                      Create Your First Plan
+                      Add Your First Package
                     </Button>
                   </VStack>
                 </Center>
@@ -780,24 +856,24 @@ export default function SubscriptionsPage() {
       <PlanModal
         isOpen={isPlanOpen}
         onClose={onPlanClose}
-        title="Add Subscription Plan"
+        title="Add Subscription Package"
         form={planForm}
         setForm={setPlanForm}
         onSave={handleSavePlan}
         saving={saving}
-        saveLabel="Create Plan"
+        saveLabel="Create Package"
       />
 
       {/* Edit plan modal */}
       <PlanModal
         isOpen={isEditOpen}
         onClose={onEditClose}
-        title="Edit Plan"
+        title="Edit Subscription Package"
         form={planForm}
         setForm={setPlanForm}
         onSave={handleSavePlan}
         saving={saving}
-        saveLabel="Update Plan"
+        saveLabel="Update Package"
       />
     </Box>
   );
@@ -840,16 +916,11 @@ function PlanForm({ form, setForm }) {
     <VStack spacing={5} align="stretch">
       <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
         <FormControl isRequired>
-          <FormLabel fontWeight="600" fontSize="sm">Plan Type</FormLabel>
-          <Select value={form.type} onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))} borderRadius="lg">
-            <option value="standard">Standard</option>
-            <option value="premium">Premium</option>
-            <option value="family">Family</option>
-            <option value="business">Business</option>
-          </Select>
+          <FormLabel fontWeight="600" fontSize="sm">Package Type</FormLabel>
+          <Input value={form.type} onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))} placeholder="e.g. monthly" borderRadius="lg" />
         </FormControl>
         <FormControl isRequired>
-          <FormLabel fontWeight="600" fontSize="sm">Display Name</FormLabel>
+          <FormLabel fontWeight="600" fontSize="sm">Name</FormLabel>
           <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="e.g. Premium" borderRadius="lg" />
         </FormControl>
       </SimpleGrid>
@@ -868,7 +939,7 @@ function PlanForm({ form, setForm }) {
 
       <Box>
         <Flex justify="space-between" align="center" mb={3}>
-          <FormLabel fontWeight="600" fontSize="sm" mb={0}>Plan Benefits</FormLabel>
+          <FormLabel fontWeight="600" fontSize="sm" mb={0}>Benefits / Details</FormLabel>
           <Button leftIcon={<Plus size={14} />} size="sm" colorScheme="green" variant="outline" onClick={addBenefit} borderRadius="lg">
             Add
           </Button>
@@ -937,8 +1008,7 @@ function MealSlotGrid({ slots, overrides, upsertSlot, upsertOverride, toast, loa
         incomeLevel: form.incomeLevel, prepType: form.prepType, day: form.day, mealType: form.mealType,
         imageUrl: form.imageUrl || "",
       }).unwrap();
-      loadSlots();
-      loadOverrides();
+      await Promise.all([loadSlots(), loadOverrides()]);
       toast({ title: "Meal saved", status: "success", duration: 3000, isClosable: true });
       onSlotModalClose();
       setEditingSlot(null);

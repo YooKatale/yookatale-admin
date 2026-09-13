@@ -28,14 +28,22 @@ const requestWithFallback = async (urlCandidates, init = {}) => {
       });
 
       const data = await parseJsonResponse(response);
-      if (response.ok || data?.status === "Success" || data?.success) {
-        return { data: data?.data ?? data };
+      const requestSucceeded =
+        response.ok &&
+        data?.success !== false &&
+        (!data?.status || data.status === "Success" || data.status === "success") &&
+        data?.success !== false;
+      if (requestSucceeded) {
+        return { data };
       }
 
       lastErr = new Error(data?.message || `Request failed for ${url}`);
       lastErr.data = data;
+      lastErr.status = response.status;
+      if (response.status !== 404) throw lastErr;
     } catch (error) {
       lastErr = error;
+      if (error?.status !== 404) throw error;
     }
   }
 
@@ -69,58 +77,32 @@ export const yoocardApiSlice = apiSlice.injectEndpoints({
         method: "PUT",
       }),
     }),
-    // Meal plans (subscription packages) — used on /subscription page
+    // Subscription packages are managed through the authenticated admin API.
     subscriptionPackagesFetch: builder.mutation({
-      queryFn: async () => {
-        const candidates = [
-          `${BACKEND_URL}/api/subscription/package/get`,
-          `${BACKEND_URL}/api/subscription-packages`,
-          `${BACKEND_URL}/api/subscription/packages`,
-          `${BACKEND_URL}/admin/subscription/packages`,
-        ];
-        return requestWithFallback(candidates, { method: "GET" });
-      },
+      query: () => ({
+        url: `${BACKEND_URL}/admin/subscription-packages`,
+        method: "GET",
+      }),
     }),
     subscriptionPackageCreate: builder.mutation({
-      queryFn: async (data) => {
-        const candidates = [
-          `${BACKEND_URL}/api/subscription/package`,
-          `${BACKEND_URL}/api/subscription/package/`,
-          `${BACKEND_URL}/api/subscription-packages`,
-          `${BACKEND_URL}/admin/subscription/packages`,
-        ];
-        return requestWithFallback(candidates, {
-          method: "POST",
-          body: JSON.stringify(data),
-          headers: { "Content-Type": "application/json" },
-        });
-      },
+      query: (data) => ({
+        url: `${BACKEND_URL}/admin/subscription-packages`,
+        method: "POST",
+        body: data,
+      }),
     }),
     subscriptionPackageUpdate: builder.mutation({
-      queryFn: async ({ id, ...body }) => {
-        const candidates = [
-          `${BACKEND_URL}/api/subscription-packages/${id}`,
-          `${BACKEND_URL}/api/subscription/package/${id}`,
-          `${BACKEND_URL}/api/subscription/packages/${id}`,
-          `${BACKEND_URL}/admin/subscription/packages/${id}`,
-        ];
-        return requestWithFallback(candidates, {
-          method: "PUT",
-          body: JSON.stringify(body),
-          headers: { "Content-Type": "application/json" },
-        });
-      },
+      query: ({ id, ...body }) => ({
+        url: `${BACKEND_URL}/admin/subscription-packages/${id}`,
+        method: "PUT",
+        body,
+      }),
     }),
     subscriptionPackageDelete: builder.mutation({
-      queryFn: async (id) => {
-        const candidates = [
-          `${BACKEND_URL}/api/subscription-packages/${id}`,
-          `${BACKEND_URL}/api/subscription/package/${id}`,
-          `${BACKEND_URL}/api/subscription/packages/${id}`,
-          `${BACKEND_URL}/admin/subscription/packages/${id}`,
-        ];
-        return requestWithFallback(candidates, { method: "DELETE" });
-      },
+      query: (id) => ({
+        url: `${BACKEND_URL}/admin/subscription-packages/${id}`,
+        method: "DELETE",
+      }),
     }),
     mealCalendarOverridesFetch: builder.mutation({
       queryFn: async () => {

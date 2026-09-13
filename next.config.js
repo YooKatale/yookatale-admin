@@ -27,10 +27,10 @@ const nextConfig = {
               "font-src 'self' https://fonts.gstatic.com",
 
               // Images
-              "img-src 'self' http://localhost:3000 data: blob: https:",
+              "img-src 'self' http://localhost:3000 http://localhost:4400 data: blob: https:",
 
-              // API + WebSocket connections (LOCAL + PROD)
-              "connect-src 'self' http://localhost:4400 ws://localhost:4400 http://localhost:8000 https://yookatale-server.onrender.com https://yookatale-server-app.onrender.com wss://yookatale-server.onrender.com",
+              // API + WebSocket connections (LOCAL DEVELOPMENT)
+              "connect-src 'self' http://localhost:4400 ws://localhost:4400 https://yookatale-server.onrender.com https://yookatale-server-app.onrender.com wss://yookatale-server.onrender.com",
 
               // Prevent embedding
               "frame-ancestors 'none'",

@@ -315,7 +315,7 @@ const SidebarWithHeader = ({ children, ...rest }) => {
     if (isPublicRoute) return;          // <-- add this guard too, no socket on public pages
     if (!userInfo?._id) return;
     const socket = io(BACKEND_URL, {
-      transports: ["websocket"],
+      transports: ["polling"],
       reconnection: true,
       reconnectionAttempts: 5,
       auth: { userId: userInfo._id, accountType: accountType || "admin" },
@@ -480,7 +480,7 @@ const SidebarWithHeader = ({ children, ...rest }) => {
     isAuthenticated ? (
       <Box bg="gray.50" minH="100vh">
         <SidebarContent
-          onClose={() => onClose}
+          onClose={onClose}
           socketConnected={socketConnected}
           display={{ base: 'none', md: 'block' }}
         />
@@ -510,6 +510,7 @@ const SidebarWithHeader = ({ children, ...rest }) => {
 
         {/* Main Content with proper spacing for navbar */}
         <Box
+          className="admin-main"
           ml={{ base: 0, md: 64 }}
           pt={{ base: 24, md: 28 }}
           px={{ base: 4, md: 6 }}

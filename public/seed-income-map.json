@@ -1,0 +1,5450 @@
+[
+  {
+    "name": "White rice",
+    "category": "Rice",
+    "price": 32500,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Brown rice",
+    "category": "Rice",
+    "price": 35000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Jasmine rice",
+    "category": "Rice",
+    "price": 35000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Basmati rice",
+    "category": "Rice",
+    "price": 32500,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Swt rice",
+    "category": "Rice",
+    "price": 27500,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Super rice",
+    "category": "Rice",
+    "price": 27500,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Kaiso rice",
+    "category": "Rice",
+    "price": 35000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Pakistan rice",
+    "category": "Rice",
+    "price": 32500,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Wheat flour",
+    "category": "Flour",
+    "price": 32500,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Sorghum flour",
+    "category": "Flour",
+    "price": 32500,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Millet flour",
+    "category": "Flour",
+    "price": 32500,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Maize flour",
+    "category": "Flour",
+    "price": 32500,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Cassava flour",
+    "category": "Flour",
+    "price": 27500,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Rice flour",
+    "category": "Flour",
+    "price": 35000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Mattoke flour",
+    "category": "Flour",
+    "price": 35000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Sweet potato flour",
+    "category": "Flour",
+    "price": 25000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Yellow maize",
+    "category": "Maize",
+    "price": 35000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Waxy corn",
+    "category": "Maize",
+    "price": 35000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Flint corn",
+    "category": "Maize",
+    "price": 35000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Dent corn",
+    "category": "Maize",
+    "price": 32500,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "White maize",
+    "category": "Maize",
+    "price": 35000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Orange flesh sweet potatoe",
+    "category": "Sweet potatoes",
+    "price": 40000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Yellow flesh sweet potato",
+    "category": "Sweet potatoes",
+    "price": 25000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Purple sweet potato",
+    "category": "Sweet potatoes",
+    "price": 25000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "White sweet potato",
+    "category": "Sweet potatoes",
+    "price": 27500,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Japanese sweet potato",
+    "category": "Sweet potatoes",
+    "price": 27500,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Russet irish potatoes",
+    "category": "Irish potatoes",
+    "price": 22500,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "White irish potatoes",
+    "category": "Irish potatoes",
+    "price": 25000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Kisoro irish potatoes",
+    "category": "Irish potatoes",
+    "price": 25000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Yukon gold irish potatoes",
+    "category": "Irish potatoes",
+    "price": 25000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Purple irish potatoes",
+    "category": "Irish potatoes",
+    "price": 25000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Butternut squash",
+    "category": "Pumpkins",
+    "price": 19000,
+    "quantity": 1,
+    "unit": "piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Sugar pie pumpkin",
+    "category": "Pumpkins",
+    "price": 32000,
+    "quantity": 4,
+    "unit": "piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Oziga pumpkin",
+    "category": "Pumpkins",
+    "price": 32000,
+    "quantity": 4,
+    "unit": "piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Wujju pumpkin",
+    "category": "Pumpkins",
+    "price": 28000,
+    "quantity": 4,
+    "unit": "piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Large white pumpkin",
+    "category": "Pumpkins",
+    "price": 30000,
+    "quantity": 4,
+    "unit": "piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Dulu pumpkin",
+    "category": "Pumpkins",
+    "price": 30000,
+    "quantity": 4,
+    "unit": "piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Sweet pumpkin",
+    "category": "Pumpkins",
+    "price": 30000,
+    "quantity": 4,
+    "unit": "piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "White cassava",
+    "category": "Cassava",
+    "price": 25000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Yellow cassava",
+    "category": "Cassava",
+    "price": 25000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Sweet cassava",
+    "category": "Cassava",
+    "price": 27500,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Nambale",
+    "category": "Beans",
+    "price": 37500,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Kidnwy beans",
+    "category": "Beans",
+    "price": 45000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Black beans",
+    "category": "Beans",
+    "price": 40000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Chickpea",
+    "category": "Beans",
+    "price": 37500,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Soya beans",
+    "category": "Beans",
+    "price": 40000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Pinto beans",
+    "category": "Beans",
+    "price": 45000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Yellow beans",
+    "category": "Beans",
+    "price": 37500,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Green beans",
+    "category": "Beans",
+    "price": 40000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Peas",
+    "category": "Beans",
+    "price": 37500,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Quail eggs",
+    "category": "Eggs",
+    "price": 54000,
+    "quantity": 3,
+    "unit": "tray/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Yellow york eggs",
+    "category": "Eggs",
+    "price": 57000,
+    "quantity": 3,
+    "unit": "tray/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Turkey eggs",
+    "category": "Eggs",
+    "price": 60000,
+    "quantity": 3,
+    "unit": "tray/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Goose eggs",
+    "category": "Eggs",
+    "price": 54000,
+    "quantity": 3,
+    "unit": "tray/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Local chicken eggs",
+    "category": "Eggs",
+    "price": 49000,
+    "quantity": 2,
+    "unit": "tray/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Duck eggs",
+    "category": "Eggs",
+    "price": 60000,
+    "quantity": 3,
+    "unit": "tray/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Ground nuts",
+    "category": "Nuts",
+    "price": 17500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Walnuts",
+    "category": "Nuts",
+    "price": 17000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Almonds",
+    "category": "Nuts",
+    "price": 18000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Cashew nuts",
+    "category": "Nuts",
+    "price": 18000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Hazel nuts",
+    "category": "Nuts",
+    "price": 18000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Engege",
+    "category": "Fish",
+    "price": 45000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Tilapia",
+    "category": "Fish",
+    "price": 43000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Nile perch",
+    "category": "Fish",
+    "price": 50000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Mukene",
+    "category": "Fish",
+    "price": 48000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Semutundu cat fish",
+    "category": "Fish",
+    "price": 49000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Salmon",
+    "category": "Fish",
+    "price": 50000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Tuna",
+    "category": "Fish",
+    "price": 50000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Molokoni",
+    "category": "Beef",
+    "price": 48000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Cow tongue",
+    "category": "Beef",
+    "price": 48000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Cow thigh",
+    "category": "Beef",
+    "price": 48000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Cow intestines",
+    "category": "Beef",
+    "price": 45000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Liver",
+    "category": "Beef",
+    "price": 43000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Cow ribs",
+    "category": "Beef",
+    "price": 50000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Chicken breast",
+    "category": "Chicken",
+    "price": 49000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Chicken wings",
+    "category": "Chicken",
+    "price": 46000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Chicken legs",
+    "category": "Chicken",
+    "price": 46000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Gizzards",
+    "category": "Chicken",
+    "price": 51000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Pork ribs",
+    "category": "Pork",
+    "price": 45000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Pork legs",
+    "category": "Pork",
+    "price": 43000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Pork chops",
+    "category": "Pork",
+    "price": 48000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Pork meat",
+    "category": "Pork",
+    "price": 51000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Goat meat",
+    "category": "Goat",
+    "price": 43000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Goat ribs",
+    "category": "Goat",
+    "price": 48000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Goat liver",
+    "category": "Goat",
+    "price": 51000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Goat offals",
+    "category": "Goat",
+    "price": 44000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Low fat milk",
+    "category": "Milk",
+    "price": 26000,
+    "quantity": 4,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Skimmed milk",
+    "category": "Milk",
+    "price": 26000,
+    "quantity": 4,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Condesed milk",
+    "category": "Milk",
+    "price": 28000,
+    "quantity": 4,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Flavoured milk",
+    "category": "Milk",
+    "price": 22000,
+    "quantity": 4,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Fresh milk",
+    "category": "Milk",
+    "price": 26000,
+    "quantity": 4,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Tinned milk",
+    "category": "Milk",
+    "price": 26000,
+    "quantity": 4,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Uht milk",
+    "category": "Milk",
+    "price": 22000,
+    "quantity": 4,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Non diary milk",
+    "category": "Milk",
+    "price": 28000,
+    "quantity": 4,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Bongo",
+    "category": "Yogurt",
+    "price": 36000,
+    "quantity": 4,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Flavoured yogurt",
+    "category": "Yogurt",
+    "price": 32000,
+    "quantity": 4,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Plain yogurt",
+    "category": "Yogurt",
+    "price": 36000,
+    "quantity": 4,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Low fat yogurt",
+    "category": "Yogurt",
+    "price": 36000,
+    "quantity": 4,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Probiotic yogurt",
+    "category": "Yogurt",
+    "price": 32000,
+    "quantity": 4,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Mango juice",
+    "category": "Juice",
+    "price": 32000,
+    "quantity": 4,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Beetroot juice",
+    "category": "Juice",
+    "price": 28000,
+    "quantity": 4,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Lemonade",
+    "category": "Juice",
+    "price": 32000,
+    "quantity": 4,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Pineapple juice",
+    "category": "Juice",
+    "price": 30000,
+    "quantity": 4,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Apple juice",
+    "category": "Juice",
+    "price": 32000,
+    "quantity": 4,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Cocktail",
+    "category": "Juice",
+    "price": 28000,
+    "quantity": 4,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Sugar cane juice",
+    "category": "Juice",
+    "price": 30000,
+    "quantity": 4,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Watermelon juice",
+    "category": "Juice",
+    "price": 90000,
+    "quantity": 12,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Pinacolada",
+    "category": "Juice",
+    "price": 30000,
+    "quantity": 4,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Pure water",
+    "category": "Water",
+    "price": 36000,
+    "quantity": 12,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Pot water",
+    "category": "Water",
+    "price": 36000,
+    "quantity": 12,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Sparkling water",
+    "category": "Water",
+    "price": 36000,
+    "quantity": 12,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Flavoured water",
+    "category": "Water",
+    "price": 36000,
+    "quantity": 12,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Cocount water",
+    "category": "Water",
+    "price": 36000,
+    "quantity": 12,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Lemon",
+    "category": "Citrus fruits",
+    "price": 15000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Limes",
+    "category": "Citrus fruits",
+    "price": 15000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Tangarines",
+    "category": "Citrus fruits",
+    "price": 16000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Mangada",
+    "category": "Citrus fruits",
+    "price": 16000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Grape fruit",
+    "category": "Citrus fruits",
+    "price": 14000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Oranges",
+    "category": "Citrus fruits",
+    "price": 16000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Mango",
+    "category": "Tropical fruits",
+    "price": 14000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Papaya",
+    "category": "Tropical fruits",
+    "price": 30000,
+    "quantity": 4,
+    "unit": "piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Pineapple",
+    "category": "Tropical fruits",
+    "price": 30000,
+    "quantity": 4,
+    "unit": "piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Apple",
+    "category": "Tropical fruits",
+    "price": 14000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Kiwi",
+    "category": "Tropical fruits",
+    "price": 31000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Passion fruit",
+    "category": "Tropical fruits",
+    "price": 15000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Guava",
+    "category": "Tropical fruits",
+    "price": 15000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Strawberries",
+    "category": "Berries",
+    "price": 29000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Black berries",
+    "category": "Berries",
+    "price": 30000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Blue berries",
+    "category": "Berries",
+    "price": 29000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Goose berries",
+    "category": "Berries",
+    "price": 33000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Raspberries",
+    "category": "Berries",
+    "price": 30000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Cranberries",
+    "category": "Berries",
+    "price": 31000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Peaches",
+    "category": "Drupes",
+    "price": 40000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Plums",
+    "category": "Drupes",
+    "price": 16000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Cherries",
+    "category": "Drupes",
+    "price": 31000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Apricots",
+    "category": "Drupes",
+    "price": 30000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Nectarines",
+    "category": "Drupes",
+    "price": 33000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Dates",
+    "category": "Drupes",
+    "price": 29000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Pears",
+    "category": "Pome fruit",
+    "price": 37500,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Pomegranates",
+    "category": "Pome fruit",
+    "price": 29000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Quinces",
+    "category": "Pome fruit",
+    "price": 29000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Watermelon",
+    "category": "Melons",
+    "price": 96000,
+    "quantity": 12,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Honey dew",
+    "category": "Melons",
+    "price": 32000,
+    "quantity": 4,
+    "unit": "piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Cantaloupe",
+    "category": "Melons",
+    "price": 32000,
+    "quantity": 4,
+    "unit": "piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Canary melon",
+    "category": "Melons",
+    "price": 30000,
+    "quantity": 4,
+    "unit": "piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Raw bananas",
+    "category": "Bananas",
+    "price": 25000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Sweet bananas",
+    "category": "Bananas",
+    "price": 25000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Red bananas",
+    "category": "Bananas",
+    "price": 22500,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Ndizi",
+    "category": "Bananas",
+    "price": 27500,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Gonja",
+    "category": "Bananas",
+    "price": 22500,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Kayinja",
+    "category": "Matooke",
+    "price": 25000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Kivu",
+    "category": "Matooke",
+    "price": 25000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Green banana",
+    "category": "Matooke",
+    "price": 25000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Yellow banana",
+    "category": "Matooke",
+    "price": 25000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Obukopa",
+    "category": "Yams",
+    "price": 27500,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "White yam",
+    "category": "Yams",
+    "price": 22500,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Purple yam",
+    "category": "Yams",
+    "price": 25000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Sweet yam",
+    "category": "Yams",
+    "price": 25000,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Yellow yam",
+    "category": "Yams",
+    "price": 27500,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "White cabbage",
+    "category": "Cabbages",
+    "price": 26000,
+    "quantity": 4,
+    "unit": "piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Purple cabbage",
+    "category": "Cabbages",
+    "price": 22000,
+    "quantity": 4,
+    "unit": "piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Savoy cabbage",
+    "category": "Cabbages",
+    "price": 26000,
+    "quantity": 4,
+    "unit": "piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Leaf cabbage",
+    "category": "Cabbages",
+    "price": 28000,
+    "quantity": 4,
+    "unit": "piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Nakati",
+    "category": "Leaf vegetables",
+    "price": 11000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Spinach",
+    "category": "Leaf vegetables",
+    "price": 13000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Dodo",
+    "category": "Leaf vegetables",
+    "price": 11000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Kale",
+    "category": "Leaf vegetables",
+    "price": 13000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Bugga",
+    "category": "Leaf vegetables",
+    "price": 13000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Lettuce",
+    "category": "Leaf vegetables",
+    "price": 11000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Carrots",
+    "category": "Root vegetables",
+    "price": 13000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Radish",
+    "category": "Root vegetables",
+    "price": 13000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Celery roots",
+    "category": "Root vegetables",
+    "price": 11000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Garlic",
+    "category": "Root vegetables",
+    "price": 14000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Shallots",
+    "category": "Onions",
+    "price": 13000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Pearl onions",
+    "category": "Onions",
+    "price": 32500,
+    "quantity": 5,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "White onions",
+    "category": "Onions",
+    "price": 11000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Sweet onions",
+    "category": "Onions",
+    "price": 13000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Red onions",
+    "category": "Onions",
+    "price": 11000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Purple onions",
+    "category": "Onions",
+    "price": 13000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Multivitamins",
+    "category": "Vitamins",
+    "price": 97500,
+    "quantity": 3,
+    "unit": "pack/piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Vitamin A",
+    "category": "Vitamins",
+    "price": 102000,
+    "quantity": 3,
+    "unit": "pack/piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Vitamin E",
+    "category": "Vitamins",
+    "price": 106500,
+    "quantity": 3,
+    "unit": "pack/piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Vitamin K",
+    "category": "Vitamins",
+    "price": 112500,
+    "quantity": 3,
+    "unit": "pack/piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Vitamin C",
+    "category": "Vitamins",
+    "price": 103500,
+    "quantity": 3,
+    "unit": "pack/piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Sesame oil",
+    "category": "Oils",
+    "price": 58000,
+    "quantity": 4,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Sunflower oil",
+    "category": "Oils",
+    "price": 60000,
+    "quantity": 4,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Ovacado oil",
+    "category": "Oils",
+    "price": 66000,
+    "quantity": 4,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Ghee",
+    "category": "Oils",
+    "price": 60000,
+    "quantity": 4,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Cowboy",
+    "category": "Oils",
+    "price": 60000,
+    "quantity": 4,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Kimbo",
+    "category": "Oils",
+    "price": 58000,
+    "quantity": 4,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Olive oil",
+    "category": "Oils",
+    "price": 66000,
+    "quantity": 4,
+    "unit": "litre/pack",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Mint",
+    "category": "Herbs",
+    "price": 12500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Rosemary",
+    "category": "Herbs",
+    "price": 10000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Cinnamon",
+    "category": "Herbs",
+    "price": 11500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Kisubi",
+    "category": "Herbs",
+    "price": 12000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Stevia",
+    "category": "Herbs",
+    "price": 10000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Cloves",
+    "category": "Herbs",
+    "price": 10000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Star anise",
+    "category": "Herbs",
+    "price": 12000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Tumeric powder",
+    "category": "Spices",
+    "price": 9500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Ginger powder",
+    "category": "Spices",
+    "price": 9500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Onion powder",
+    "category": "Spices",
+    "price": 10500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Beef masala",
+    "category": "Spices",
+    "price": 20000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Pilao masala",
+    "category": "Spices",
+    "price": 10000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Tea masala",
+    "category": "Spices",
+    "price": 9500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Chicken masala",
+    "category": "Spices",
+    "price": 21000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Fish masala",
+    "category": "Spices",
+    "price": 20000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Chilli powder",
+    "category": "Spices",
+    "price": 10500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Arabica coffee",
+    "category": "Coffee",
+    "price": 22500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Robusta coffee",
+    "category": "Coffee",
+    "price": 22500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Excelsa coffee",
+    "category": "Coffee",
+    "price": 20500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Liberica coffee",
+    "category": "Coffee",
+    "price": 21500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Bugisu coffee",
+    "category": "Coffee",
+    "price": 20500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Nyasaland coffee",
+    "category": "Coffee",
+    "price": 22000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Sweet bread",
+    "category": "Bread",
+    "price": 21000,
+    "quantity": 3,
+    "unit": "pack/piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Salty bread",
+    "category": "Bread",
+    "price": 22500,
+    "quantity": 3,
+    "unit": "pack/piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Wheat bread",
+    "category": "Bread",
+    "price": 22500,
+    "quantity": 3,
+    "unit": "pack/piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Yellow bread",
+    "category": "Bread",
+    "price": 22500,
+    "quantity": 3,
+    "unit": "pack/piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "White bread",
+    "category": "Bread",
+    "price": 24000,
+    "quantity": 3,
+    "unit": "pack/piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Bans",
+    "category": "Bread",
+    "price": 21000,
+    "quantity": 3,
+    "unit": "pack/piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Baguettes",
+    "category": "Bread",
+    "price": 24000,
+    "quantity": 3,
+    "unit": "pack/piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Croissants",
+    "category": "Pasteries",
+    "price": 19500,
+    "quantity": 3,
+    "unit": "pack/piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Danishes",
+    "category": "Pasteries",
+    "price": 19500,
+    "quantity": 3,
+    "unit": "pack/piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Muffins",
+    "category": "Pasteries",
+    "price": 16500,
+    "quantity": 3,
+    "unit": "pack/piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Cupcakes",
+    "category": "Pasteries",
+    "price": 163500,
+    "quantity": 3,
+    "unit": "pack/piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Cookies",
+    "category": "Pasteries",
+    "price": 19500,
+    "quantity": 3,
+    "unit": "pack/piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Birthday cakes",
+    "category": "Pasteries",
+    "price": 186000,
+    "quantity": 3,
+    "unit": "pack/piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "Wedding cakes",
+    "category": "Pasteries",
+    "price": 165000,
+    "quantity": 3,
+    "unit": "pack/piece",
+    "incomeLevel": "high"
+  },
+  {
+    "name": "White rice",
+    "category": "Rice",
+    "price": 10000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Brown rice",
+    "category": "Rice",
+    "price": 11000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Jasmine rice",
+    "category": "Rice",
+    "price": 11000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Basmati rice",
+    "category": "Rice",
+    "price": 10000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Swt rice",
+    "category": "Rice",
+    "price": 9000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Super rice",
+    "category": "Rice",
+    "price": 9000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Kaiso rice",
+    "category": "Rice",
+    "price": 11000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Pakistan rice",
+    "category": "Rice",
+    "price": 10000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Wheat flour",
+    "category": "Flour",
+    "price": 10000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Sorghum flour",
+    "category": "Flour",
+    "price": 10000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Millet flour",
+    "category": "Flour",
+    "price": 10000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Maize flour",
+    "category": "Flour",
+    "price": 10000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Cassava flour",
+    "category": "Flour",
+    "price": 9000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Rice flour",
+    "category": "Flour",
+    "price": 11000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Mattoke flour",
+    "category": "Flour",
+    "price": 11000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Sweet potato flour",
+    "category": "Flour",
+    "price": 8000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Yellow maize",
+    "category": "Maize",
+    "price": 11000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Waxy corn",
+    "category": "Maize",
+    "price": 11000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Flint corn",
+    "category": "Maize",
+    "price": 11000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Dent corn",
+    "category": "Maize",
+    "price": 10000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "White maize",
+    "category": "Maize",
+    "price": 11000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Orange flesh sweet potatoe",
+    "category": "Sweet potatoes",
+    "price": 13000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Yellow flesh sweet potato",
+    "category": "Sweet potatoes",
+    "price": 8000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Purple sweet potato",
+    "category": "Sweet potatoes",
+    "price": 8000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "White sweet potato",
+    "category": "Sweet potatoes",
+    "price": 9000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Japanese sweet potato",
+    "category": "Sweet potatoes",
+    "price": 9000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Russet irish potatoes",
+    "category": "Irish potatoes",
+    "price": 7000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "White irish potatoes",
+    "category": "Irish potatoes",
+    "price": 8000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Kisoro irish potatoes",
+    "category": "Irish potatoes",
+    "price": 8000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Yukon gold irish potatoes",
+    "category": "Irish potatoes",
+    "price": 8000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Purple irish potatoes",
+    "category": "Irish potatoes",
+    "price": 8000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Butternut squash",
+    "category": "Pumpkins",
+    "price": 7500,
+    "quantity": 0.5,
+    "unit": "piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Sugar pie pumpkin",
+    "category": "Pumpkins",
+    "price": 13000,
+    "quantity": 2,
+    "unit": "piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Oziga pumpkin",
+    "category": "Pumpkins",
+    "price": 13000,
+    "quantity": 2,
+    "unit": "piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Wujju pumpkin",
+    "category": "Pumpkins",
+    "price": 11000,
+    "quantity": 2,
+    "unit": "piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Large white pumpkin",
+    "category": "Pumpkins",
+    "price": 12000,
+    "quantity": 2,
+    "unit": "piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Dulu pumpkin",
+    "category": "Pumpkins",
+    "price": 12000,
+    "quantity": 2,
+    "unit": "piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Sweet pumpkin",
+    "category": "Pumpkins",
+    "price": 12000,
+    "quantity": 2,
+    "unit": "piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "White cassava",
+    "category": "Cassava",
+    "price": 8000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Yellow cassava",
+    "category": "Cassava",
+    "price": 8000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Sweet cassava",
+    "category": "Cassava",
+    "price": 9000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Nambale",
+    "category": "Beans",
+    "price": 12000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Kidnwy beans",
+    "category": "Beans",
+    "price": 14000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Black beans",
+    "category": "Beans",
+    "price": 13000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Chickpea",
+    "category": "Beans",
+    "price": 12000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Soya beans",
+    "category": "Beans",
+    "price": 13000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Pinto beans",
+    "category": "Beans",
+    "price": 14000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Yellow beans",
+    "category": "Beans",
+    "price": 12000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Green beans",
+    "category": "Beans",
+    "price": 13000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Peas",
+    "category": "Beans",
+    "price": 12000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Quail eggs",
+    "category": "Eggs",
+    "price": 29000,
+    "quantity": 2,
+    "unit": "tray/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Yellow york eggs",
+    "category": "Eggs",
+    "price": 30000,
+    "quantity": 2,
+    "unit": "tray/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Turkey eggs",
+    "category": "Eggs",
+    "price": 32000,
+    "quantity": 2,
+    "unit": "tray/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Goose eggs",
+    "category": "Eggs",
+    "price": 29000,
+    "quantity": 2,
+    "unit": "tray/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Local chicken eggs",
+    "category": "Eggs",
+    "price": 19500,
+    "quantity": 1,
+    "unit": "tray/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Duck eggs",
+    "category": "Eggs",
+    "price": 32000,
+    "quantity": 2,
+    "unit": "tray/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Ground nuts",
+    "category": "Nuts",
+    "price": 7000,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Walnuts",
+    "category": "Nuts",
+    "price": 6750,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Almonds",
+    "category": "Nuts",
+    "price": 7250,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Cashew nuts",
+    "category": "Nuts",
+    "price": 7250,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Hazel nuts",
+    "category": "Nuts",
+    "price": 7250,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Engege",
+    "category": "Fish",
+    "price": 18000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Tilapia",
+    "category": "Fish",
+    "price": 17000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Nile perch",
+    "category": "Fish",
+    "price": 20000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Mukene",
+    "category": "Fish",
+    "price": 19000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Semutundu cat fish",
+    "category": "Fish",
+    "price": 19500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Salmon",
+    "category": "Fish",
+    "price": 20000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Tuna",
+    "category": "Fish",
+    "price": 20000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Molokoni",
+    "category": "Beef",
+    "price": 19000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Cow tongue",
+    "category": "Beef",
+    "price": 19000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Cow thigh",
+    "category": "Beef",
+    "price": 19000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Cow intestines",
+    "category": "Beef",
+    "price": 18000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Liver",
+    "category": "Beef",
+    "price": 17000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Cow ribs",
+    "category": "Beef",
+    "price": 20000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Chicken breast",
+    "category": "Chicken",
+    "price": 19500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Chicken wings",
+    "category": "Chicken",
+    "price": 18500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Chicken legs",
+    "category": "Chicken",
+    "price": 18500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Gizzards",
+    "category": "Chicken",
+    "price": 20500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Pork ribs",
+    "category": "Pork",
+    "price": 18000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Pork legs",
+    "category": "Pork",
+    "price": 17000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Pork chops",
+    "category": "Pork",
+    "price": 19000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Pork meat",
+    "category": "Pork",
+    "price": 20500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Goat meat",
+    "category": "Goat",
+    "price": 17000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Goat ribs",
+    "category": "Goat",
+    "price": 19000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Goat liver",
+    "category": "Goat",
+    "price": 20500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Goat offals",
+    "category": "Goat",
+    "price": 17500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Low fat milk",
+    "category": "Milk",
+    "price": 10000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Skimmed milk",
+    "category": "Milk",
+    "price": 10000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Condesed milk",
+    "category": "Milk",
+    "price": 11000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Flavoured milk",
+    "category": "Milk",
+    "price": 9000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Fresh milk",
+    "category": "Milk",
+    "price": 10000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Tinned milk",
+    "category": "Milk",
+    "price": 10000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Uht milk",
+    "category": "Milk",
+    "price": 9000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Non diary milk",
+    "category": "Milk",
+    "price": 11000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Bongo",
+    "category": "Yogurt",
+    "price": 14000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Flavoured yogurt",
+    "category": "Yogurt",
+    "price": 13000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Plain yogurt",
+    "category": "Yogurt",
+    "price": 14000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Low fat yogurt",
+    "category": "Yogurt",
+    "price": 14000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Probiotic yogurt",
+    "category": "Yogurt",
+    "price": 13000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Mango juice",
+    "category": "Juice",
+    "price": 13000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Beetroot juice",
+    "category": "Juice",
+    "price": 11000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Lemonade",
+    "category": "Juice",
+    "price": 13000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Pineapple juice",
+    "category": "Juice",
+    "price": 12000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Apple juice",
+    "category": "Juice",
+    "price": 13000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Cocktail",
+    "category": "Juice",
+    "price": 11000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Sugar cane juice",
+    "category": "Juice",
+    "price": 12000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Watermelon juice",
+    "category": "Juice",
+    "price": 36000,
+    "quantity": 6,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Pinacolada",
+    "category": "Juice",
+    "price": 12000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Pure water",
+    "category": "Water",
+    "price": 15000,
+    "quantity": 6,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Pot water",
+    "category": "Water",
+    "price": 15000,
+    "quantity": 6,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Sparkling water",
+    "category": "Water",
+    "price": 15000,
+    "quantity": 6,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Flavoured water",
+    "category": "Water",
+    "price": 15000,
+    "quantity": 6,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Cocount water",
+    "category": "Water",
+    "price": 15000,
+    "quantity": 6,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Lemon",
+    "category": "Citrus fruits",
+    "price": 6000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Limes",
+    "category": "Citrus fruits",
+    "price": 6000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Tangarines",
+    "category": "Citrus fruits",
+    "price": 6500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Mangada",
+    "category": "Citrus fruits",
+    "price": 6500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Grape fruit",
+    "category": "Citrus fruits",
+    "price": 5500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Oranges",
+    "category": "Citrus fruits",
+    "price": 6500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Mango",
+    "category": "Tropical fruits",
+    "price": 5500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Papaya",
+    "category": "Tropical fruits",
+    "price": 12000,
+    "quantity": 2,
+    "unit": "piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Pineapple",
+    "category": "Tropical fruits",
+    "price": 12000,
+    "quantity": 2,
+    "unit": "piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Apple",
+    "category": "Tropical fruits",
+    "price": 5500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Kiwi",
+    "category": "Tropical fruits",
+    "price": 12500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Passion fruit",
+    "category": "Tropical fruits",
+    "price": 6000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Guava",
+    "category": "Tropical fruits",
+    "price": 6000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Strawberries",
+    "category": "Berries",
+    "price": 11500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Black berries",
+    "category": "Berries",
+    "price": 12000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Blue berries",
+    "category": "Berries",
+    "price": 11500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Goose berries",
+    "category": "Berries",
+    "price": 13000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Raspberries",
+    "category": "Berries",
+    "price": 12000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Cranberries",
+    "category": "Berries",
+    "price": 12500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Peaches",
+    "category": "Drupes",
+    "price": 13000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Plums",
+    "category": "Drupes",
+    "price": 6500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Cherries",
+    "category": "Drupes",
+    "price": 12500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Apricots",
+    "category": "Drupes",
+    "price": 12000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Nectarines",
+    "category": "Drupes",
+    "price": 13000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Dates",
+    "category": "Drupes",
+    "price": 11500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Pears",
+    "category": "Pome fruit",
+    "price": 12000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Pomegranates",
+    "category": "Pome fruit",
+    "price": 11500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Quinces",
+    "category": "Pome fruit",
+    "price": 11500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Watermelon",
+    "category": "Melons",
+    "price": 39000,
+    "quantity": 6,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Honey dew",
+    "category": "Melons",
+    "price": 13000,
+    "quantity": 2,
+    "unit": "piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Cantaloupe",
+    "category": "Melons",
+    "price": 13000,
+    "quantity": 2,
+    "unit": "piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Canary melon",
+    "category": "Melons",
+    "price": 12000,
+    "quantity": 2,
+    "unit": "piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Raw bananas",
+    "category": "Bananas",
+    "price": 8000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Sweet bananas",
+    "category": "Bananas",
+    "price": 8000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Red bananas",
+    "category": "Bananas",
+    "price": 7000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Ndizi",
+    "category": "Bananas",
+    "price": 9000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Gonja",
+    "category": "Bananas",
+    "price": 7000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Kayinja",
+    "category": "Matooke",
+    "price": 8000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Kivu",
+    "category": "Matooke",
+    "price": 8000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Green banana",
+    "category": "Matooke",
+    "price": 8000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Yellow banana",
+    "category": "Matooke",
+    "price": 8000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Obukopa",
+    "category": "Yams",
+    "price": 9000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "White yam",
+    "category": "Yams",
+    "price": 7000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Purple yam",
+    "category": "Yams",
+    "price": 8000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Sweet yam",
+    "category": "Yams",
+    "price": 8000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Yellow yam",
+    "category": "Yams",
+    "price": 9000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "White cabbage",
+    "category": "Cabbages",
+    "price": 10000,
+    "quantity": 2,
+    "unit": "piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Purple cabbage",
+    "category": "Cabbages",
+    "price": 9000,
+    "quantity": 2,
+    "unit": "piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Savoy cabbage",
+    "category": "Cabbages",
+    "price": 10000,
+    "quantity": 2,
+    "unit": "piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Leaf cabbage",
+    "category": "Cabbages",
+    "price": 11000,
+    "quantity": 2,
+    "unit": "piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Nakati",
+    "category": "Leaf vegetables",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Spinach",
+    "category": "Leaf vegetables",
+    "price": 5000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Dodo",
+    "category": "Leaf vegetables",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Kale",
+    "category": "Leaf vegetables",
+    "price": 5000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Bugga",
+    "category": "Leaf vegetables",
+    "price": 5000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Lettuce",
+    "category": "Leaf vegetables",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Carrots",
+    "category": "Root vegetables",
+    "price": 5000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Radish",
+    "category": "Root vegetables",
+    "price": 5000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Celery roots",
+    "category": "Root vegetables",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Garlic",
+    "category": "Root vegetables",
+    "price": 5500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Shallots",
+    "category": "Onions",
+    "price": 5000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Pearl onions",
+    "category": "Onions",
+    "price": 10000,
+    "quantity": 2,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "White onions",
+    "category": "Onions",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Sweet onions",
+    "category": "Onions",
+    "price": 5000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Red onions",
+    "category": "Onions",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Purple onions",
+    "category": "Onions",
+    "price": 5000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Multivitamins",
+    "category": "Vitamins",
+    "price": 52000,
+    "quantity": 2,
+    "unit": "pack/piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Vitamin A",
+    "category": "Vitamins",
+    "price": 54000,
+    "quantity": 2,
+    "unit": "pack/piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Vitamin E",
+    "category": "Vitamins",
+    "price": 57000,
+    "quantity": 2,
+    "unit": "pack/piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Vitamin K",
+    "category": "Vitamins",
+    "price": 60000,
+    "quantity": 2,
+    "unit": "pack/piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Vitamin C",
+    "category": "Vitamins",
+    "price": 55000,
+    "quantity": 2,
+    "unit": "pack/piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Sesame oil",
+    "category": "Oils",
+    "price": 23000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Sunflower oil",
+    "category": "Oils",
+    "price": 24000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Ovacado oil",
+    "category": "Oils",
+    "price": 26000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Ghee",
+    "category": "Oils",
+    "price": 24000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Cowboy",
+    "category": "Oils",
+    "price": 24000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Kimbo",
+    "category": "Oils",
+    "price": 23000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Olive oil",
+    "category": "Oils",
+    "price": 26000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Mint",
+    "category": "Herbs",
+    "price": 5000,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Rosemary",
+    "category": "Herbs",
+    "price": 4000,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Cinnamon",
+    "category": "Herbs",
+    "price": 4500,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Kisubi",
+    "category": "Herbs",
+    "price": 4750,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Stevia",
+    "category": "Herbs",
+    "price": 4000,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Cloves",
+    "category": "Herbs",
+    "price": 4000,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Star anise",
+    "category": "Herbs",
+    "price": 4750,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Tumeric powder",
+    "category": "Spices",
+    "price": 3750,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Ginger powder",
+    "category": "Spices",
+    "price": 3750,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Onion powder",
+    "category": "Spices",
+    "price": 4250,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Beef masala",
+    "category": "Spices",
+    "price": 8000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Pilao masala",
+    "category": "Spices",
+    "price": 4000,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Tea masala",
+    "category": "Spices",
+    "price": 3750,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Chicken masala",
+    "category": "Spices",
+    "price": 8500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Fish masala",
+    "category": "Spices",
+    "price": 8000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Chilli powder",
+    "category": "Spices",
+    "price": 4250,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Arabica coffee",
+    "category": "Coffee",
+    "price": 9000,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Robusta coffee",
+    "category": "Coffee",
+    "price": 9000,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Excelsa coffee",
+    "category": "Coffee",
+    "price": 8250,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Liberica coffee",
+    "category": "Coffee",
+    "price": 8500,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Bugisu coffee",
+    "category": "Coffee",
+    "price": 8250,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Nyasaland coffee",
+    "category": "Coffee",
+    "price": 8750,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Sweet bread",
+    "category": "Bread",
+    "price": 11000,
+    "quantity": 2,
+    "unit": "pack/piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Salty bread",
+    "category": "Bread",
+    "price": 12000,
+    "quantity": 2,
+    "unit": "pack/piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Wheat bread",
+    "category": "Bread",
+    "price": 12000,
+    "quantity": 2,
+    "unit": "pack/piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Yellow bread",
+    "category": "Bread",
+    "price": 12000,
+    "quantity": 2,
+    "unit": "pack/piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "White bread",
+    "category": "Bread",
+    "price": 13000,
+    "quantity": 2,
+    "unit": "pack/piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Bans",
+    "category": "Bread",
+    "price": 11000,
+    "quantity": 2,
+    "unit": "pack/piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Baguettes",
+    "category": "Bread",
+    "price": 13000,
+    "quantity": 2,
+    "unit": "pack/piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Croissants",
+    "category": "Pasteries",
+    "price": 10000,
+    "quantity": 2,
+    "unit": "pack/piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Danishes",
+    "category": "Pasteries",
+    "price": 10000,
+    "quantity": 2,
+    "unit": "pack/piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Muffins",
+    "category": "Pasteries",
+    "price": 9000,
+    "quantity": 2,
+    "unit": "pack/piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Cupcakes",
+    "category": "Pasteries",
+    "price": 87000,
+    "quantity": 2,
+    "unit": "pack/piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Cookies",
+    "category": "Pasteries",
+    "price": 10000,
+    "quantity": 2,
+    "unit": "pack/piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Birthday cakes",
+    "category": "Pasteries",
+    "price": 99000,
+    "quantity": 2,
+    "unit": "pack/piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "Wedding cakes",
+    "category": "Pasteries",
+    "price": 88000,
+    "quantity": 2,
+    "unit": "pack/piece",
+    "incomeLevel": "middle"
+  },
+  {
+    "name": "White rice",
+    "category": "Rice",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Brown rice",
+    "category": "Rice",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Jasmine rice",
+    "category": "Rice",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Basmati rice",
+    "category": "Rice",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Swt rice",
+    "category": "Rice",
+    "price": 4000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Super rice",
+    "category": "Rice",
+    "price": 4000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Kaiso rice",
+    "category": "Rice",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Pakistan rice",
+    "category": "Rice",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Wheat flour",
+    "category": "Flour",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Sorghum flour",
+    "category": "Flour",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Millet flour",
+    "category": "Flour",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Maize flour",
+    "category": "Flour",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Cassava flour",
+    "category": "Flour",
+    "price": 4000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Rice flour",
+    "category": "Flour",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Mattoke flour",
+    "category": "Flour",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Sweet potato flour",
+    "category": "Flour",
+    "price": 3500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Yellow maize",
+    "category": "Maize",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Waxy corn",
+    "category": "Maize",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Flint corn",
+    "category": "Maize",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Dent corn",
+    "category": "Maize",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "White maize",
+    "category": "Maize",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Orange flesh sweet potatoe",
+    "category": "Sweet potatoes",
+    "price": 5500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Yellow flesh sweet potato",
+    "category": "Sweet potatoes",
+    "price": 3500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Purple sweet potato",
+    "category": "Sweet potatoes",
+    "price": 3500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "White sweet potato",
+    "category": "Sweet potatoes",
+    "price": 4000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Japanese sweet potato",
+    "category": "Sweet potatoes",
+    "price": 4000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Russet irish potatoes",
+    "category": "Irish potatoes",
+    "price": 3000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "White irish potatoes",
+    "category": "Irish potatoes",
+    "price": 3500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Kisoro irish potatoes",
+    "category": "Irish potatoes",
+    "price": 3500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Yukon gold irish potatoes",
+    "category": "Irish potatoes",
+    "price": 3500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Purple irish potatoes",
+    "category": "Irish potatoes",
+    "price": 3500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Butternut squash",
+    "category": "Pumpkins",
+    "price": 3250,
+    "quantity": 0.25,
+    "unit": "piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Sugar pie pumpkin",
+    "category": "Pumpkins",
+    "price": 5500,
+    "quantity": 1,
+    "unit": "piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Oziga pumpkin",
+    "category": "Pumpkins",
+    "price": 5500,
+    "quantity": 1,
+    "unit": "piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Wujju pumpkin",
+    "category": "Pumpkins",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Large white pumpkin",
+    "category": "Pumpkins",
+    "price": 5000,
+    "quantity": 1,
+    "unit": "piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Dulu pumpkin",
+    "category": "Pumpkins",
+    "price": 5000,
+    "quantity": 1,
+    "unit": "piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Sweet pumpkin",
+    "category": "Pumpkins",
+    "price": 5000,
+    "quantity": 1,
+    "unit": "piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "White cassava",
+    "category": "Cassava",
+    "price": 3500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Yellow cassava",
+    "category": "Cassava",
+    "price": 3500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Sweet cassava",
+    "category": "Cassava",
+    "price": 4000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Nambale",
+    "category": "Beans",
+    "price": 5000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Kidnwy beans",
+    "category": "Beans",
+    "price": 6000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Black beans",
+    "category": "Beans",
+    "price": 5500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Chickpea",
+    "category": "Beans",
+    "price": 5000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Soya beans",
+    "category": "Beans",
+    "price": 5500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Pinto beans",
+    "category": "Beans",
+    "price": 6000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Yellow beans",
+    "category": "Beans",
+    "price": 5000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Green beans",
+    "category": "Beans",
+    "price": 5500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Peas",
+    "category": "Beans",
+    "price": 5000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Quail eggs",
+    "category": "Eggs",
+    "price": 12500,
+    "quantity": 1,
+    "unit": "tray/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Yellow york eggs",
+    "category": "Eggs",
+    "price": 13000,
+    "quantity": 1,
+    "unit": "tray/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Turkey eggs",
+    "category": "Eggs",
+    "price": 13500,
+    "quantity": 1,
+    "unit": "tray/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Goose eggs",
+    "category": "Eggs",
+    "price": 12500,
+    "quantity": 1,
+    "unit": "tray/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Local chicken eggs",
+    "category": "Eggs",
+    "price": 8250,
+    "quantity": 0.5,
+    "unit": "tray/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Duck eggs",
+    "category": "Eggs",
+    "price": 13500,
+    "quantity": 1,
+    "unit": "tray/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Ground nuts",
+    "category": "Nuts",
+    "price": 3000,
+    "quantity": 0.25,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Walnuts",
+    "category": "Nuts",
+    "price": 2875,
+    "quantity": 0.25,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Almonds",
+    "category": "Nuts",
+    "price": 3125,
+    "quantity": 0.25,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Cashew nuts",
+    "category": "Nuts",
+    "price": 3125,
+    "quantity": 0.25,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Hazel nuts",
+    "category": "Nuts",
+    "price": 3125,
+    "quantity": 0.25,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Engege",
+    "category": "Fish",
+    "price": 7750,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Tilapia",
+    "category": "Fish",
+    "price": 7250,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Nile perch",
+    "category": "Fish",
+    "price": 8500,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Mukene",
+    "category": "Fish",
+    "price": 8000,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Semutundu cat fish",
+    "category": "Fish",
+    "price": 8250,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Salmon",
+    "category": "Fish",
+    "price": 8500,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Tuna",
+    "category": "Fish",
+    "price": 8500,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Molokoni",
+    "category": "Beef",
+    "price": 8000,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Cow tongue",
+    "category": "Beef",
+    "price": 8000,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Cow thigh",
+    "category": "Beef",
+    "price": 8000,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Cow intestines",
+    "category": "Beef",
+    "price": 7750,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Liver",
+    "category": "Beef",
+    "price": 7250,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Cow ribs",
+    "category": "Beef",
+    "price": 8500,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Chicken breast",
+    "category": "Chicken",
+    "price": 8250,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Chicken wings",
+    "category": "Chicken",
+    "price": 7750,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Chicken legs",
+    "category": "Chicken",
+    "price": 7750,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Gizzards",
+    "category": "Chicken",
+    "price": 8750,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Pork ribs",
+    "category": "Pork",
+    "price": 7750,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Pork legs",
+    "category": "Pork",
+    "price": 7250,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Pork chops",
+    "category": "Pork",
+    "price": 8000,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Pork meat",
+    "category": "Pork",
+    "price": 8750,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Goat meat",
+    "category": "Goat",
+    "price": 7250,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Goat ribs",
+    "category": "Goat",
+    "price": 8000,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Goat liver",
+    "category": "Goat",
+    "price": 8750,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Goat offals",
+    "category": "Goat",
+    "price": 7500,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Low fat milk",
+    "category": "Milk",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Skimmed milk",
+    "category": "Milk",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Condesed milk",
+    "category": "Milk",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Flavoured milk",
+    "category": "Milk",
+    "price": 4000,
+    "quantity": 1,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Fresh milk",
+    "category": "Milk",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Tinned milk",
+    "category": "Milk",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Uht milk",
+    "category": "Milk",
+    "price": 4000,
+    "quantity": 1,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Non diary milk",
+    "category": "Milk",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Bongo",
+    "category": "Yogurt",
+    "price": 6000,
+    "quantity": 1,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Flavoured yogurt",
+    "category": "Yogurt",
+    "price": 5500,
+    "quantity": 1,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Plain yogurt",
+    "category": "Yogurt",
+    "price": 6000,
+    "quantity": 1,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Low fat yogurt",
+    "category": "Yogurt",
+    "price": 6000,
+    "quantity": 1,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Probiotic yogurt",
+    "category": "Yogurt",
+    "price": 5500,
+    "quantity": 1,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Mango juice",
+    "category": "Juice",
+    "price": 5500,
+    "quantity": 1,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Beetroot juice",
+    "category": "Juice",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Lemonade",
+    "category": "Juice",
+    "price": 5500,
+    "quantity": 1,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Pineapple juice",
+    "category": "Juice",
+    "price": 5000,
+    "quantity": 1,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Apple juice",
+    "category": "Juice",
+    "price": 5500,
+    "quantity": 1,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Cocktail",
+    "category": "Juice",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Sugar cane juice",
+    "category": "Juice",
+    "price": 5000,
+    "quantity": 1,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Watermelon juice",
+    "category": "Juice",
+    "price": 10000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Pinacolada",
+    "category": "Juice",
+    "price": 5000,
+    "quantity": 1,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Pure water",
+    "category": "Water",
+    "price": 4000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Pot water",
+    "category": "Water",
+    "price": 4000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Sparkling water",
+    "category": "Water",
+    "price": 4000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Flavoured water",
+    "category": "Water",
+    "price": 4000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Cocount water",
+    "category": "Water",
+    "price": 4000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Lemon",
+    "category": "Citrus fruits",
+    "price": 2500,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Limes",
+    "category": "Citrus fruits",
+    "price": 2500,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Tangarines",
+    "category": "Citrus fruits",
+    "price": 2750,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Mangada",
+    "category": "Citrus fruits",
+    "price": 2750,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Grape fruit",
+    "category": "Citrus fruits",
+    "price": 2250,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Oranges",
+    "category": "Citrus fruits",
+    "price": 2750,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Mango",
+    "category": "Tropical fruits",
+    "price": 2250,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Papaya",
+    "category": "Tropical fruits",
+    "price": 5000,
+    "quantity": 1,
+    "unit": "piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Pineapple",
+    "category": "Tropical fruits",
+    "price": 5000,
+    "quantity": 1,
+    "unit": "piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Apple",
+    "category": "Tropical fruits",
+    "price": 2250,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Kiwi",
+    "category": "Tropical fruits",
+    "price": 5250,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Passion fruit",
+    "category": "Tropical fruits",
+    "price": 2500,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Guava",
+    "category": "Tropical fruits",
+    "price": 2500,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Strawberries",
+    "category": "Berries",
+    "price": 5000,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Black berries",
+    "category": "Berries",
+    "price": 5000,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Blue berries",
+    "category": "Berries",
+    "price": 5000,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Goose berries",
+    "category": "Berries",
+    "price": 5500,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Raspberries",
+    "category": "Berries",
+    "price": 5000,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Cranberries",
+    "category": "Berries",
+    "price": 5250,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Peaches",
+    "category": "Drupes",
+    "price": 5500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Plums",
+    "category": "Drupes",
+    "price": 2750,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Cherries",
+    "category": "Drupes",
+    "price": 5250,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Apricots",
+    "category": "Drupes",
+    "price": 5000,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Nectarines",
+    "category": "Drupes",
+    "price": 5500,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Dates",
+    "category": "Drupes",
+    "price": 5000,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Pears",
+    "category": "Pome fruit",
+    "price": 5000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Pomegranates",
+    "category": "Pome fruit",
+    "price": 5000,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Quinces",
+    "category": "Pome fruit",
+    "price": 5000,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Watermelon",
+    "category": "Melons",
+    "price": 11000,
+    "quantity": 2,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Honey dew",
+    "category": "Melons",
+    "price": 5500,
+    "quantity": 1,
+    "unit": "piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Cantaloupe",
+    "category": "Melons",
+    "price": 5500,
+    "quantity": 1,
+    "unit": "piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Canary melon",
+    "category": "Melons",
+    "price": 5000,
+    "quantity": 1,
+    "unit": "piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Raw bananas",
+    "category": "Bananas",
+    "price": 3500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Sweet bananas",
+    "category": "Bananas",
+    "price": 3500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Red bananas",
+    "category": "Bananas",
+    "price": 3000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Ndizi",
+    "category": "Bananas",
+    "price": 4000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Gonja",
+    "category": "Bananas",
+    "price": 3000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Kayinja",
+    "category": "Matooke",
+    "price": 3500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Kivu",
+    "category": "Matooke",
+    "price": 3500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Green banana",
+    "category": "Matooke",
+    "price": 3500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Yellow banana",
+    "category": "Matooke",
+    "price": 3500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Obukopa",
+    "category": "Yams",
+    "price": 4000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "White yam",
+    "category": "Yams",
+    "price": 3000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Purple yam",
+    "category": "Yams",
+    "price": 3500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Sweet yam",
+    "category": "Yams",
+    "price": 3500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Yellow yam",
+    "category": "Yams",
+    "price": 4000,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "White cabbage",
+    "category": "Cabbages",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Purple cabbage",
+    "category": "Cabbages",
+    "price": 4000,
+    "quantity": 1,
+    "unit": "piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Savoy cabbage",
+    "category": "Cabbages",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Leaf cabbage",
+    "category": "Cabbages",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Nakati",
+    "category": "Leaf vegetables",
+    "price": 2000,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Spinach",
+    "category": "Leaf vegetables",
+    "price": 2250,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Dodo",
+    "category": "Leaf vegetables",
+    "price": 2000,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Kale",
+    "category": "Leaf vegetables",
+    "price": 2250,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Bugga",
+    "category": "Leaf vegetables",
+    "price": 2250,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Lettuce",
+    "category": "Leaf vegetables",
+    "price": 2000,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Carrots",
+    "category": "Root vegetables",
+    "price": 2250,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Radish",
+    "category": "Root vegetables",
+    "price": 2250,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Celery roots",
+    "category": "Root vegetables",
+    "price": 2000,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Garlic",
+    "category": "Root vegetables",
+    "price": 2250,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Shallots",
+    "category": "Onions",
+    "price": 2250,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Pearl onions",
+    "category": "Onions",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "White onions",
+    "category": "Onions",
+    "price": 2000,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Sweet onions",
+    "category": "Onions",
+    "price": 2250,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Red onions",
+    "category": "Onions",
+    "price": 2000,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Purple onions",
+    "category": "Onions",
+    "price": 2250,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Multivitamins",
+    "category": "Vitamins",
+    "price": 22000,
+    "quantity": 1,
+    "unit": "pack/piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Vitamin A",
+    "category": "Vitamins",
+    "price": 23000,
+    "quantity": 1,
+    "unit": "pack/piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Vitamin E",
+    "category": "Vitamins",
+    "price": 24000,
+    "quantity": 1,
+    "unit": "pack/piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Vitamin K",
+    "category": "Vitamins",
+    "price": 25500,
+    "quantity": 1,
+    "unit": "pack/piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Vitamin C",
+    "category": "Vitamins",
+    "price": 23500,
+    "quantity": 1,
+    "unit": "pack/piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Sesame oil",
+    "category": "Oils",
+    "price": 10000,
+    "quantity": 1,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Sunflower oil",
+    "category": "Oils",
+    "price": 10000,
+    "quantity": 1,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Ovacado oil",
+    "category": "Oils",
+    "price": 11000,
+    "quantity": 1,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Ghee",
+    "category": "Oils",
+    "price": 10000,
+    "quantity": 1,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Cowboy",
+    "category": "Oils",
+    "price": 10000,
+    "quantity": 1,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Kimbo",
+    "category": "Oils",
+    "price": 10000,
+    "quantity": 1,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Olive oil",
+    "category": "Oils",
+    "price": 11000,
+    "quantity": 1,
+    "unit": "litre/pack",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Mint",
+    "category": "Herbs",
+    "price": 2125,
+    "quantity": 0.25,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Rosemary",
+    "category": "Herbs",
+    "price": 1750,
+    "quantity": 0.25,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Cinnamon",
+    "category": "Herbs",
+    "price": 1875,
+    "quantity": 0.25,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Kisubi",
+    "category": "Herbs",
+    "price": 2000,
+    "quantity": 0.25,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Stevia",
+    "category": "Herbs",
+    "price": 1750,
+    "quantity": 0.25,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Cloves",
+    "category": "Herbs",
+    "price": 1750,
+    "quantity": 0.25,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Star anise",
+    "category": "Herbs",
+    "price": 2000,
+    "quantity": 0.25,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Tumeric powder",
+    "category": "Spices",
+    "price": 1625,
+    "quantity": 0.25,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Ginger powder",
+    "category": "Spices",
+    "price": 1625,
+    "quantity": 0.25,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Onion powder",
+    "category": "Spices",
+    "price": 1750,
+    "quantity": 0.25,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Beef masala",
+    "category": "Spices",
+    "price": 3500,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Pilao masala",
+    "category": "Spices",
+    "price": 1750,
+    "quantity": 0.25,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Tea masala",
+    "category": "Spices",
+    "price": 1625,
+    "quantity": 0.25,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Chicken masala",
+    "category": "Spices",
+    "price": 3500,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Fish masala",
+    "category": "Spices",
+    "price": 3500,
+    "quantity": 0.5,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Chilli powder",
+    "category": "Spices",
+    "price": 1750,
+    "quantity": 0.25,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Arabica coffee",
+    "category": "Coffee",
+    "price": 3875,
+    "quantity": 0.25,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Robusta coffee",
+    "category": "Coffee",
+    "price": 3875,
+    "quantity": 0.25,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Excelsa coffee",
+    "category": "Coffee",
+    "price": 3500,
+    "quantity": 0.25,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Liberica coffee",
+    "category": "Coffee",
+    "price": 3625,
+    "quantity": 0.25,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Bugisu coffee",
+    "category": "Coffee",
+    "price": 3500,
+    "quantity": 0.25,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Nyasaland coffee",
+    "category": "Coffee",
+    "price": 3750,
+    "quantity": 0.25,
+    "unit": "kg",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Sweet bread",
+    "category": "Bread",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "pack/piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Salty bread",
+    "category": "Bread",
+    "price": 5000,
+    "quantity": 1,
+    "unit": "pack/piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Wheat bread",
+    "category": "Bread",
+    "price": 5000,
+    "quantity": 1,
+    "unit": "pack/piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Yellow bread",
+    "category": "Bread",
+    "price": 5000,
+    "quantity": 1,
+    "unit": "pack/piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "White bread",
+    "category": "Bread",
+    "price": 5500,
+    "quantity": 1,
+    "unit": "pack/piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Bans",
+    "category": "Bread",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "pack/piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Baguettes",
+    "category": "Bread",
+    "price": 5500,
+    "quantity": 1,
+    "unit": "pack/piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Croissants",
+    "category": "Pasteries",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "pack/piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Danishes",
+    "category": "Pasteries",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "pack/piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Muffins",
+    "category": "Pasteries",
+    "price": 4000,
+    "quantity": 1,
+    "unit": "pack/piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Cupcakes",
+    "category": "Pasteries",
+    "price": 37000,
+    "quantity": 1,
+    "unit": "pack/piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Cookies",
+    "category": "Pasteries",
+    "price": 4500,
+    "quantity": 1,
+    "unit": "pack/piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Birthday cakes",
+    "category": "Pasteries",
+    "price": 42000,
+    "quantity": 1,
+    "unit": "pack/piece",
+    "incomeLevel": "low"
+  },
+  {
+    "name": "Wedding cakes",
+    "category": "Pasteries",
+    "price": 37500,
+    "quantity": 1,
+    "unit": "pack/piece",
+    "incomeLevel": "low"
+  }
+]
