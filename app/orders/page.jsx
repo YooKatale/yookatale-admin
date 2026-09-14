@@ -135,7 +135,7 @@ export default function AdminOrdersPage() {
 
   // Real-time socket feed
   useEffect(() => {
-    const socket = io(BACKEND_URL, { transports: ["websocket"], reconnection: true });
+    const socket = io(BACKEND_URL, { transports: ["polling"], reconnection: true });
     socketRef.current = socket;
     socket.emit("join:admin");
     socket.on("admin:order_update", (data) => {

@@ -95,8 +95,25 @@
   * {
     @apply border-border;
   }
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
   body {
     @apply bg-background text-foreground;
+  }
+  img,
+  svg,
+  video,
+  canvas {
+    max-width: 100%;
+  }
+  button,
+  input,
+  select,
+  textarea {
+    max-width: 100%;
   }
   .primary-color {
     @apply primary-color;
@@ -106,5 +123,30 @@
   }
   .secondary-color {
     @apply secondary-color;
+  }
+}
+
+.admin-main {
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.admin-main table {
+  min-width: 640px;
+}
+
+.admin-main [role="table"] {
+  min-width: 640px;
+}
+
+@media (max-width: 767px) {
+  .admin-main {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .admin-main table,
+  .admin-main [role="table"] {
+    font-size: 0.8125rem;
   }
 }
