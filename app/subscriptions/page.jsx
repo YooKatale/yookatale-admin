@@ -96,9 +96,11 @@ import React, { useCallback, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
 const DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
-const MEAL_TYPES = ["breakfast", "lunch", "supper"];
+const MEAL_TYPES = ["breakfast", "lunch", "supper", "full-day", "ingredient-refill"];
 const INCOME_LEVELS = ["middle", "low", "high"];
 const PREP_TYPES = ["ready-to-eat", "ready-to-cook"];
+const CUSTOMER_TYPES = ["individual", "family", "business"];
+const PACKAGE_TIERS = ["low", "middle", "high"];
 
 const getSubUserLabel = (sub) => {
   const user = sub?.user || {};
@@ -109,10 +111,11 @@ const getSubUserLabel = (sub) => {
 const getPackageErrorMessage = (error, fallback) =>
   error?.data?.message || error?.data?.error || fallback;
 
-const normalizePackageDetails = (details) =>
-  (Array.isArray(details) ? details : [])
-    .map((detail) => String(detail ?? "").trim())
-    .filter(Boolean);
+const emptyIncomeTiers = () => ({
+  low: { weekly: "", monthly: "", quantity: "" },
+  middle: { weekly: "", monthly: "", quantity: "" },
+  high: { weekly: "", monthly: "", quantity: "" },
+});
 
 const TAB_CONFIG = [
   { key: "yoocards", label: "YooCards", icon: CreditCard, color: "green", desc: "Pending subscription approvals" },
@@ -153,7 +156,11 @@ export default function SubscriptionsPage() {
   const { isOpen: isPlanOpen, onOpen: onPlanOpen, onClose: onPlanClose } = useDisclosure();
   const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure();
   const [editingPlan, setEditingPlan] = useState(null);
-  const [planForm, setPlanForm] = useState({ type: "", price: "", name: "", details: "", previousPrice: "" });
+  const [planForm, setPlanForm] = useState({
+    type: "individual",
+    incomeTiers: emptyIncomeTiers(),
+  });
+  const [packageTypeFilter, setPackageTypeFilter] = useState("all");
 
   const loadSubscriptions = useCallback(async () => {
     setLoading(true);
@@ -293,19 +300,22 @@ export default function SubscriptionsPage() {
 
   const openAddPlan = () => {
     setEditingPlan(null);
-    setPlanForm({ type: "monthly", price: "", name: "", details: [], previousPrice: "" });
+    setPlanForm({ type: "individual", incomeTiers: emptyIncomeTiers() });
     onPlanOpen();
   };
 
   const openEditPlan = (p) => {
     setEditingPlan(p);
-    const detailsArray = normalizePackageDetails(p?.details);
     setPlanForm({
-      type: p?.type || "",
-      price: p?.price ?? "",
-      name: p?.name || "",
-      details: detailsArray,
-      previousPrice: p?.previousPrice ?? "",
+      type: p?.type || "individual",
+      incomeTiers: PACKAGE_TIERS.reduce((tiers, tier) => ({
+        ...tiers,
+        [tier]: {
+          weekly: p?.incomeTiers?.[tier]?.weekly ?? "",
+          monthly: p?.incomeTiers?.[tier]?.monthly ?? "",
+          quantity: p?.incomeTiers?.[tier]?.quantity ?? "",
+        },
+      }), emptyIncomeTiers()),
     });
     onEditOpen();
   };
@@ -315,39 +325,37 @@ export default function SubscriptionsPage() {
 
   const handleSavePlan = async () => {
     const type = String(planForm.type || "").trim();
-    const name = String(planForm.name || "").trim();
-    const details = normalizePackageDetails(planForm.details);
-    const price = Number(planForm.price);
-    const previousPrice = String(planForm.previousPrice ?? "").trim() === ""
-      ? null
-      : Number(planForm.previousPrice);
+    const incomeTiers = PACKAGE_TIERS.reduce((tiers, tier) => ({
+      ...tiers,
+      [tier]: {
+        weekly: Number(planForm.incomeTiers?.[tier]?.weekly),
+        monthly: Number(planForm.incomeTiers?.[tier]?.monthly),
+        quantity: String(planForm.incomeTiers?.[tier]?.quantity || "").trim(),
+      },
+    }), {});
 
-    if (!type || !name) {
-      toast({ title: "Required fields missing", description: "Enter a package name and type.", status: "warning", duration: 4000, isClosable: true });
+    if (!CUSTOMER_TYPES.includes(type)) {
+      toast({ title: "Invalid package type", description: "Choose Individual, Family, or Business.", status: "warning", duration: 4000, isClosable: true });
       return;
     }
-    if (String(planForm.price || "").trim() === "" || !Number.isFinite(price) || price < 0) {
-      toast({ title: "Invalid price", description: "Enter a valid package price.", status: "warning", duration: 4000, isClosable: true });
-      return;
-    }
-    if (previousPrice !== null && (!Number.isFinite(previousPrice) || previousPrice < 0)) {
-      toast({ title: "Invalid previous price", description: "Enter a valid previous price or leave it blank.", status: "warning", duration: 4000, isClosable: true });
+    const invalidTier = PACKAGE_TIERS.find((tier) => (
+      !Number.isFinite(incomeTiers[tier].weekly) || incomeTiers[tier].weekly < 0 ||
+      !Number.isFinite(incomeTiers[tier].monthly) || incomeTiers[tier].monthly < 0 ||
+      !incomeTiers[tier].quantity
+    ));
+    if (invalidTier) {
+      toast({ title: "Incomplete income tier", description: `Enter weekly price, monthly price, and quantity for the ${invalidTier} tier.`, status: "warning", duration: 4000, isClosable: true });
       return;
     }
 
-    const payload = { type, price, name, details, previousPrice };
+    const payload = { type, incomeTiers };
     let requestPayload = payload;
     if (editingPlan) {
-      const originalPreviousPrice = editingPlan.previousPrice === null || editingPlan.previousPrice === undefined || editingPlan.previousPrice === ""
-        ? null
-        : Number(editingPlan.previousPrice);
-      const originalDetails = normalizePackageDetails(editingPlan.details);
-      requestPayload = {};
-      if (type !== String(editingPlan.type || "").trim()) requestPayload.type = type;
-      if (name !== String(editingPlan.name || "").trim()) requestPayload.name = name;
-      if (price !== Number(editingPlan.price)) requestPayload.price = price;
-      if (previousPrice !== originalPreviousPrice) requestPayload.previousPrice = previousPrice;
-      if (JSON.stringify(details) !== JSON.stringify(originalDetails)) requestPayload.details = details;
+      requestPayload = {
+        type: type !== editingPlan.type ? type : undefined,
+        incomeTiers: JSON.stringify(incomeTiers) !== JSON.stringify(editingPlan.incomeTiers || {}) ? incomeTiers : undefined,
+      };
+      Object.keys(requestPayload).forEach((key) => requestPayload[key] === undefined && delete requestPayload[key]);
       if (Object.keys(requestPayload).length === 0) {
         toast({ title: "No changes to save", status: "info", duration: 3000, isClosable: true });
         return;
@@ -392,6 +400,10 @@ export default function SubscriptionsPage() {
       setDeletingPackageId(null);
     }
   };
+
+  const visiblePackages = packages.filter((plan) => {
+    return packageTypeFilter === "all" || plan.type === packageTypeFilter;
+  });
 
   return (
     <Box maxW="full" px={{ base: 4, md: 8 }} py={6}>
@@ -673,6 +685,13 @@ export default function SubscriptionsPage() {
       {/* Meal Plans Tab */}
       {activeTab === "plans" && (
         <Box>
+          <Flex mb={4} gap={3} flexWrap="wrap" align="center">
+            <Select w={{ base: "full", md: "190px" }} size="sm" borderRadius="lg" value={packageTypeFilter} onChange={(e) => setPackageTypeFilter(e.target.value)}>
+              <option value="all">All package types</option>
+              {CUSTOMER_TYPES.map((type) => <option key={type} value={type}>{type[0].toUpperCase() + type.slice(1)}</option>)}
+            </Select>
+            <Badge colorScheme="purple" borderRadius="full" px={3}>{visiblePackages.length} shown</Badge>
+          </Flex>
           {loadingPackages ? (
             <Center py={12}><Spinner size="lg" color="purple.500" thickness="3px" /></Center>
           ) : packageError ? (
@@ -687,12 +706,10 @@ export default function SubscriptionsPage() {
                 </Center>
               </CardBody>
             </Card>
-          ) : packages.length > 0 ? (
+          ) : visiblePackages.length > 0 ? (
             <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
-              {packages.map((p) => {
-                const details = Array.isArray(p.details) ? p.details : [];
-                const typeColors = { standard: "green", premium: "purple", family: "blue", business: "orange" };
-                const colorScheme = typeColors[p.type] || "green";
+              {visiblePackages.map((p) => {
+                const colorScheme = p.type === "business" ? "orange" : p.type === "family" ? "blue" : "green";
                 return (
                   <Card key={p._id} borderRadius="xl" boxShadow="sm" _hover={{ boxShadow: "md", transform: "translateY(-2px)" }} transition="all 0.2s" overflow="hidden">
                     <Box h="4px" bg={`${colorScheme}.400`} />
@@ -700,7 +717,8 @@ export default function SubscriptionsPage() {
                       <Flex justify="space-between" align="start" mb={3}>
                         <Box>
                           <Badge colorScheme={colorScheme} borderRadius="full" mb={1} textTransform="capitalize">{p.type}</Badge>
-                          <Heading size="md">{p.name || p.type}</Heading>
+                          <Heading size="md">{p.type} package</Heading>
+                          <Text fontSize="xs" color="gray.500">Three income tiers</Text>
                         </Box>
                         <HStack spacing={1}>
                           <Tooltip label="Edit plan">
@@ -729,7 +747,7 @@ export default function SubscriptionsPage() {
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Delete plan?</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Remove &quot;{p.name}&quot;. This cannot be undone.
+                                    Remove the {p.type} package. This cannot be undone.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
@@ -745,31 +763,19 @@ export default function SubscriptionsPage() {
 
                       <Box mb={4}>
                         <HStack spacing={2} align="baseline">
-                          <Text fontSize="2xl" fontWeight="800" color={`${colorScheme}.600`}>
-                            UGX {Number(p.price || 0).toLocaleString()}
-                          </Text>
-                          {p.previousPrice !== null && p.previousPrice !== undefined && (
-                            <Text fontSize="sm" color="gray.400" textDecoration="line-through">
-                              {Number(p.previousPrice).toLocaleString()}
-                            </Text>
-                          )}
+                          <Text fontSize="sm" fontWeight="700" color={`${colorScheme}.600`}>Income tier prices</Text>
                         </HStack>
-                        <Text fontSize="xs" color="gray.500">per {p.type || "period"}</Text>
-                      </Box>
-
-                      {details.length > 0 && (
-                        <VStack align="stretch" spacing={1.5}>
-                          {details.slice(0, 5).map((d, i) => (
-                            <HStack key={i} spacing={2} align="start">
-                              <CheckCircle size={14} color="var(--chakra-colors-green-500)" style={{ marginTop: 2, flexShrink: 0 }} />
-                              <Text fontSize="sm" color="gray.600">{d}</Text>
+                        <VStack align="stretch" spacing={1} mt={2}>
+                          {PACKAGE_TIERS.map((tier) => (
+                            <HStack key={tier} justify="space-between" fontSize="sm">
+                              <Badge colorScheme="gray" textTransform="capitalize">{tier}</Badge>
+                              <Text>UGX {Number(p.incomeTiers?.[tier]?.weekly || 0).toLocaleString()} / week</Text>
+                              <Text color="gray.500">{p.incomeTiers?.[tier]?.quantity || "No quantity"}</Text>
                             </HStack>
                           ))}
-                          {details.length > 5 && (
-                            <Text fontSize="xs" color="gray.400">+{details.length - 5} more benefits</Text>
-                          )}
                         </VStack>
-                      )}
+                      </Box>
+
                       {p.createdAt && (
                         <Text mt={4} fontSize="xs" color="gray.400">
                           Created {moment(p.createdAt).format("DD MMM YYYY")}
@@ -903,87 +909,67 @@ function PlanModal({ isOpen, onClose, title, form, setForm, onSave, saving, save
 }
 
 function PlanForm({ form, setForm }) {
-  const benefits = Array.isArray(form.details) ? form.details : (form.details ? String(form.details).split("\n").filter(Boolean) : []);
-
-  const setBenefits = (arr) => setForm((f) => ({ ...f, details: arr }));
-  const addBenefit = () => setBenefits([...benefits, ""]);
-  const updateBenefit = (index, value) => { const next = [...benefits]; next[index] = value; setBenefits(next); };
-  const removeBenefit = (index) => setBenefits(benefits.filter((_, i) => i !== index));
-  const moveUp = (index) => { if (index <= 0) return; const next = [...benefits]; [next[index - 1], next[index]] = [next[index], next[index - 1]]; setBenefits(next); };
-  const moveDown = (index) => { if (index >= benefits.length - 1) return; const next = [...benefits]; [next[index], next[index + 1]] = [next[index + 1], next[index]]; setBenefits(next); };
-
   return (
     <VStack spacing={5} align="stretch">
-      <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-        <FormControl isRequired>
-          <FormLabel fontWeight="600" fontSize="sm">Package Type</FormLabel>
-          <Input value={form.type} onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))} placeholder="e.g. monthly" borderRadius="lg" />
-        </FormControl>
-        <FormControl isRequired>
-          <FormLabel fontWeight="600" fontSize="sm">Name</FormLabel>
-          <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="e.g. Premium" borderRadius="lg" />
-        </FormControl>
-      </SimpleGrid>
-
-      <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-        <FormControl isRequired>
-          <FormLabel fontWeight="600" fontSize="sm">Price (UGX)</FormLabel>
-          <Input type="number" min={0} value={form.price} onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))} placeholder="e.g. 30000" borderRadius="lg" />
-        </FormControl>
-        <FormControl>
-          <FormLabel fontWeight="600" fontSize="sm">Previous Price (UGX)</FormLabel>
-          <Input type="number" min={0} value={form.previousPrice} onChange={(e) => setForm((f) => ({ ...f, previousPrice: e.target.value }))} placeholder="e.g. 40000" borderRadius="lg" />
-          <Text fontSize="xs" color="gray.500" mt={1}>Shown as strike-through</Text>
-        </FormControl>
-      </SimpleGrid>
-
-      <Box>
-        <Flex justify="space-between" align="center" mb={3}>
-          <FormLabel fontWeight="600" fontSize="sm" mb={0}>Benefits / Details</FormLabel>
-          <Button leftIcon={<Plus size={14} />} size="sm" colorScheme="green" variant="outline" onClick={addBenefit} borderRadius="lg">
-            Add
-          </Button>
-        </Flex>
-        <VStack spacing={2} align="stretch">
-          {benefits.map((benefit, index) => (
-            <Flex key={index} gap={2} align="center" p={2} bg="gray.50" borderRadius="lg" borderWidth="1px" borderColor="gray.200">
-              <VStack spacing={0} flexShrink={0}>
-                <IconButton aria-label="Up" icon={<ChevronUp size={14} />} size="xs" variant="ghost" onClick={() => moveUp(index)} isDisabled={index === 0} />
-                <IconButton aria-label="Down" icon={<ChevronDown size={14} />} size="xs" variant="ghost" onClick={() => moveDown(index)} isDisabled={index === benefits.length - 1} />
-              </VStack>
-              <Input flex={1} value={benefit} onChange={(e) => updateBenefit(index, e.target.value)} placeholder={`Benefit ${index + 1}`} size="sm" borderRadius="md" />
-              <IconButton aria-label="Remove" icon={<Trash2 size={14} />} size="sm" variant="ghost" colorScheme="red" onClick={() => removeBenefit(index)} />
-            </Flex>
-          ))}
-          {benefits.length === 0 && (
-            <Box p={6} textAlign="center" borderWidth="2px" borderStyle="dashed" borderColor="gray.200" borderRadius="lg">
-              <Text color="gray.400" fontSize="sm">No benefits yet. Click &quot;Add&quot; to add plan features.</Text>
-            </Box>
-          )}
-        </VStack>
-      </Box>
+      <FormControl isRequired>
+        <FormLabel fontWeight="600" fontSize="sm">Package type</FormLabel>
+        <Select value={form.type} onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))} borderRadius="lg">
+          {CUSTOMER_TYPES.map((type) => <option key={type} value={type}>{type[0].toUpperCase() + type.slice(1)}</option>)}
+        </Select>
+      </FormControl>
+      <Text fontSize="sm" color="gray.600">Each package contains the required Low, Middle, and High income tiers.</Text>
+      {PACKAGE_TIERS.map((tier) => (
+        <Box key={tier} borderWidth="1px" borderColor="gray.200" borderRadius="lg" p={4}>
+          <Badge colorScheme={tier === "middle" ? "green" : "gray"} mb={3} textTransform="capitalize">{tier} income tier</Badge>
+          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
+            <FormControl isRequired>
+              <FormLabel fontSize="sm">Weekly price (UGX)</FormLabel>
+              <Input type="number" min={0} value={form.incomeTiers?.[tier]?.weekly ?? ""} onChange={(e) => setForm((f) => ({ ...f, incomeTiers: { ...f.incomeTiers, [tier]: { ...f.incomeTiers[tier], weekly: e.target.value } } }))} />
+            </FormControl>
+            <FormControl isRequired>
+              <FormLabel fontSize="sm">Monthly price (UGX)</FormLabel>
+              <Input type="number" min={0} value={form.incomeTiers?.[tier]?.monthly ?? ""} onChange={(e) => setForm((f) => ({ ...f, incomeTiers: { ...f.incomeTiers, [tier]: { ...f.incomeTiers[tier], monthly: e.target.value } } }))} />
+            </FormControl>
+            <FormControl isRequired>
+              <FormLabel fontSize="sm">Quantity</FormLabel>
+              <Input value={form.incomeTiers?.[tier]?.quantity ?? ""} onChange={(e) => setForm((f) => ({ ...f, incomeTiers: { ...f.incomeTiers, [tier]: { ...f.incomeTiers[tier], quantity: e.target.value } } }))} placeholder="e.g. 12 meals/day" />
+            </FormControl>
+          </SimpleGrid>
+        </Box>
+      ))}
     </VStack>
   );
 }
 
 function MealSlotGrid({ slots, overrides, upsertSlot, upsertOverride, toast, loadSlots, loadOverrides }) {
+  const [calendarMode, setCalendarMode] = useState("standard");
   const [incomeLevel, setIncomeLevel] = useState("middle");
   const [prepType, setPrepType] = useState("ready-to-eat");
+  const [customerType, setCustomerType] = useState("individual");
   const [editingSlot, setEditingSlot] = useState(null);
   const [saving, setSaving] = useState(false);
   const { isOpen: isSlotModalOpen, onOpen: onSlotModalOpen, onClose: onSlotModalClose } = useDisclosure();
 
-  const getSlot = (day, mealType) => slots.find((s) => s.incomeLevel === incomeLevel && s.prepType === prepType && s.day === day && s.mealType === mealType);
+  const getSlot = (day, mealType) => slots.find((s) => {
+    if (calendarMode === "specialty") {
+      return s.planType?.includes("meat-menu") && s.customerType === customerType && s.prepType === prepType && s.day === day && s.mealType === mealType;
+    }
+    return s.planType?.startsWith("standard-") && s.incomeLevel === incomeLevel && s.prepType === prepType && s.day === day && s.mealType === mealType;
+  });
   const getOverride = (day, mealType) => overrides.find((o) => o.incomeLevel === incomeLevel && o.prepType === prepType && o.day === day && o.mealType === mealType);
 
   const openEditor = (day, mealType) => {
     const slot = getSlot(day, mealType);
     const override = getOverride(day, mealType);
     setEditingSlot({
-      day, mealType, incomeLevel, prepType,
+      day, mealType, incomeLevel: calendarMode === "specialty" ? "all" : incomeLevel, prepType,
+      customerType: slot?.customerType || customerType,
+      planType: slot?.planType || (calendarMode === "specialty" ? (prepType === "ready-to-eat" ? "rte-meat-menu" : "rtc-meat-menu") : `standard-${prepType === "ready-to-eat" ? "rte" : "rtc"}`),
+      mealKey: slot?.mealKey || `${slot?.customerType || customerType}-${calendarMode === "specialty" ? "specialty" : incomeLevel}-${prepType}-${day}-${mealType}`,
       mealName: slot?.mealName || "",
       description: slot?.description || "",
       quantity: slot?.quantity || "",
+      deliveryCadence: slot?.deliveryCadence || "",
       priceWeekly: slot?.priceWeekly ?? 0,
       priceMonthly: slot?.priceMonthly ?? 0,
       imageUrl: slot?.imageUrl || override?.imageUrl || "",
@@ -998,12 +984,23 @@ function MealSlotGrid({ slots, overrides, upsertSlot, upsertOverride, toast, loa
     }
     setSaving(true);
     try {
-      await upsertSlot({
-        incomeLevel: form.incomeLevel, prepType: form.prepType, day: form.day, mealType: form.mealType,
-        mealName: form.mealName, description: form.description, quantity: form.quantity,
-        priceWeekly: Number(form.priceWeekly) || 0, priceMonthly: Number(form.priceMonthly) || 0,
-        imageUrl: form.imageUrl || "",
-      }).unwrap();
+      const mealSlot = {
+        planType: form.planType,
+        customerType: form.customerType,
+        incomeLevel: form.incomeLevel,
+        prepType: form.prepType,
+        day: form.day,
+        mealType: form.mealType,
+        mealKey: form.mealKey,
+        mealName: String(form.mealName ?? ""),
+        description: String(form.description ?? ""),
+        quantity: String(form.quantity ?? ""),
+        deliveryCadence: String(form.deliveryCadence ?? ""),
+        priceWeekly: Number(form.priceWeekly) || 0,
+        priceMonthly: Number(form.priceMonthly) || 0,
+        imageUrl: String(form.imageUrl ?? ""),
+      };
+      await upsertSlot(mealSlot).unwrap();
       await upsertOverride({
         incomeLevel: form.incomeLevel, prepType: form.prepType, day: form.day, mealType: form.mealType,
         imageUrl: form.imageUrl || "",
@@ -1026,6 +1023,21 @@ function MealSlotGrid({ slots, overrides, upsertSlot, upsertOverride, toast, loa
       <VStack align="stretch" spacing={4}>
         <Flex gap={3} flexWrap="wrap" align="center">
           <HStack spacing={2}>
+            <Text fontSize="sm" fontWeight="600" color="gray.600">Menu:</Text>
+            <Select w="170px" value={calendarMode} onChange={(e) => setCalendarMode(e.target.value)} size="sm" borderRadius="lg" fontWeight="500">
+              <option value="standard">Core daily meals</option>
+              <option value="specialty">Specialty meals</option>
+            </Select>
+          </HStack>
+          {calendarMode === "specialty" ? (
+            <HStack spacing={2}>
+              <Text fontSize="sm" fontWeight="600" color="gray.600">Customer:</Text>
+              <Select w="150px" value={customerType} onChange={(e) => setCustomerType(e.target.value)} size="sm" borderRadius="lg" fontWeight="500">
+                {CUSTOMER_TYPES.map((type) => <option key={type} value={type}>{type[0].toUpperCase() + type.slice(1)}</option>)}
+              </Select>
+            </HStack>
+          ) : (
+          <HStack spacing={2}>
             <Text fontSize="sm" fontWeight="600" color="gray.600">Income:</Text>
             <Select w="150px" value={incomeLevel} onChange={(e) => setIncomeLevel(e.target.value)} size="sm" borderRadius="lg" fontWeight="500">
               <option value="middle">Middle</option>
@@ -1033,6 +1045,7 @@ function MealSlotGrid({ slots, overrides, upsertSlot, upsertOverride, toast, loa
               <option value="high">High</option>
             </Select>
           </HStack>
+          )}
           <HStack spacing={2}>
             <Text fontSize="sm" fontWeight="600" color="gray.600">Type:</Text>
             <Select w="160px" value={prepType} onChange={(e) => setPrepType(e.target.value)} size="sm" borderRadius="lg" fontWeight="500">
@@ -1147,7 +1160,11 @@ function MealSlotEditorModal({ isOpen, onClose, slot, onSave, saving = false }) 
     try {
       const fd = new FormData();
       fd.append("image", file);
-      const res = await fetch(`${BACKEND_URL}/api/meal-calendar/upload`, { method: "POST", body: fd });
+      const res = await fetch(`${BACKEND_URL}/api/meal-calendar/upload`, {
+        method: "POST",
+        body: fd,
+        credentials: "include",
+      });
       const data = await res.json().catch(() => ({}));
       if (data?.status === "Success" && data?.data?.imageUrl) {
         setForm((f) => ({ ...f, imageUrl: data.data.imageUrl }));
@@ -1190,6 +1207,10 @@ function MealSlotEditorModal({ isOpen, onClose, slot, onSave, saving = false }) 
               <FormControl>
                 <FormLabel fontWeight="600" fontSize="sm">Quantity</FormLabel>
                 <Input value={form.quantity || ""} onChange={(e) => setForm((f) => ({ ...f, quantity: e.target.value }))} placeholder="e.g. ~550g" borderRadius="lg" />
+              </FormControl>
+              <FormControl>
+                <FormLabel fontWeight="600" fontSize="sm">Delivery cadence</FormLabel>
+                <Input value={form.deliveryCadence || ""} onChange={(e) => setForm((f) => ({ ...f, deliveryCadence: e.target.value }))} placeholder="e.g. 2 deliveries/week" borderRadius="lg" />
               </FormControl>
               <SimpleGrid columns={2} spacing={4}>
                 <FormControl>

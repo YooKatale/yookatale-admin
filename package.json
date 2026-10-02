@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "proxy_temp": "http://localhost:8000/",
-  "proxy": "https://yookatale-server-app.onrender.com/",
+  "proxy": "https://yookatale-serverside.onrender.com/",
   "scripts": {
     "postinstall": "node -e \"const fs=require('fs');const s='node_modules/tinymce',d='public/tinymce';if(fs.existsSync(s)&&!fs.existsSync(d)){fs.cpSync(s,d,{recursive:true});console.log('TinyMCE copied to public/')}\"",
     "dev": "next dev",
