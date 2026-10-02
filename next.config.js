@@ -27,10 +27,10 @@ const nextConfig = {
               "font-src 'self' https://fonts.gstatic.com",
 
               // Images
-              "img-src 'self' http://localhost:3000 http://localhost:4400 data: blob: https:",
+              "img-src 'self' data: blob: https:",
 
               // API + WebSocket connections (LOCAL DEVELOPMENT)
-              "connect-src 'self' http://localhost:4400 ws://localhost:4400 https://yookatale-server.onrender.com https://yookatale-server-app.onrender.com wss://yookatale-server.onrender.com",
+              "connect-src 'self' https://yookatale-serverside.onrender.com wss://yookatale-serverside.onrender.com",
 
               // Prevent embedding
               "frame-ancestors 'none'",
