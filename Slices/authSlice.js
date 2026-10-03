@@ -8,6 +8,15 @@ const SAFE_FIELDS = [
   "account", "accountType", "profileImage", "expires",
 ];
 
+export const getAuthToken = (userInfo) =>
+  userInfo?.token ??
+  userInfo?.authToken ??
+  userInfo?.accessToken ??
+  userInfo?.access_token ??
+  userInfo?.data?.token ??
+  userInfo?.data?.accessToken ??
+  null;
+
 // Strip sensitive fields before localStorage storage
 const sanitizeForStorage = (userInfo) => {
   if (!userInfo) return null;

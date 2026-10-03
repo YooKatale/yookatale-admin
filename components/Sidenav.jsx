@@ -119,7 +119,7 @@ const NavItem = ({ icon: IconComponent, path, children, index, size, onClose, ..
   )
 }
 
-const NavGroup = ({ groupLabel, groupIcon: GroupIcon, items, isEditor, onClose }) => {
+const NavGroup = ({ groupLabel, groupIcon: GroupIcon, items, isLimitedAccount, onClose }) => {
   const pathname = usePathname();
   const isAnyActive = items.some((item) => item.path === pathname);
   const [isOpen, setIsOpen] = useState(isAnyActive);
@@ -128,7 +128,7 @@ const NavGroup = ({ groupLabel, groupIcon: GroupIcon, items, isEditor, onClose }
     if (isAnyActive) setIsOpen(true);
   }, [pathname]);
 
-  const visibleItems = isEditor ? items.filter((i) => i.editorCanAccess) : items;
+  const visibleItems = isLimitedAccount ? items.filter((i) => i.editorCanAccess) : items;
   if (visibleItems.length === 0) return null;
 
   return (
@@ -176,7 +176,7 @@ const NavGroup = ({ groupLabel, groupIcon: GroupIcon, items, isEditor, onClose }
 const SidebarContent = ({ onClose, socketConnected = false, ...rest }) => {
   const { userInfo } = useSelector((state) => state.auth);
   const accountType = userInfo?.accountType ?? userInfo?.account ?? "";
-  const isEditor = accountType === "editor";
+  const isLimitedAccount = accountType === "editor" || accountType === "shareholder";
 
   return (
     <Box
@@ -249,7 +249,7 @@ const SidebarContent = ({ onClose, socketConnected = false, ...rest }) => {
             {SideNavGroups.map((group, gi) => {
               if (!group.groupLabel) {
                 // Standalone items (Dashboard, Settings)
-                const visible = isEditor ? group.items.filter((i) => i.editorCanAccess) : group.items;
+                const visible = isLimitedAccount ? group.items.filter((i) => i.editorCanAccess) : group.items;
                 return visible.map((link) => (
                   <NavItem key={link.name} icon={link.icon} path={link.path} onClose={onClose}>
                     {link.name}
@@ -262,7 +262,7 @@ const SidebarContent = ({ onClose, socketConnected = false, ...rest }) => {
                   groupLabel={group.groupLabel}
                   groupIcon={group.groupIcon}
                   items={group.items}
-                  isEditor={isEditor}
+                  isLimitedAccount={isLimitedAccount}
                   onClose={onClose}
                 />
               );
@@ -300,7 +300,7 @@ const SidebarWithHeader = ({ children, ...rest }) => {
   const { userInfo } = useSelector((state) => state.auth);
   const isAuthenticated = !!(userInfo?._id);
   const accountType = userInfo?.accountType ?? userInfo?.account ?? "";
-  const isEditor = accountType === "editor";
+  const isLimitedAccount = accountType === "editor" || accountType === "shareholder";
   const [socketConnected, setSocketConnected] = useState(false);
   const adminSocketRef = useRef(null);
 
@@ -332,10 +332,10 @@ const SidebarWithHeader = ({ children, ...rest }) => {
   useEffect(() => {
     if (isPublicRoute) return;          // <-- add this guard
     if (!isAuthenticated || !userInfo) return;
-    if (isEditor && !isPathAllowedForEditor(pathname)) {
+    if (isLimitedAccount && !isPathAllowedForEditor(pathname)) {
       router.replace("/");
     }
-  }, [isAuthenticated, userInfo, isEditor, pathname, router, isPublicRoute]);
+  }, [isAuthenticated, userInfo, isLimitedAccount, pathname, router, isPublicRoute]);
 
   const MobileNav = ({ onOpen, userInfo, ...rest }) => {
     const [isLoading, setLoading] = useState({ operation: "", status: false });

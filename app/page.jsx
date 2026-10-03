@@ -1,6 +1,7 @@
 "use client";
 
 import { useLazyGetDashboardDataQuery } from "@Slices/userApiSlice";
+import { getAuthToken } from "@Slices/authSlice";
 import { useVendorGetMutation } from "@Slices/vendorApiSlice";
 import { usePartnerGetMutation } from "@Slices/partnersApiSlice";
 import {
@@ -44,18 +45,20 @@ export default function Home() {
   const router = useRouter();
   const { userInfo } = useSelector((state) => state.auth);
   const accountType = userInfo?.accountType ?? userInfo?.account ?? "";
-  const isEditor = accountType === "editor";
+  const isLimitedAccount = accountType === "editor" || accountType === "shareholder";
+  const isShareholder = accountType === "shareholder";
+  const hasShareholderRevenue = isShareholder && Boolean(Dashboard?.Revenue);
 
 
-  const { data: liveOrderStats = {} } = useOrderStatsQuery(undefined, { skip: isEditor });
-  const { data: liveOrdersData = { orders: [] } } = useAdminOrdersQuery({ page: 1, limit: 200 }, { skip: isEditor });
-  const { data: liveDrivers = [] } = useAdminDriversQuery(undefined, { skip: isEditor });
-  const { data: liveVendors = [] } = useAdminVendorsQuery(undefined, { skip: isEditor });
+  const { data: liveOrderStats = {} } = useOrderStatsQuery(undefined, { skip: isLimitedAccount });
+  const { data: liveOrdersData = { orders: [] } } = useAdminOrdersQuery({ page: 1, limit: 200 }, { skip: isLimitedAccount });
+  const { data: liveDrivers = [] } = useAdminDriversQuery(undefined, { skip: isLimitedAccount });
+  const { data: liveVendors = [] } = useAdminVendorsQuery(undefined, { skip: isLimitedAccount });
 
   const handleDataFetch = async () => {
     try {
       setLoading(true);
-      const res = await fetchDashboardData().unwrap();
+      const res = await fetchDashboardData(getAuthToken(userInfo)).unwrap();
       if (res?.status === "Success") {
         setDashboard(res?.data);
         setFilteredOrders(res?.data?.PendingOrders?.orders || []);
@@ -93,7 +96,7 @@ export default function Home() {
     handleDataFetch();
     handleVendorFetch();
     handlePartnerFetch();
-    if (!isEditor) {
+    if (!isLimitedAccount) {
       fetchVisitStats(30).unwrap().then((r) => { if (r?.status === "Success") setVisitStats(r.data); }).catch(() => { });
     }
   }, []);
@@ -364,8 +367,8 @@ export default function Home() {
         <Grid
           templateColumns={{
             base: "1fr",
-            md: isEditor ? "1fr" : "repeat(2, 1fr)",
-            lg: isEditor ? "1fr" : "repeat(4, 1fr)",
+            md: hasShareholderRevenue ? "repeat(2, 1fr)" : isLimitedAccount ? "1fr" : "repeat(2, 1fr)",
+            lg: hasShareholderRevenue ? "repeat(2, 1fr)" : isLimitedAccount ? "1fr" : "repeat(4, 1fr)",
           }}
           gap={6}
           mb={8}
@@ -377,7 +380,16 @@ export default function Home() {
             color="blue"
             subtitle="Active products"
           />
-          {!isEditor && (
+          {hasShareholderRevenue && (
+            <StatCard
+              icon={DollarSign}
+              title="Shareholder Revenue"
+              value={`UGX ${Number(Dashboard.Revenue.amount || 0).toLocaleString("en-US")}`}
+              color="purple"
+              subtitle={`USD equivalent: $${Number(Dashboard.Revenue.usdEquivalent || 0).toLocaleString("en-US")}`}
+            />
+          )}
+          {!isLimitedAccount && (
             <>
               <StatCard
                 icon={Users}
@@ -404,7 +416,7 @@ export default function Home() {
           )}
         </Grid>
 
-        {!isEditor && (
+        {!isLimitedAccount && (
           <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(4, 1fr)" }} gap={6} mb={8}>
             <StatCard
               icon={Activity}
@@ -439,7 +451,7 @@ export default function Home() {
 
 
         {/* Recent Orders - Admin only; hidden for editors */}
-        {!isEditor && (
+        {!isLimitedAccount && (
           <motion.div variants={itemVariants}>
             <Card
               bg="white"
@@ -536,7 +548,7 @@ export default function Home() {
         )}
 
         {/* Trends row — visitor stats + side-by-side charts, admin only */}
-        {!isEditor && (
+        {!isLimitedAccount && (
           <>
             <Grid templateColumns={{ base: "1fr 1fr", md: "repeat(3, 1fr)" }} gap={4} mb={6} mt={8}>
               <StatCard icon={Eye} title="Total Visitors" value={visitStats.total.toLocaleString()} color="purple" subtitle="All-time page views" />
@@ -585,9 +597,9 @@ export default function Home() {
         )}
 
         {/* Vendors and Partners Section - Vendors hidden for editors */}
-        <Grid templateColumns={{ base: "1fr", lg: isEditor ? "1fr" : "1fr 1fr" }} gap={6} mt={8}>
+        <Grid templateColumns={{ base: "1fr", lg: isLimitedAccount ? "1fr" : "1fr 1fr" }} gap={6} mt={8}>
           {/* Vendors - Admin only */}
-          {!isEditor && vendors.length > 0 && (
+          {!isLimitedAccount && vendors.length > 0 && (
             <motion.div variants={itemVariants}>
               <Card
                 bg="white"
