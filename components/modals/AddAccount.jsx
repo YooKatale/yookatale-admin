@@ -11,7 +11,9 @@ import {
   useRegisterMutation,
   useUpdateAdminUserAccountMutation,
 } from "@Slices/userApiSlice";
+import { getAuthToken } from "@Slices/authSlice";
 import { Select } from "@chakra-ui/react";
+import { useSelector } from "react-redux";
 
 const INITIAL_USER_STATE = {
   firstname: "",
@@ -29,6 +31,8 @@ const AddAccount = ({ closeModal, accountData, editmode, reloadAccounts }) => {
   const [User, setUser] = useState(INITIAL_USER_STATE);
 
   const { toast } = useToast();
+  const { userInfo } = useSelector((state) => state.auth);
+  const authToken = getAuthToken(userInfo);
 
   const [registerUser] = useRegisterMutation();
   const [updateUser] = useUpdateAdminUserAccountMutation();
@@ -69,17 +73,30 @@ const AddAccount = ({ closeModal, accountData, editmode, reloadAccounts }) => {
 
   const submitHandler = async (e) => {
     e.preventDefault();
+    if (!editmode && !authToken) {
+      toast({
+        variant: "destructive",
+        title: "Authentication error",
+        description: "Your admin authentication token is unavailable. Please sign in again.",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
       // Only include _id when editing an existing account
       const payload = editmode
         ? { ...User, _id: accountData._id, ...(User.password ? {} : { password: undefined }) }
-        : { ...User };
+        : {
+            ...User,
+            ...(User.username ? {} : { username: undefined }),
+            ...(User.password ? {} : { password: undefined }),
+          };
 
       const res = await (editmode
         ? updateUser(payload).unwrap()
-        : registerUser(payload).unwrap());
+        : registerUser({ data: payload, token: authToken }).unwrap());
 
       const success = res?.status === "Success" || res?.success === true || res?.status === "success";
       if (success) {
@@ -197,11 +214,11 @@ const AddAccount = ({ closeModal, accountData, editmode, reloadAccounts }) => {
                 <Input
                   type="text"
                   id="username"
-                  placeholder="Username is required"
+                  placeholder={User.accountType === "shareholder" ? "Optional" : "Username is required"}
                   name="username"
                   value={User.username}
                   onChange={handleChange}
-                  required
+                  required={editmode || User.accountType !== "shareholder"}
                 />
               </div>
               <div className="space-y-2">
@@ -226,13 +243,13 @@ const AddAccount = ({ closeModal, accountData, editmode, reloadAccounts }) => {
                   <Input
                     type="password"
                     id="password"
-                    placeholder="Password is required"
+                    placeholder={User.accountType === "shareholder" ? "Optional" : "Password is required"}
                     name="password"
                     value={User.password}
                     onChange={handleChange}
                     minLength={8}
                     autoComplete="new-password"
-                    required
+                    required={User.accountType !== "shareholder"}
                   />
                 </div>
               )}
@@ -281,6 +298,7 @@ const AddAccount = ({ closeModal, accountData, editmode, reloadAccounts }) => {
                   <option value="admin">Admin</option>
                   <option value="iam">IAM</option>
                   <option value="editor">Editor</option>
+                  <option value="shareholder">Shareholder</option>
                 </Select>
               </div>
             </div>

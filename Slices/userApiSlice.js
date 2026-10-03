@@ -14,10 +14,13 @@ export const usersApiSlice = apiSlice.injectEndpoints({
     }),
 
     register: builder.mutation({
-      query: (data) => ({
+      query: ({ data, token }) => ({
         url: `${BACKEND_URL}/admin/register`,
         method: "POST",
         body: data,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }),
       invalidatesTags: ["Accounts"],
     }),
@@ -72,9 +75,10 @@ export const usersApiSlice = apiSlice.injectEndpoints({
     }),
 
     getDashboardData: builder.query({
-      query: () => ({
+      query: (token) => ({
         url: `${BACKEND_URL}/admin/dashboard`,
         method: "GET",
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       }),
     }),
 
