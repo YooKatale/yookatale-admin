@@ -2,6 +2,20 @@
 const nextConfig = {
   poweredByHeader: false,
 
+  async rewrites() {
+    const backendUrl = (
+      process.env.NEXT_PUBLIC_BACKEND_URL ||
+      "https://yookatale-serverside.onrender.com"
+    ).replace(/\/+$/, "");
+
+    return [
+      {
+        source: "/api/admin/:path*",
+        destination: `${backendUrl}/admin/:path*`,
+      },
+    ];
+  },
+
   async headers() {
     return [
       {

@@ -1,7 +1,6 @@
 "use client";
 
 import { useLazyGetDashboardDataQuery } from "@Slices/userApiSlice";
-import { getAuthToken } from "@Slices/authSlice";
 import { useVendorGetMutation } from "@Slices/vendorApiSlice";
 import { usePartnerGetMutation } from "@Slices/partnersApiSlice";
 import {
@@ -58,7 +57,7 @@ export default function Home() {
   const handleDataFetch = async () => {
     try {
       setLoading(true);
-      const res = await fetchDashboardData(getAuthToken(userInfo)).unwrap();
+      const res = await fetchDashboardData().unwrap();
       if (res?.status === "Success") {
         setDashboard(res?.data);
         setFilteredOrders(res?.data?.PendingOrders?.orders || []);
