@@ -7,20 +7,17 @@ export const usersApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (data) => ({
-        url: `${BACKEND_URL}/admin/auth`,
+        url: "/api/admin/auth",
         method: "POST",
         body: data,
       }),
     }),
 
     register: builder.mutation({
-      query: ({ data, token }) => ({
-        url: `${BACKEND_URL}/admin/register`,
+      query: ({ data }) => ({
+        url: "/api/admin/register",
         method: "POST",
         body: data,
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       }),
       invalidatesTags: ["Accounts"],
     }),
@@ -75,16 +72,15 @@ export const usersApiSlice = apiSlice.injectEndpoints({
     }),
 
     getDashboardData: builder.query({
-      query: (token) => ({
-        url: `${BACKEND_URL}/admin/dashboard`,
+      query: () => ({
+        url: "/api/admin/dashboard",
         method: "GET",
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       }),
     }),
 
     dashboardData: builder.mutation({
       query: () => ({
-        url: `${BACKEND_URL}/admin/dashboard`,
+        url: "/api/admin/dashboard",
         method: "GET",
       }),
     }),

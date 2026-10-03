@@ -11,9 +11,7 @@ import {
   useRegisterMutation,
   useUpdateAdminUserAccountMutation,
 } from "@Slices/userApiSlice";
-import { getAuthToken } from "@Slices/authSlice";
 import { Select } from "@chakra-ui/react";
-import { useSelector } from "react-redux";
 
 const INITIAL_USER_STATE = {
   firstname: "",
@@ -31,8 +29,6 @@ const AddAccount = ({ closeModal, accountData, editmode, reloadAccounts }) => {
   const [User, setUser] = useState(INITIAL_USER_STATE);
 
   const { toast } = useToast();
-  const { userInfo } = useSelector((state) => state.auth);
-  const authToken = getAuthToken(userInfo);
 
   const [registerUser] = useRegisterMutation();
   const [updateUser] = useUpdateAdminUserAccountMutation();
@@ -73,14 +69,6 @@ const AddAccount = ({ closeModal, accountData, editmode, reloadAccounts }) => {
 
   const submitHandler = async (e) => {
     e.preventDefault();
-    if (!editmode && !authToken) {
-      toast({
-        variant: "destructive",
-        title: "Authentication error",
-        description: "Your admin authentication token is unavailable. Please sign in again.",
-      });
-      return;
-    }
 
     setLoading(true);
 
@@ -96,7 +84,7 @@ const AddAccount = ({ closeModal, accountData, editmode, reloadAccounts }) => {
 
       const res = await (editmode
         ? updateUser(payload).unwrap()
-        : registerUser({ data: payload, token: authToken }).unwrap());
+        : registerUser({ data: payload }).unwrap());
 
       const success = res?.status === "Success" || res?.success === true || res?.status === "success";
       if (success) {
