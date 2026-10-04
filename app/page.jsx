@@ -46,7 +46,7 @@ export default function Home() {
   const accountType = userInfo?.accountType ?? userInfo?.account ?? "";
   const isLimitedAccount = accountType === "editor" || accountType === "shareholder";
   const isShareholder = accountType === "shareholder";
-  const hasShareholderRevenue = isShareholder && Boolean(Dashboard?.Revenue);
+  const hasDashboardRevenue = Boolean(Dashboard?.Revenue);
 
 
   const { data: liveOrderStats = {} } = useOrderStatsQuery(undefined, { skip: isLimitedAccount });
@@ -366,8 +366,8 @@ export default function Home() {
         <Grid
           templateColumns={{
             base: "1fr",
-            md: hasShareholderRevenue ? "repeat(2, 1fr)" : isLimitedAccount ? "1fr" : "repeat(2, 1fr)",
-            lg: hasShareholderRevenue ? "repeat(2, 1fr)" : isLimitedAccount ? "1fr" : "repeat(4, 1fr)",
+            md: isShareholder && hasDashboardRevenue ? "repeat(2, 1fr)" : isLimitedAccount ? "1fr" : "repeat(2, 1fr)",
+            lg: isShareholder && hasDashboardRevenue ? "repeat(2, 1fr)" : isLimitedAccount ? "1fr" : "repeat(4, 1fr)",
           }}
           gap={6}
           mb={8}
@@ -379,7 +379,7 @@ export default function Home() {
             color="blue"
             subtitle="Active products"
           />
-          {hasShareholderRevenue && (
+          {isShareholder && hasDashboardRevenue && (
             <StatCard
               icon={DollarSign}
               title="Shareholder Revenue"
@@ -407,9 +407,17 @@ export default function Home() {
               <StatCard
                 icon={DollarSign}
                 title="Total Revenue"
-                value={`UGX ${(Dashboard?.AllTimeOrders?.allorderscashvalue || 0).toLocaleString()}`}
+                value={`UGX ${Number(
+                  hasDashboardRevenue
+                    ? Dashboard.Revenue.amount || 0
+                    : Dashboard?.AllTimeOrders?.allorderscashvalue || 0
+                ).toLocaleString("en-US")}`}
                 color="purple"
-                subtitle="All-time revenue"
+                subtitle={
+                  hasDashboardRevenue
+                    ? `USD equivalent: $${Number(Dashboard.Revenue.usdEquivalent || 0).toLocaleString("en-US")}`
+                    : "All-time revenue"
+                }
               />
             </>
           )}
