@@ -20,6 +20,7 @@ const requestWithFallback = async (urlCandidates, init = {}) => {
     try {
       const response = await fetch(url, {
         credentials: "include",
+        cache: "no-store",
         ...init,
         headers: {
           Accept: "application/json",
@@ -82,6 +83,7 @@ export const yoocardApiSlice = apiSlice.injectEndpoints({
       query: () => ({
         url: `${BACKEND_URL}/admin/subscription-packages`,
         method: "GET",
+        cache: "no-store",
       }),
     }),
     subscriptionPackageCreate: builder.mutation({
