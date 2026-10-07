@@ -158,6 +158,10 @@ export default function SubscriptionsPage() {
   const [editingPlan, setEditingPlan] = useState(null);
   const [planForm, setPlanForm] = useState({
     type: "individual",
+    name: "",
+    price: "",
+    previousPrice: "",
+    details: "",
     incomeTiers: emptyIncomeTiers(),
   });
   const [packageTypeFilter, setPackageTypeFilter] = useState("all");
@@ -300,7 +304,14 @@ export default function SubscriptionsPage() {
 
   const openAddPlan = () => {
     setEditingPlan(null);
-    setPlanForm({ type: "individual", incomeTiers: emptyIncomeTiers() });
+    setPlanForm({
+      type: "individual",
+      name: "",
+      price: "",
+      previousPrice: "",
+      details: "",
+      incomeTiers: emptyIncomeTiers(),
+    });
     onPlanOpen();
   };
 
@@ -308,6 +319,10 @@ export default function SubscriptionsPage() {
     setEditingPlan(p);
     setPlanForm({
       type: p?.type || "individual",
+      name: p?.name || "",
+      price: p?.price ?? "",
+      previousPrice: p?.previousPrice ?? "",
+      details: Array.isArray(p?.details) ? p.details.join("\n") : p?.details || "",
       incomeTiers: PACKAGE_TIERS.reduce((tiers, tier) => ({
         ...tiers,
         [tier]: {
@@ -325,6 +340,13 @@ export default function SubscriptionsPage() {
 
   const handleSavePlan = async () => {
     const type = String(planForm.type || "").trim();
+    const name = String(planForm.name || "").trim();
+    const price = Number(planForm.price);
+    const previousPrice = planForm.previousPrice === "" ? undefined : Number(planForm.previousPrice);
+    const details = String(planForm.details || "")
+      .split("\n")
+      .map((detail) => detail.trim())
+      .filter(Boolean);
     const incomeTiers = PACKAGE_TIERS.reduce((tiers, tier) => ({
       ...tiers,
       [tier]: {
@@ -338,6 +360,14 @@ export default function SubscriptionsPage() {
       toast({ title: "Invalid package type", description: "Choose Individual, Family, or Business.", status: "warning", duration: 4000, isClosable: true });
       return;
     }
+    if (!name || !Number.isFinite(price) || price < 0) {
+      toast({ title: "Package details required", description: "Enter a package name and a valid price.", status: "warning", duration: 4000, isClosable: true });
+      return;
+    }
+    if (previousPrice !== undefined && (!Number.isFinite(previousPrice) || previousPrice < 0)) {
+      toast({ title: "Invalid previous price", description: "Enter a valid previous price or leave it blank.", status: "warning", duration: 4000, isClosable: true });
+      return;
+    }
     const invalidTier = PACKAGE_TIERS.find((tier) => (
       !Number.isFinite(incomeTiers[tier].weekly) || incomeTiers[tier].weekly < 0 ||
       !Number.isFinite(incomeTiers[tier].monthly) || incomeTiers[tier].monthly < 0 ||
@@ -348,11 +378,22 @@ export default function SubscriptionsPage() {
       return;
     }
 
-    const payload = { type, incomeTiers };
+    const payload = {
+      type,
+      name,
+      price,
+      ...(previousPrice === undefined ? {} : { previousPrice }),
+      details,
+      incomeTiers,
+    };
     let requestPayload = payload;
     if (editingPlan) {
       requestPayload = {
         type: type !== editingPlan.type ? type : undefined,
+        name: name !== (editingPlan.name || "") ? name : undefined,
+        price: price !== Number(editingPlan.price) ? price : undefined,
+        previousPrice: previousPrice !== (editingPlan.previousPrice ?? undefined) ? (previousPrice ?? null) : undefined,
+        details: JSON.stringify(details) !== JSON.stringify(editingPlan.details || []) ? details : undefined,
         incomeTiers: JSON.stringify(incomeTiers) !== JSON.stringify(editingPlan.incomeTiers || {}) ? incomeTiers : undefined,
       };
       Object.keys(requestPayload).forEach((key) => requestPayload[key] === undefined && delete requestPayload[key]);
@@ -710,6 +751,7 @@ export default function SubscriptionsPage() {
             <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
               {visiblePackages.map((p) => {
                 const colorScheme = p.type === "business" ? "orange" : p.type === "family" ? "blue" : "green";
+                const packageDetails = Array.isArray(p.details) ? p.details : [];
                 return (
                   <Card key={p._id} borderRadius="xl" boxShadow="sm" _hover={{ boxShadow: "md", transform: "translateY(-2px)" }} transition="all 0.2s" overflow="hidden">
                     <Box h="4px" bg={`${colorScheme}.400`} />
@@ -717,7 +759,17 @@ export default function SubscriptionsPage() {
                       <Flex justify="space-between" align="start" mb={3}>
                         <Box>
                           <Badge colorScheme={colorScheme} borderRadius="full" mb={1} textTransform="capitalize">{p.type}</Badge>
-                          <Heading size="md">{p.type} package</Heading>
+                          <Heading size="md">{p.name || `${p.type} package`}</Heading>
+                          <HStack align="baseline" spacing={2} mt={1}>
+                            <Text fontSize="lg" fontWeight="700" color={`${colorScheme}.600`}>
+                              UGX {Number(p.price || 0).toLocaleString()}
+                            </Text>
+                            {p.previousPrice != null && Number(p.previousPrice) > Number(p.price) && (
+                              <Text as="s" fontSize="sm" color="gray.500">
+                                UGX {Number(p.previousPrice).toLocaleString()}
+                              </Text>
+                            )}
+                          </HStack>
                           <Text fontSize="xs" color="gray.500">Three income tiers</Text>
                         </Box>
                         <HStack spacing={1}>
@@ -770,11 +822,25 @@ export default function SubscriptionsPage() {
                             <HStack key={tier} justify="space-between" fontSize="sm">
                               <Badge colorScheme="gray" textTransform="capitalize">{tier}</Badge>
                               <Text>UGX {Number(p.incomeTiers?.[tier]?.weekly || 0).toLocaleString()} / week</Text>
-                              <Text color="gray.500">{p.incomeTiers?.[tier]?.quantity || "No quantity"}</Text>
+                              <VStack align="end" spacing={0}>
+                                <Text>UGX {Number(p.incomeTiers?.[tier]?.monthly || 0).toLocaleString()} / month</Text>
+                                <Text color="gray.500">{p.incomeTiers?.[tier]?.quantity || "No quantity"}</Text>
+                              </VStack>
                             </HStack>
                           ))}
                         </VStack>
                       </Box>
+
+                      {packageDetails.length > 0 && (
+                        <Box mt={4}>
+                          <Text fontSize="sm" fontWeight="700" mb={2}>Included benefits</Text>
+                          <VStack align="stretch" spacing={1}>
+                            {packageDetails.map((detail, index) => (
+                              <Text key={`${index}-${detail}`} fontSize="sm" color="gray.600">- {detail}</Text>
+                            ))}
+                          </VStack>
+                        </Box>
+                      )}
 
                       {p.createdAt && (
                         <Text mt={4} fontSize="xs" color="gray.400">
@@ -886,23 +952,37 @@ export default function SubscriptionsPage() {
 }
 
 function PlanModal({ isOpen, onClose, title, form, setForm, onSave, saving, saveLabel }) {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!saving) onSave();
+  };
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered scrollBehavior="inside">
+    <Modal isOpen={isOpen} onClose={onClose} size={{ base: "full", md: "xl" }} isCentered scrollBehavior="inside">
       <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
-      <ModalContent maxH="90vh" borderRadius="xl" boxShadow="2xl">
-        <ModalHeader fontSize="lg" fontWeight="bold" borderBottomWidth="1px" py={4}>
-          {title}
-        </ModalHeader>
-        <ModalCloseButton top={4} right={4} />
-        <ModalBody py={5} overflowY="auto">
-          <PlanForm form={form} setForm={setForm} />
-        </ModalBody>
-        <ModalFooter borderTopWidth="1px" py={4} gap={3}>
-          <Button variant="outline" onClick={onClose} isDisabled={saving} borderRadius="lg">Cancel</Button>
-          <Button colorScheme="green" onClick={onSave} isLoading={saving} loadingText="Saving..." borderRadius="lg">
-            {saveLabel}
-          </Button>
-        </ModalFooter>
+      <ModalContent
+        maxH={{ base: "100dvh", md: "calc(100vh - 3rem)" }}
+        h={{ base: "100dvh", md: "auto" }}
+        borderRadius={{ base: "none", md: "xl" }}
+        boxShadow="2xl"
+        display="flex"
+        flexDirection="column"
+      >
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", minHeight: 0, flex: 1 }}>
+          <ModalHeader fontSize="lg" fontWeight="bold" borderBottomWidth="1px" py={4} pr={12}>
+            {title}
+          </ModalHeader>
+          <ModalCloseButton top={4} right={4} />
+          <ModalBody py={5} overflowY="auto" flex="1" minH={0}>
+            <PlanForm form={form} setForm={setForm} />
+          </ModalBody>
+          <ModalFooter borderTopWidth="1px" py={4} gap={3} flexWrap="wrap">
+            <Button variant="outline" onClick={onClose} isDisabled={saving} borderRadius="lg" flex={{ base: 1, md: "initial" }}>Cancel</Button>
+            <Button colorScheme="green" type="submit" isLoading={saving} loadingText="Saving..." borderRadius="lg" flex={{ base: 1, md: "initial" }}>
+              {saveLabel}
+            </Button>
+          </ModalFooter>
+        </form>
       </ModalContent>
     </Modal>
   );
@@ -917,11 +997,34 @@ function PlanForm({ form, setForm }) {
           {CUSTOMER_TYPES.map((type) => <option key={type} value={type}>{type[0].toUpperCase() + type.slice(1)}</option>)}
         </Select>
       </FormControl>
+      <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+        <FormControl isRequired>
+          <FormLabel fontWeight="600" fontSize="sm">Package name</FormLabel>
+          <Input value={form.name ?? ""} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="e.g. Premium" />
+        </FormControl>
+        <FormControl isRequired>
+          <FormLabel fontWeight="600" fontSize="sm">Membership price (UGX)</FormLabel>
+          <Input type="number" min={0} value={form.price ?? ""} onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))} />
+        </FormControl>
+        <FormControl>
+          <FormLabel fontWeight="600" fontSize="sm">Previous price (UGX)</FormLabel>
+          <Input type="number" min={0} value={form.previousPrice ?? ""} onChange={(e) => setForm((f) => ({ ...f, previousPrice: e.target.value }))} />
+        </FormControl>
+      </SimpleGrid>
+      <FormControl>
+        <FormLabel fontWeight="600" fontSize="sm">Package details</FormLabel>
+        <Textarea
+          value={form.details ?? ""}
+          onChange={(e) => setForm((f) => ({ ...f, details: e.target.value }))}
+          placeholder={"One benefit per line"}
+          rows={5}
+        />
+      </FormControl>
       <Text fontSize="sm" color="gray.600">Each package contains the required Low, Middle, and High income tiers.</Text>
       {PACKAGE_TIERS.map((tier) => (
         <Box key={tier} borderWidth="1px" borderColor="gray.200" borderRadius="lg" p={4}>
           <Badge colorScheme={tier === "middle" ? "green" : "gray"} mb={3} textTransform="capitalize">{tier} income tier</Badge>
-          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
+          <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} spacing={4}>
             <FormControl isRequired>
               <FormLabel fontSize="sm">Weekly price (UGX)</FormLabel>
               <Input type="number" min={0} value={form.incomeTiers?.[tier]?.weekly ?? ""} onChange={(e) => setForm((f) => ({ ...f, incomeTiers: { ...f.incomeTiers, [tier]: { ...f.incomeTiers[tier], weekly: e.target.value } } }))} />
@@ -951,10 +1054,11 @@ function MealSlotGrid({ slots, overrides, upsertSlot, upsertOverride, toast, loa
   const { isOpen: isSlotModalOpen, onOpen: onSlotModalOpen, onClose: onSlotModalClose } = useDisclosure();
 
   const getSlot = (day, mealType) => slots.find((s) => {
+    const customerTypeSuffix = s.mealName?.match(/\((individual|family|business)\)\s*$/i)?.[1]?.toLowerCase();
     if (calendarMode === "specialty") {
-      return s.planType?.includes("meat-menu") && s.customerType === customerType && s.prepType === prepType && s.day === day && s.mealType === mealType;
+      return customerTypeSuffix === customerType && s.prepType === prepType && s.day === day && s.mealType === mealType;
     }
-    return s.planType?.startsWith("standard-") && s.incomeLevel === incomeLevel && s.prepType === prepType && s.day === day && s.mealType === mealType;
+    return !customerTypeSuffix && s.incomeLevel === incomeLevel && s.prepType === prepType && s.day === day && s.mealType === mealType;
   });
   const getOverride = (day, mealType) => overrides.find((o) => o.incomeLevel === incomeLevel && o.prepType === prepType && o.day === day && o.mealType === mealType);
 
@@ -962,14 +1066,11 @@ function MealSlotGrid({ slots, overrides, upsertSlot, upsertOverride, toast, loa
     const slot = getSlot(day, mealType);
     const override = getOverride(day, mealType);
     setEditingSlot({
-      day, mealType, incomeLevel: calendarMode === "specialty" ? "all" : incomeLevel, prepType,
-      customerType: slot?.customerType || customerType,
-      planType: slot?.planType || (calendarMode === "specialty" ? (prepType === "ready-to-eat" ? "rte-meat-menu" : "rtc-meat-menu") : `standard-${prepType === "ready-to-eat" ? "rte" : "rtc"}`),
-      mealKey: slot?.mealKey || `${slot?.customerType || customerType}-${calendarMode === "specialty" ? "specialty" : incomeLevel}-${prepType}-${day}-${mealType}`,
+      day, mealType, incomeLevel: slot?.incomeLevel || incomeLevel, prepType,
+      customerType,
       mealName: slot?.mealName || "",
       description: slot?.description || "",
       quantity: slot?.quantity || "",
-      deliveryCadence: slot?.deliveryCadence || "",
       priceWeekly: slot?.priceWeekly ?? 0,
       priceMonthly: slot?.priceMonthly ?? 0,
       imageUrl: slot?.imageUrl || override?.imageUrl || "",
@@ -984,18 +1085,18 @@ function MealSlotGrid({ slots, overrides, upsertSlot, upsertOverride, toast, loa
     }
     setSaving(true);
     try {
+      const mealName = String(form.mealName ?? "").trim();
+      const specialtySuffix = `(${form.customerType || customerType})`;
       const mealSlot = {
-        planType: form.planType,
-        customerType: form.customerType,
-        incomeLevel: form.incomeLevel,
+        incomeLevel: form.incomeLevel || incomeLevel,
         prepType: form.prepType,
         day: form.day,
         mealType: form.mealType,
-        mealKey: form.mealKey,
-        mealName: String(form.mealName ?? ""),
+        mealName: calendarMode === "specialty" && !mealName.toLowerCase().endsWith(specialtySuffix.toLowerCase())
+          ? `${mealName} ${specialtySuffix}`
+          : mealName,
         description: String(form.description ?? ""),
         quantity: String(form.quantity ?? ""),
-        deliveryCadence: String(form.deliveryCadence ?? ""),
         priceWeekly: Number(form.priceWeekly) || 0,
         priceMonthly: Number(form.priceMonthly) || 0,
         imageUrl: String(form.imageUrl ?? ""),
@@ -1185,16 +1286,22 @@ function MealSlotEditorModal({ isOpen, onClose, slot, onSave, saving = false }) 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size={{ base: "full", md: "lg" }} isCentered scrollBehavior="inside" closeOnOverlayClick={!saving}>
       <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
-      <ModalContent maxH="90vh" borderRadius="xl">
-        <ModalHeader borderBottomWidth="1px" py={4}>
+      <ModalContent
+        maxH={{ base: "100dvh", md: "calc(100vh - 3rem)" }}
+        h={{ base: "100dvh", md: "auto" }}
+        borderRadius={{ base: "none", md: "xl" }}
+        display="flex"
+        flexDirection="column"
+      >
+        <ModalHeader borderBottomWidth="1px" py={4} pr={12}>
           <HStack spacing={2}>
             <UtensilsCrossed size={18} />
             <Text textTransform="capitalize">{slot.day} — {slot.mealType}</Text>
           </HStack>
         </ModalHeader>
         <ModalCloseButton />
-        <form onSubmit={handleSubmit}>
-          <ModalBody py={4}>
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", minHeight: 0, flex: 1 }}>
+          <ModalBody py={4} overflowY="auto" flex="1" minH={0}>
             <VStack spacing={4} align="stretch">
               <FormControl>
                 <FormLabel fontWeight="600" fontSize="sm">Meal Name</FormLabel>
@@ -1208,11 +1315,7 @@ function MealSlotEditorModal({ isOpen, onClose, slot, onSave, saving = false }) 
                 <FormLabel fontWeight="600" fontSize="sm">Quantity</FormLabel>
                 <Input value={form.quantity || ""} onChange={(e) => setForm((f) => ({ ...f, quantity: e.target.value }))} placeholder="e.g. ~550g" borderRadius="lg" />
               </FormControl>
-              <FormControl>
-                <FormLabel fontWeight="600" fontSize="sm">Delivery cadence</FormLabel>
-                <Input value={form.deliveryCadence || ""} onChange={(e) => setForm((f) => ({ ...f, deliveryCadence: e.target.value }))} placeholder="e.g. 2 deliveries/week" borderRadius="lg" />
-              </FormControl>
-              <SimpleGrid columns={2} spacing={4}>
+              <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4}>
                 <FormControl>
                   <FormLabel fontWeight="600" fontSize="sm">Weekly (UGX)</FormLabel>
                   <Input type="number" min={0} value={form.priceWeekly ?? ""} onChange={(e) => setForm((f) => ({ ...f, priceWeekly: e.target.value }))} placeholder="87500" borderRadius="lg" />
@@ -1224,9 +1327,9 @@ function MealSlotEditorModal({ isOpen, onClose, slot, onSave, saving = false }) 
               </SimpleGrid>
               <FormControl>
                 <FormLabel fontWeight="600" fontSize="sm">Image</FormLabel>
-                <HStack spacing={2}>
-                  <Input value={form.imageUrl || ""} onChange={(e) => setForm((f) => ({ ...f, imageUrl: e.target.value }))} placeholder="URL or upload" borderRadius="lg" />
-                  <Button as="label" size="sm" colorScheme="green" cursor="pointer" isLoading={uploading} borderRadius="lg">
+                <HStack spacing={2} align="stretch" minW={0}>
+                  <Input minW={0} value={form.imageUrl || ""} onChange={(e) => setForm((f) => ({ ...f, imageUrl: e.target.value }))} placeholder="URL or upload" borderRadius="lg" />
+                  <Button as="label" size="sm" colorScheme="green" cursor="pointer" isLoading={uploading} borderRadius="lg" flexShrink={0}>
                     Upload
                     <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden onChange={handleImageUpload} />
                   </Button>
@@ -1239,9 +1342,9 @@ function MealSlotEditorModal({ isOpen, onClose, slot, onSave, saving = false }) 
               </FormControl>
             </VStack>
           </ModalBody>
-          <ModalFooter borderTopWidth="1px" gap={3}>
-            <Button variant="outline" onClick={onClose} isDisabled={saving} borderRadius="lg">Cancel</Button>
-            <Button colorScheme="green" type="submit" isLoading={saving} loadingText="Saving..." borderRadius="lg">Save Meal</Button>
+          <ModalFooter borderTopWidth="1px" gap={3} flexWrap="wrap">
+            <Button variant="outline" onClick={onClose} isDisabled={saving} borderRadius="lg" flex={{ base: 1, sm: "initial" }}>Cancel</Button>
+            <Button colorScheme="green" type="submit" isLoading={saving} loadingText="Saving..." borderRadius="lg" flex={{ base: 1, sm: "initial" }}>Save Meal</Button>
           </ModalFooter>
         </form>
       </ModalContent>
