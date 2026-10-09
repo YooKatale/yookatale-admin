@@ -101,6 +101,7 @@ const INCOME_LEVELS = ["middle", "low", "high"];
 const PREP_TYPES = ["ready-to-eat", "ready-to-cook"];
 const CUSTOMER_TYPES = ["individual", "family", "business"];
 const PACKAGE_TIERS = ["low", "middle", "high"];
+const SPECIAL_SUBSCRIPTION_TYPES = ["milk", "beef"];
 
 const getSubUserLabel = (sub) => {
   const user = sub?.user || {};
@@ -165,6 +166,8 @@ export default function SubscriptionsPage() {
     incomeTiers: emptyIncomeTiers(),
   });
   const [packageTypeFilter, setPackageTypeFilter] = useState("all");
+  const [packageSection, setPackageSection] = useState("main");
+  const [packageTierSelections, setPackageTierSelections] = useState({});
 
   const loadSubscriptions = useCallback(async () => {
     setLoading(true);
@@ -302,12 +305,15 @@ export default function SubscriptionsPage() {
     else setSelectedSubs(subscriptionsData.map((s) => s._id));
   };
 
-  const openAddPlan = () => {
+  const openAddPlan = (type = "individual") => {
     setEditingPlan(null);
     setPlanForm({
-      type: "individual",
-      name: "",
+      type,
+      name: SPECIAL_SUBSCRIPTION_TYPES.includes(type) ? `${type[0].toUpperCase()}${type.slice(1)} Subscription` : "",
       price: "",
+      priceWeekly: "",
+      priceMonthly: "",
+      quantity: "",
       previousPrice: "",
       details: "",
       incomeTiers: emptyIncomeTiers(),
@@ -321,6 +327,9 @@ export default function SubscriptionsPage() {
       type: p?.type || "individual",
       name: p?.name || "",
       price: p?.price ?? "",
+      priceWeekly: p?.priceWeekly ?? p?.weeklyPrice ?? "",
+      priceMonthly: p?.priceMonthly ?? p?.monthlyPrice ?? "",
+      quantity: p?.quantity ?? "",
       previousPrice: p?.previousPrice ?? "",
       details: Array.isArray(p?.details) ? p.details.join("\n") : p?.details || "",
       incomeTiers: PACKAGE_TIERS.reduce((tiers, tier) => ({
@@ -341,61 +350,87 @@ export default function SubscriptionsPage() {
   const handleSavePlan = async () => {
     const type = String(planForm.type || "").trim();
     const name = String(planForm.name || "").trim();
-    const price = Number(planForm.price);
-    const previousPrice = planForm.previousPrice === "" ? undefined : Number(planForm.previousPrice);
-    const details = String(planForm.details || "")
-      .split("\n")
-      .map((detail) => detail.trim())
-      .filter(Boolean);
-    const incomeTiers = PACKAGE_TIERS.reduce((tiers, tier) => ({
-      ...tiers,
-      [tier]: {
-        weekly: Number(planForm.incomeTiers?.[tier]?.weekly),
-        monthly: Number(planForm.incomeTiers?.[tier]?.monthly),
-        quantity: String(planForm.incomeTiers?.[tier]?.quantity || "").trim(),
-      },
-    }), {});
+    const isSpecialSubscription = SPECIAL_SUBSCRIPTION_TYPES.includes(type);
+    let payload;
 
-    if (!CUSTOMER_TYPES.includes(type)) {
-      toast({ title: "Invalid package type", description: "Choose Individual, Family, or Business.", status: "warning", duration: 4000, isClosable: true });
-      return;
-    }
-    if (!name || !Number.isFinite(price) || price < 0) {
-      toast({ title: "Package details required", description: "Enter a package name and a valid price.", status: "warning", duration: 4000, isClosable: true });
-      return;
-    }
-    if (previousPrice !== undefined && (!Number.isFinite(previousPrice) || previousPrice < 0)) {
-      toast({ title: "Invalid previous price", description: "Enter a valid previous price or leave it blank.", status: "warning", duration: 4000, isClosable: true });
-      return;
-    }
-    const invalidTier = PACKAGE_TIERS.find((tier) => (
-      !Number.isFinite(incomeTiers[tier].weekly) || incomeTiers[tier].weekly < 0 ||
-      !Number.isFinite(incomeTiers[tier].monthly) || incomeTiers[tier].monthly < 0 ||
-      !incomeTiers[tier].quantity
-    ));
-    if (invalidTier) {
-      toast({ title: "Incomplete income tier", description: `Enter weekly price, monthly price, and quantity for the ${invalidTier} tier.`, status: "warning", duration: 4000, isClosable: true });
-      return;
+    if (isSpecialSubscription) {
+      const priceWeekly = Number(planForm.priceWeekly);
+      const priceMonthly = Number(planForm.priceMonthly);
+      const quantity = String(planForm.quantity || "").trim();
+      if (!name || planForm.priceWeekly === "" || planForm.priceMonthly === "" ||
+          !Number.isFinite(priceWeekly) || priceWeekly < 0 ||
+          !Number.isFinite(priceMonthly) || priceMonthly < 0 || !quantity) {
+        toast({ title: "Subscription details required", description: "Enter a name, valid weekly and monthly prices, and quantity.", status: "warning", duration: 4000, isClosable: true });
+        return;
+      }
+      payload = { type, name, priceWeekly, priceMonthly, quantity };
+    } else {
+      const price = Number(planForm.price);
+      const previousPrice = planForm.previousPrice === "" ? undefined : Number(planForm.previousPrice);
+      const details = String(planForm.details || "")
+        .split("\n")
+        .map((detail) => detail.trim())
+        .filter(Boolean);
+      const incomeTiers = PACKAGE_TIERS.reduce((tiers, tier) => ({
+        ...tiers,
+        [tier]: {
+          weekly: Number(planForm.incomeTiers?.[tier]?.weekly),
+          monthly: Number(planForm.incomeTiers?.[tier]?.monthly),
+          quantity: String(planForm.incomeTiers?.[tier]?.quantity || "").trim(),
+        },
+      }), {});
+
+      if (!CUSTOMER_TYPES.includes(type)) {
+        toast({ title: "Invalid package type", description: "Choose Individual, Family, or Business.", status: "warning", duration: 4000, isClosable: true });
+        return;
+      }
+      if (!name || !Number.isFinite(price) || price < 0) {
+        toast({ title: "Package details required", description: "Enter a package name and a valid price.", status: "warning", duration: 4000, isClosable: true });
+        return;
+      }
+      if (previousPrice !== undefined && (!Number.isFinite(previousPrice) || previousPrice < 0)) {
+        toast({ title: "Invalid previous price", description: "Enter a valid previous price or leave it blank.", status: "warning", duration: 4000, isClosable: true });
+        return;
+      }
+      const invalidTier = PACKAGE_TIERS.find((tier) => (
+        !Number.isFinite(incomeTiers[tier].weekly) || incomeTiers[tier].weekly < 0 ||
+        !Number.isFinite(incomeTiers[tier].monthly) || incomeTiers[tier].monthly < 0 ||
+        !incomeTiers[tier].quantity
+      ));
+      if (invalidTier) {
+        toast({ title: "Incomplete income tier", description: `Enter weekly price, monthly price, and quantity for the ${invalidTier} tier.`, status: "warning", duration: 4000, isClosable: true });
+        return;
+      }
+      payload = {
+        type,
+        name,
+        price,
+        ...(previousPrice === undefined ? {} : { previousPrice }),
+        details,
+        incomeTiers,
+      };
     }
 
-    const payload = {
-      type,
-      name,
-      price,
-      ...(previousPrice === undefined ? {} : { previousPrice }),
-      details,
-      incomeTiers,
-    };
     let requestPayload = payload;
     if (editingPlan) {
-      requestPayload = {
-        type: type !== editingPlan.type ? type : undefined,
-        name: name !== (editingPlan.name || "") ? name : undefined,
-        price: price !== Number(editingPlan.price) ? price : undefined,
-        previousPrice: previousPrice !== (editingPlan.previousPrice ?? undefined) ? (previousPrice ?? null) : undefined,
-        details: JSON.stringify(details) !== JSON.stringify(editingPlan.details || []) ? details : undefined,
-        incomeTiers: JSON.stringify(incomeTiers) !== JSON.stringify(editingPlan.incomeTiers || {}) ? incomeTiers : undefined,
-      };
+      if (isSpecialSubscription) {
+        requestPayload = {
+          type: type !== editingPlan.type ? type : undefined,
+          name: name !== (editingPlan.name || "") ? name : undefined,
+          priceWeekly: payload.priceWeekly !== Number(editingPlan.priceWeekly ?? editingPlan.weeklyPrice) ? payload.priceWeekly : undefined,
+          priceMonthly: payload.priceMonthly !== Number(editingPlan.priceMonthly ?? editingPlan.monthlyPrice) ? payload.priceMonthly : undefined,
+          quantity: payload.quantity !== (editingPlan.quantity || "") ? payload.quantity : undefined,
+        };
+      } else {
+        requestPayload = {
+          type: type !== editingPlan.type ? type : undefined,
+          name: name !== (editingPlan.name || "") ? name : undefined,
+          price: payload.price !== Number(editingPlan.price) ? payload.price : undefined,
+          previousPrice: payload.previousPrice !== (editingPlan.previousPrice ?? undefined) ? (payload.previousPrice ?? null) : undefined,
+          details: JSON.stringify(payload.details) !== JSON.stringify(editingPlan.details || []) ? payload.details : undefined,
+          incomeTiers: JSON.stringify(payload.incomeTiers) !== JSON.stringify(editingPlan.incomeTiers || {}) ? payload.incomeTiers : undefined,
+        };
+      }
       Object.keys(requestPayload).forEach((key) => requestPayload[key] === undefined && delete requestPayload[key]);
       if (Object.keys(requestPayload).length === 0) {
         toast({ title: "No changes to save", status: "info", duration: 3000, isClosable: true });
@@ -443,7 +478,9 @@ export default function SubscriptionsPage() {
   };
 
   const visiblePackages = packages.filter((plan) => {
-    return packageTypeFilter === "all" || plan.type === packageTypeFilter;
+    const isSpecialSubscription = SPECIAL_SUBSCRIPTION_TYPES.includes(String(plan.type).toLowerCase());
+    const belongsToSection = packageSection === "milk-beef" ? isSpecialSubscription : !isSpecialSubscription;
+    return belongsToSection && (packageTypeFilter === "all" || String(plan.type).toLowerCase() === packageTypeFilter);
   });
 
   return (
@@ -456,9 +493,20 @@ export default function SubscriptionsPage() {
         </Box>
         <HStack spacing={2}>
           {activeTab === "plans" && (
-            <Button leftIcon={<Plus size={16} />} colorScheme="green" size="sm" onClick={openAddPlan} borderRadius="lg">
-              Add Package
-            </Button>
+            packageSection === "main" ? (
+              <Button leftIcon={<Plus size={16} />} colorScheme="green" size="sm" onClick={() => openAddPlan()} borderRadius="lg">
+                Add Package
+              </Button>
+            ) : (
+              <>
+                <Button leftIcon={<Plus size={16} />} colorScheme="green" size="sm" onClick={() => openAddPlan("milk")} borderRadius="lg">
+                  Add Milk Subscription
+                </Button>
+                <Button leftIcon={<Plus size={16} />} colorScheme="orange" size="sm" onClick={() => openAddPlan("beef")} borderRadius="lg">
+                  Add Beef Subscription
+                </Button>
+              </>
+            )
           )}
         </HStack>
       </Flex>
@@ -726,10 +774,36 @@ export default function SubscriptionsPage() {
       {/* Meal Plans Tab */}
       {activeTab === "plans" && (
         <Box>
+          <HStack mb={4} spacing={2} flexWrap="wrap">
+            <Button
+              size="sm"
+              variant={packageSection === "main" ? "solid" : "outline"}
+              colorScheme="purple"
+              onClick={() => { setPackageSection("main"); setPackageTypeFilter("all"); }}
+            >
+              Main Packages
+            </Button>
+            <Button
+              size="sm"
+              variant={packageSection === "milk-beef" ? "solid" : "outline"}
+              colorScheme="orange"
+              onClick={() => { setPackageSection("milk-beef"); setPackageTypeFilter("all"); }}
+            >
+              Milk & Beef Subscriptions
+            </Button>
+          </HStack>
           <Flex mb={4} gap={3} flexWrap="wrap" align="center">
-            <Select w={{ base: "full", md: "190px" }} size="sm" borderRadius="lg" value={packageTypeFilter} onChange={(e) => setPackageTypeFilter(e.target.value)}>
-              <option value="all">All package types</option>
-              {CUSTOMER_TYPES.map((type) => <option key={type} value={type}>{type[0].toUpperCase() + type.slice(1)}</option>)}
+            <Select
+              w={{ base: "full", md: "190px" }}
+              size="sm"
+              borderRadius="lg"
+              value={packageTypeFilter}
+              onChange={(e) => setPackageTypeFilter(e.target.value)}
+            >
+              <option value="all">All {packageSection === "main" ? "package" : "subscription"} types</option>
+              {(packageSection === "main" ? CUSTOMER_TYPES : SPECIAL_SUBSCRIPTION_TYPES).map((type) => (
+                <option key={type} value={type}>{type[0].toUpperCase() + type.slice(1)}</option>
+              ))}
             </Select>
             <Badge colorScheme="purple" borderRadius="full" px={3}>{visiblePackages.length} shown</Badge>
           </Flex>
@@ -750,8 +824,14 @@ export default function SubscriptionsPage() {
           ) : visiblePackages.length > 0 ? (
             <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
               {visiblePackages.map((p) => {
-                const colorScheme = p.type === "business" ? "orange" : p.type === "family" ? "blue" : "green";
+                const isSpecialSubscription = SPECIAL_SUBSCRIPTION_TYPES.includes(String(p.type).toLowerCase());
+                const colorScheme = p.type === "business" || p.type === "beef" ? "orange" : p.type === "family" ? "blue" : "green";
                 const packageDetails = Array.isArray(p.details) ? p.details : [];
+                const selectedTier = packageTierSelections[p._id] || "middle";
+                const selectedWeeklyPrice =
+                  p.incomeTiers?.[selectedTier]?.weekly ??
+                  p.incomeTiers?.middle?.weekly ??
+                  p.price;
                 return (
                   <Card key={p._id} borderRadius="xl" boxShadow="sm" _hover={{ boxShadow: "md", transform: "translateY(-2px)" }} transition="all 0.2s" overflow="hidden">
                     <Box h="4px" bg={`${colorScheme}.400`} />
@@ -762,15 +842,18 @@ export default function SubscriptionsPage() {
                           <Heading size="md">{p.name || `${p.type} package`}</Heading>
                           <HStack align="baseline" spacing={2} mt={1}>
                             <Text fontSize="lg" fontWeight="700" color={`${colorScheme}.600`}>
-                              UGX {Number(p.price || 0).toLocaleString()}
+                              UGX {Number(isSpecialSubscription ? (p.priceWeekly ?? p.weeklyPrice ?? 0) : (selectedWeeklyPrice || 0)).toLocaleString()}
                             </Text>
-                            {p.previousPrice != null && Number(p.previousPrice) > Number(p.price) && (
-                              <Text as="s" fontSize="sm" color="gray.500">
-                                UGX {Number(p.previousPrice).toLocaleString()}
-                              </Text>
-                            )}
                           </HStack>
-                          <Text fontSize="xs" color="gray.500">Three income tiers</Text>
+                          {isSpecialSubscription ? (
+                            <Text fontSize="xs" color="gray.500">
+                              Weekly subscription price
+                            </Text>
+                          ) : (
+                            <Text fontSize="xs" color="gray.500" textTransform="capitalize">
+                              {selectedTier} income tier · weekly
+                            </Text>
+                          )}
                         </Box>
                         <HStack spacing={1}>
                           <Tooltip label="Edit plan">
@@ -813,9 +896,39 @@ export default function SubscriptionsPage() {
                         </HStack>
                       </Flex>
 
+                      {isSpecialSubscription ? (
+                        <Box mb={4}>
+                          <VStack align="stretch" spacing={2}>
+                            <HStack justify="space-between">
+                              <Text fontSize="sm" color="gray.600">Monthly</Text>
+                              <Text fontSize="sm" fontWeight="600">UGX {Number(p.priceMonthly ?? p.monthlyPrice ?? 0).toLocaleString()}</Text>
+                            </HStack>
+                            <HStack justify="space-between">
+                              <Text fontSize="sm" color="gray.600">Quantity</Text>
+                              <Text fontSize="sm" fontWeight="600">{p.quantity || "Not specified"}</Text>
+                            </HStack>
+                          </VStack>
+                        </Box>
+                      ) : (
                       <Box mb={4}>
-                        <HStack spacing={2} align="baseline">
-                          <Text fontSize="sm" fontWeight="700" color={`${colorScheme}.600`}>Income tier prices</Text>
+                        <HStack justify="space-between" spacing={3} align="center">
+                          <Text fontSize="sm" fontWeight="700" color={`${colorScheme}.600`}>Choose income tier</Text>
+                          <Select
+                            aria-label={`${p.type} package income tier`}
+                            size="sm"
+                            maxW="140px"
+                            value={selectedTier}
+                            onChange={(e) => setPackageTierSelections((current) => ({
+                              ...current,
+                              [p._id]: e.target.value,
+                            }))}
+                          >
+                            {PACKAGE_TIERS.map((tier) => (
+                              <option key={tier} value={tier}>
+                                {tier[0].toUpperCase() + tier.slice(1)}
+                              </option>
+                            ))}
+                          </Select>
                         </HStack>
                         <VStack align="stretch" spacing={1} mt={2}>
                           {PACKAGE_TIERS.map((tier) => (
@@ -830,8 +943,9 @@ export default function SubscriptionsPage() {
                           ))}
                         </VStack>
                       </Box>
+                      )}
 
-                      {packageDetails.length > 0 && (
+                      {!isSpecialSubscription && packageDetails.length > 0 && (
                         <Box mt={4}>
                           <Text fontSize="sm" fontWeight="700" mb={2}>Included benefits</Text>
                           <VStack align="stretch" spacing={1}>
@@ -852,8 +966,7 @@ export default function SubscriptionsPage() {
                 );
               })}
 
-              {/* Add plan card */}
-              <Card
+              {packageSection === "main" && <Card
                 borderRadius="xl"
                 borderWidth="2px"
                 borderStyle="dashed"
@@ -873,7 +986,7 @@ export default function SubscriptionsPage() {
                     </VStack>
                   </Center>
                 </CardBody>
-              </Card>
+              </Card>}
             </SimpleGrid>
           ) : (
             <Card borderRadius="xl">
@@ -883,10 +996,23 @@ export default function SubscriptionsPage() {
                     <Flex w={16} h={16} borderRadius="full" bg="purple.50" align="center" justify="center">
                       <Package size={32} color="var(--chakra-colors-purple-400)" />
                     </Flex>
-                    <Text color="gray.500" fontWeight="500">No subscription packages yet</Text>
-                    <Button leftIcon={<Plus size={16} />} colorScheme="green" onClick={openAddPlan} borderRadius="lg">
-                      Add Your First Package
-                    </Button>
+                    <Text color="gray.500" fontWeight="500">
+                      {packageSection === "main" ? "No subscription packages yet" : "No Milk or Beef subscriptions yet"}
+                    </Text>
+                    {packageSection === "main" ? (
+                      <Button leftIcon={<Plus size={16} />} colorScheme="green" onClick={() => openAddPlan()} borderRadius="lg">
+                        Add Your First Package
+                      </Button>
+                    ) : (
+                      <HStack flexWrap="wrap" justify="center">
+                        <Button leftIcon={<Plus size={16} />} colorScheme="green" onClick={() => openAddPlan("milk")} borderRadius="lg">
+                          Add Milk Subscription
+                        </Button>
+                        <Button leftIcon={<Plus size={16} />} colorScheme="orange" onClick={() => openAddPlan("beef")} borderRadius="lg">
+                          Add Beef Subscription
+                        </Button>
+                      </HStack>
+                    )}
                   </VStack>
                 </Center>
               </CardBody>
@@ -928,7 +1054,9 @@ export default function SubscriptionsPage() {
       <PlanModal
         isOpen={isPlanOpen}
         onClose={onPlanClose}
-        title="Add Subscription Package"
+        title={SPECIAL_SUBSCRIPTION_TYPES.includes(planForm.type)
+          ? `Add ${planForm.type[0].toUpperCase()}${planForm.type.slice(1)} Subscription`
+          : "Add Subscription Package"}
         form={planForm}
         setForm={setPlanForm}
         onSave={handleSavePlan}
@@ -940,7 +1068,9 @@ export default function SubscriptionsPage() {
       <PlanModal
         isOpen={isEditOpen}
         onClose={onEditClose}
-        title="Edit Subscription Package"
+        title={SPECIAL_SUBSCRIPTION_TYPES.includes(planForm.type)
+          ? `Edit ${planForm.type[0].toUpperCase()}${planForm.type.slice(1)} Subscription`
+          : "Edit Subscription Package"}
         form={planForm}
         setForm={setPlanForm}
         onSave={handleSavePlan}
@@ -989,6 +1119,53 @@ function PlanModal({ isOpen, onClose, title, form, setForm, onSave, saving, save
 }
 
 function PlanForm({ form, setForm }) {
+  if (SPECIAL_SUBSCRIPTION_TYPES.includes(form.type)) {
+    const subscriptionType = form.type[0].toUpperCase() + form.type.slice(1);
+    return (
+      <VStack spacing={5} align="stretch">
+        <Text fontSize="sm" color="gray.600">
+          {subscriptionType} subscriptions use one weekly price, one monthly price, and a quantity. They do not have income tiers.
+        </Text>
+        <FormControl isRequired>
+          <FormLabel fontWeight="600" fontSize="sm">{subscriptionType} subscription name</FormLabel>
+          <Input
+            value={form.name ?? ""}
+            onChange={(e) => setForm((current) => ({ ...current, name: e.target.value }))}
+            placeholder={`${subscriptionType} Subscription`}
+          />
+        </FormControl>
+        <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4}>
+          <FormControl isRequired>
+            <FormLabel fontWeight="600" fontSize="sm">Weekly price (UGX)</FormLabel>
+            <Input
+              type="number"
+              min={0}
+              value={form.priceWeekly ?? ""}
+              onChange={(e) => setForm((current) => ({ ...current, priceWeekly: e.target.value }))}
+            />
+          </FormControl>
+          <FormControl isRequired>
+            <FormLabel fontWeight="600" fontSize="sm">Monthly price (UGX)</FormLabel>
+            <Input
+              type="number"
+              min={0}
+              value={form.priceMonthly ?? ""}
+              onChange={(e) => setForm((current) => ({ ...current, priceMonthly: e.target.value }))}
+            />
+          </FormControl>
+        </SimpleGrid>
+        <FormControl isRequired>
+          <FormLabel fontWeight="600" fontSize="sm">Quantity</FormLabel>
+          <Input
+            value={form.quantity ?? ""}
+            onChange={(e) => setForm((current) => ({ ...current, quantity: e.target.value }))}
+            placeholder="e.g. 2 litres or 5 kg per week"
+          />
+        </FormControl>
+      </VStack>
+    );
+  }
+
   return (
     <VStack spacing={5} align="stretch">
       <FormControl isRequired>

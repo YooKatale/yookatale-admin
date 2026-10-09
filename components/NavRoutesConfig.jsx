@@ -19,6 +19,7 @@ import {
   RadioTower,
   FileText,
   Newspaper,
+  Megaphone,
 } from "lucide-react";
 import { HiCreditCard, HiMenuAlt2 } from "react-icons/hi";
 
@@ -75,6 +76,7 @@ export const SideNavGroups = [
       { name: "Vendors", icon: Users2Icon, path: "/vendors", editorCanAccess: false },
       { name: "Seller Stores", icon: Store, path: "/seller-stores", editorCanAccess: false },
       { name: "Seller Listings", icon: ClipboardCheck, path: "/seller-listings", editorCanAccess: false },
+      { name: "Advertising Pricing", icon: Megaphone, path: "/advertising-pricing", editorCanAccess: false },
     ],
   },
   {
@@ -82,6 +84,7 @@ export const SideNavGroups = [
     groupIcon: Banknote,
     items: [
       { name: "Subscriptions", icon: HiCreditCard, path: "/subscriptions", editorCanAccess: true },
+      { name: "Vendor Partner Plans", icon: Package, path: "/partner-plans", editorCanAccess: false },
       { name: "Referral Tracking", icon: UserCheck, path: "/referrals", editorCanAccess: false },
       { name: "Cashout & Payments", icon: Banknote, path: "/cashout", editorCanAccess: false },
       { name: "Job Applications", icon: FileText, path: "/applications", editorCanAccess: false },
