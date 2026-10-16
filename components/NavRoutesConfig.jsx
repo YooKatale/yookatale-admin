@@ -34,6 +34,7 @@ export const EDITOR_ALLOWED_PATHS = [
   "/orders",
   "/drivers",
   "/subscriptions",
+  "/subscriptions/meat-menu",
   "/support",
   "/email-sender",
   "/newsblogs",

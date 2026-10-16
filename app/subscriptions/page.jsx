@@ -92,6 +92,7 @@ import {
 } from "lucide-react";
 import { BACKEND_URL } from "@constants/constant";
 import moment from "moment";
+import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
@@ -122,9 +123,11 @@ const TAB_CONFIG = [
   { key: "yoocards", label: "YooCards", icon: CreditCard, color: "green", desc: "Pending subscription approvals" },
   { key: "plans", label: "Meal Plans", icon: Package, color: "purple", desc: "Manage subscription packages" },
   { key: "calendar", label: "Meal Calendar", icon: Calendar, color: "orange", desc: "Weekly meal slots & images" },
+  { key: "meat-menu", label: "Meat Menu", icon: UtensilsCrossed, color: "red", href: "/subscriptions/meat-menu" },
 ];
 
 export default function SubscriptionsPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("yoocards");
   const [subscriptionsData, setSubscriptionsData] = useState([]);
   const [packages, setPackages] = useState([]);
@@ -574,7 +577,7 @@ export default function SubscriptionsPage() {
           return (
             <Button
               key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
+              onClick={() => tab.href ? router.push(tab.href) : setActiveTab(tab.key)}
               variant={isActive ? "solid" : "outline"}
               colorScheme={isActive ? tab.color : "gray"}
               size="md"

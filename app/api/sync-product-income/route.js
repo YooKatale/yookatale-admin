@@ -3,7 +3,9 @@ import seedProducts from "../../../public/seed-income-map.json";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const PRODUCTION_API = "https://yookatale-serverside.onrender.com";
+const BACKEND_URL = (
+  process.env.NEXT_PUBLIC_BACKEND_URL || "https://yookatale-serverside.onrender.com"
+).replace(/\/+$/, "");
 
 const incomeProducts = seedProducts.filter((product) => product.incomeLevel);
 
@@ -31,7 +33,7 @@ const responseMessage = async (response) => {
 };
 
 async function loadProductionProducts(cookie) {
-  const response = await fetch(`${PRODUCTION_API}/api/products`, {
+  const response = await fetch(`${BACKEND_URL}/api/products`, {
     headers: { cookie },
     cache: "no-store",
   });
@@ -131,7 +133,7 @@ export async function POST(request) {
       }
       form.set("incomeLevel", seed.incomeLevel);
       const response = await fetch(
-        `${PRODUCTION_API}/admin/product/edit/${product._id}`,
+        `${BACKEND_URL}/admin/product/edit/${product._id}`,
         {
           method: "PUT",
           headers: { cookie },
