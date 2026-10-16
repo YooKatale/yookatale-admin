@@ -1,13 +1,16 @@
 /** @type {import('next').NextConfig} */
+const backendUrl = (
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  "https://yookatale-serverside.onrender.com"
+).replace(/\/+$/, "");
+const backendWebSocketUrl = backendUrl
+  .replace(/^https:/, "wss:")
+  .replace(/^http:/, "ws:");
+
 const nextConfig = {
   poweredByHeader: false,
 
   async rewrites() {
-    const backendUrl = (
-      process.env.NEXT_PUBLIC_BACKEND_URL ||
-      "https://yookatale-serverside.onrender.com"
-    ).replace(/\/+$/, "");
-
     return [
       {
         source: "/api/admin/:path*",
@@ -43,8 +46,8 @@ const nextConfig = {
               // Images
               "img-src 'self' data: blob: https:",
 
-              // API + WebSocket connections (LOCAL DEVELOPMENT)
-              "connect-src 'self' https://yookatale-serverside.onrender.com wss://yookatale-serverside.onrender.com",
+              // API + WebSocket connections
+              `connect-src 'self' ${backendUrl} ${backendWebSocketUrl}`,
 
               // Prevent embedding
               "frame-ancestors 'none'",
